@@ -7,12 +7,12 @@ interface DesktopAdSidebarProps {
 }
 
 const allSponsors = [
-  { name: "HypeProxies", domain: "hypeproxies.com" },
-  { name: "Okara", domain: "okara.ai" },
-  { name: "Whisper Memos", domain: "whispermemos.com" },
-  { name: "Pledge.to", domain: "pledge.to" },
-  { name: "BAMF", domain: "bamf.com" },
-  { name: "TrustMRR", domain: "trustmrr.com" },
+  { name: "Strava", domain: "strava.com" },
+  { name: "On Running", domain: "on-running.com" },
+  { name: "Nike", domain: "nike.com" },
+  { name: "Whoop", domain: "whoop.com" },
+  { name: "BPN", domain: "bareperformancenutrition.com" },
+  { name: "Hoka", domain: "hoka.com" },
 ];
 
 export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarProps) => {
