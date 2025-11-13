@@ -8,12 +8,18 @@ interface SponsorCarouselProps {
 }
 
 const sponsors = [
-  { name: "HypeProxies", domain: "hypeproxies.com" },
-  { name: "Okara", domain: "okara.ai" },
-  { name: "Whisper Memos", domain: "whispermemos.com" },
-  { name: "Pledge.to", domain: "pledge.to" },
-  { name: "BAMF", domain: "bamf.com" },
-  { name: "TrustMRR", domain: "trustmrr.com" },
+  { name: "Strava", domain: "strava.com" },
+  { name: "Nike", domain: "nike.com" },
+  { name: "On Running", domain: "on-running.com" },
+  { name: "Adidas", domain: "adidas.com" },
+  { name: "Whoop", domain: "whoop.com" },
+  { name: "Garmin", domain: "garmin.com" },
+  { name: "BPN", domain: "bareperformancenutrition.com" },
+  { name: "Hoka", domain: "hoka.com" },
+  { name: "Brooks", domain: "brooksrunning.com" },
+  { name: "Maurten", domain: "maurten.com" },
+  { name: "Oura Ring", domain: "ouraring.com" },
+  { name: "Tracksmith", domain: "tracksmith.com" },
 ];
 
 export const SponsorCarousel = ({ direction = "left", onAdvertiseClick }: SponsorCarouselProps) => {
