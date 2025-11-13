@@ -29,7 +29,7 @@ export const SponsorCarousel = ({ direction = "left", onAdvertiseClick }: Sponso
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
 
-    const scrollSpeed = direction === "left" ? 0.5 : -0.5;
+    const scrollSpeed = direction === "left" ? 1.5 : -1.5;
     let animationFrameId: number;
 
     const scroll = () => {
