@@ -22,4 +22,6 @@ export interface Runner {
   all_time_distance: number;
   created_at: string;
   updated_at: string;
+  x_profile?: string | null;
+  bio?: string | null;
 }
