@@ -78,20 +78,46 @@ Deno.serve(async (req) => {
       console.log('Fetched athlete stats');
     }
 
-    // Fetch athlete activities
-    const activitiesResponse = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?per_page=200`,
-      {
-        headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+    // Fetch athlete activities with pagination to get full history
+    let allActivities: any[] = [];
+    let page = 1;
+    const perPage = 200;
+    const maxPages = 10; // Fetch up to 2000 activities to capture full history
+    
+    console.log('Starting to fetch activities...');
+    
+    while (page <= maxPages) {
+      const activitiesResponse = await fetch(
+        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}`,
+        {
+          headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+        }
+      );
+
+      if (!activitiesResponse.ok) {
+        throw new Error('Failed to fetch activities');
       }
-    );
 
-    if (!activitiesResponse.ok) {
-      throw new Error('Failed to fetch activities');
+      const activities = await activitiesResponse.json();
+      
+      if (activities.length === 0) {
+        console.log(`No more activities found at page ${page}`);
+        break;
+      }
+      
+      allActivities = allActivities.concat(activities);
+      console.log(`Fetched page ${page}: ${activities.length} activities (total: ${allActivities.length})`);
+      
+      // Stop if we got fewer than perPage results (no more pages)
+      if (activities.length < perPage) {
+        break;
+      }
+      
+      page++;
     }
-
-    const activities = await activitiesResponse.json();
-    console.log(`Fetched ${activities.length} activities`);
+    
+    const activities = allActivities;
+    console.log(`Total activities fetched: ${activities.length}`);
 
     // Calculate streak
     const runActivities = activities
