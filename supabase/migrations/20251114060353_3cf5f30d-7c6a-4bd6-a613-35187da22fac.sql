@@ -1,0 +1,7 @@
+-- Add location fields to runners table
+ALTER TABLE public.runners
+ADD COLUMN IF NOT EXISTS city TEXT,
+ADD COLUMN IF NOT EXISTS state TEXT,
+ADD COLUMN IF NOT EXISTS country TEXT,
+ADD COLUMN IF NOT EXISTS latitude NUMERIC,
+ADD COLUMN IF NOT EXISTS longitude NUMERIC;
