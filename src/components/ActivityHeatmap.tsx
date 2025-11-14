@@ -105,12 +105,12 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   };
 
   const getIntensityClass = (distance: number) => {
-    if (distance === 0) return "bg-muted/20";
-    if (distance < 2) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/30 to-[hsl(15_100%_50%)]/30";
-    if (distance < 4) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/50 to-[hsl(15_100%_50%)]/50";
-    if (distance < 6) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/70 to-[hsl(15_100%_50%)]/70";
-    if (distance < 8) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/85 to-[hsl(15_100%_50%)]/85";
-    return "bg-gradient-to-br from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)]";
+    if (distance === 0) return "bg-muted/20"; // No activity - light gray
+    if (distance < 2) return "bg-[hsl(25_80%_85%)]"; // Very light orange
+    if (distance < 4) return "bg-[hsl(25_90%_70%)]"; // Light orange
+    if (distance < 6) return "bg-[hsl(22_95%_60%)]"; // Medium orange
+    if (distance < 8) return "bg-[hsl(20_100%_52%)]"; // Dark orange
+    return "bg-[hsl(15_100%_45%)]"; // Darkest orange for 8+ miles
   };
 
   if (isLoading) {
@@ -215,11 +215,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
               <span>Less</span>
               <div className="flex gap-1">
                 <div className="w-3 h-3 rounded-sm bg-muted/20" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/30 to-[hsl(15_100%_50%)]/30" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/50 to-[hsl(15_100%_50%)]/50" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/70 to-[hsl(15_100%_50%)]/70" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/85 to-[hsl(15_100%_50%)]/85" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)]" />
+                <div className="w-3 h-3 rounded-sm bg-[hsl(25_80%_85%)]" />
+                <div className="w-3 h-3 rounded-sm bg-[hsl(25_90%_70%)]" />
+                <div className="w-3 h-3 rounded-sm bg-[hsl(22_95%_60%)]" />
+                <div className="w-3 h-3 rounded-sm bg-[hsl(20_100%_52%)]" />
+                <div className="w-3 h-3 rounded-sm bg-[hsl(15_100%_45%)]" />
               </div>
               <span>More</span>
             </div>
