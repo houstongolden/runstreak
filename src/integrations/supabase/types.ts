@@ -56,6 +56,39 @@ export type Database = {
           },
         ]
       }
+      aggregate_stats: {
+        Row: {
+          active_streaks_count: number
+          avg_days_on_streak_improvement: number
+          avg_days_on_streak_percentage: number
+          created_at: string
+          id: string
+          stat_date: string
+          total_miles_logged: number
+          total_users: number
+        }
+        Insert: {
+          active_streaks_count?: number
+          avg_days_on_streak_improvement?: number
+          avg_days_on_streak_percentage?: number
+          created_at?: string
+          id?: string
+          stat_date?: string
+          total_miles_logged?: number
+          total_users?: number
+        }
+        Update: {
+          active_streaks_count?: number
+          avg_days_on_streak_improvement?: number
+          avg_days_on_streak_percentage?: number
+          created_at?: string
+          id?: string
+          stat_date?: string
+          total_miles_logged?: number
+          total_users?: number
+        }
+        Relationships: []
+      }
       best_efforts: {
         Row: {
           activity_id: number | null
@@ -212,12 +245,18 @@ export type Database = {
           current_streak_days: number | null
           current_streak_miles: number | null
           date_preference: string | null
+          days_on_streak_before_joining: number | null
+          days_on_streak_last_30: number | null
+          days_on_streak_last_60: number | null
+          days_on_streak_last_90: number | null
+          days_on_streak_since_joining: number | null
           display_name: string
           email: string | null
           follower_count: number | null
           friend_count: number | null
           ftp: number | null
           id: string
+          joined_runstreak_at: string | null
           last_activity_date: string | null
           latitude: number | null
           longest_streak_ever: number | null
@@ -233,6 +272,8 @@ export type Database = {
           streak_start_date: string | null
           streak_status: string | null
           token_expires_at: string | null
+          total_days_before_joining: number | null
+          total_days_since_joining: number | null
           updated_at: string
           updated_at_strava: string | null
           username: string | null
@@ -261,12 +302,18 @@ export type Database = {
           current_streak_days?: number | null
           current_streak_miles?: number | null
           date_preference?: string | null
+          days_on_streak_before_joining?: number | null
+          days_on_streak_last_30?: number | null
+          days_on_streak_last_60?: number | null
+          days_on_streak_last_90?: number | null
+          days_on_streak_since_joining?: number | null
           display_name: string
           email?: string | null
           follower_count?: number | null
           friend_count?: number | null
           ftp?: number | null
           id?: string
+          joined_runstreak_at?: string | null
           last_activity_date?: string | null
           latitude?: number | null
           longest_streak_ever?: number | null
@@ -282,6 +329,8 @@ export type Database = {
           streak_start_date?: string | null
           streak_status?: string | null
           token_expires_at?: string | null
+          total_days_before_joining?: number | null
+          total_days_since_joining?: number | null
           updated_at?: string
           updated_at_strava?: string | null
           username?: string | null
@@ -310,12 +359,18 @@ export type Database = {
           current_streak_days?: number | null
           current_streak_miles?: number | null
           date_preference?: string | null
+          days_on_streak_before_joining?: number | null
+          days_on_streak_last_30?: number | null
+          days_on_streak_last_60?: number | null
+          days_on_streak_last_90?: number | null
+          days_on_streak_since_joining?: number | null
           display_name?: string
           email?: string | null
           follower_count?: number | null
           friend_count?: number | null
           ftp?: number | null
           id?: string
+          joined_runstreak_at?: string | null
           last_activity_date?: string | null
           latitude?: number | null
           longest_streak_ever?: number | null
@@ -331,6 +386,8 @@ export type Database = {
           streak_start_date?: string | null
           streak_status?: string | null
           token_expires_at?: string | null
+          total_days_before_joining?: number | null
+          total_days_since_joining?: number | null
           updated_at?: string
           updated_at_strava?: string | null
           username?: string | null

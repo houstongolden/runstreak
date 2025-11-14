@@ -154,6 +154,52 @@ Deno.serve(async (req) => {
 
     const averageMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
 
+    // Calculate Days on Streak metrics (activity regardless of breaks)
+    const calculateDaysOnStreak = (daysBack: number) => {
+      const cutoffDate = new Date(today);
+      cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+      return sortedDates.filter(dateStr => {
+        const date = new Date(dateStr);
+        return date >= cutoffDate && date <= today;
+      }).length;
+    };
+
+    const daysOnStreak30 = calculateDaysOnStreak(30);
+    const daysOnStreak60 = calculateDaysOnStreak(60);
+    const daysOnStreak90 = calculateDaysOnStreak(90);
+
+    // Check if this is an existing user to get their join date
+    const { data: existingRunner } = await supabase
+      .from('runners')
+      .select('id, joined_runstreak_at')
+      .eq('strava_user_id', athleteProfile.id)
+      .maybeSingle();
+
+    const joinedDate = existingRunner?.joined_runstreak_at 
+      ? new Date(existingRunner.joined_runstreak_at)
+      : new Date(); // New users join today
+
+    joinedDate.setHours(0, 0, 0, 0);
+    
+    // Calculate days on streak since joining RunStreak
+    const daysSinceJoining = Math.floor((today.getTime() - joinedDate.getTime()) / 86400000) + 1;
+    const daysOnStreakSinceJoining = sortedDates.filter(dateStr => {
+      const date = new Date(dateStr);
+      return date >= joinedDate && date <= today;
+    }).length;
+
+    // Calculate baseline before joining (average of 90-day periods before join date)
+    const daysBeforeJoining = 90; // Use 90 days before joining as baseline
+    const baselineStartDate = new Date(joinedDate);
+    baselineStartDate.setDate(baselineStartDate.getDate() - daysBeforeJoining);
+    
+    const daysOnStreakBeforeJoining = sortedDates.filter(dateStr => {
+      const date = new Date(dateStr);
+      return date >= baselineStartDate && date < joinedDate;
+    }).length;
+
+    console.log(`Days on Streak: 30d=${daysOnStreak30}, 60d=${daysOnStreak60}, 90d=${daysOnStreak90}, since joining=${daysOnStreakSinceJoining}/${daysSinceJoining}`);
+
     // Calculate all historical streaks (5+ days)
     const allStreaks: Array<{
       start_date: string;
@@ -258,7 +304,20 @@ Deno.serve(async (req) => {
       ytd_elevation_gain: athleteStats?.ytd_run_totals?.elevation_gain || 0.0,
       all_time_run_count: athleteStats?.all_run_totals?.count || 0,
       all_time_distance: athleteStats?.all_run_totals?.distance || 0.0,
+      // Days on Streak metrics (new user-friendly approach)
+      days_on_streak_last_30: daysOnStreak30,
+      days_on_streak_last_60: daysOnStreak60,
+      days_on_streak_last_90: daysOnStreak90,
+      days_on_streak_since_joining: daysOnStreakSinceJoining,
+      total_days_since_joining: daysSinceJoining,
+      days_on_streak_before_joining: daysOnStreakBeforeJoining,
+      total_days_before_joining: daysBeforeJoining,
     };
+
+    // Only set joined_runstreak_at for new users
+    if (!existingRunner) {
+      runnerData.joined_runstreak_at = joinedDate.toISOString();
+    }
 
     // Upsert runner data
     const { data: savedRunner, error: upsertError } = await supabase

@@ -18,6 +18,8 @@ import { Runner } from "@/types";
 import { Plus, Flame } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ShinyText from "@/components/ui/shiny-text";
+import { RunStreakPhilosophy } from "@/components/RunStreakPhilosophy";
+import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 
 type LeaderboardView = "total" | "percent" | "fiveday";
 
@@ -358,6 +360,12 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* RunStreak Philosophy Section */}
+      <RunStreakPhilosophy />
+
+      {/* Aggregate Stats */}
+      <AggregateStatsCard />
 
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background">
