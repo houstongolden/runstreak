@@ -13,6 +13,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -30,6 +31,7 @@ interface CoachingSession {
 
 export function AppSidebar() {
   const location = useLocation();
+  const { setOpenMobile } = useSidebar();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
   const [coachingSessions, setCoachingSessions] = useState<CoachingSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
@@ -43,6 +45,10 @@ export function AppSidebar() {
       fetchCoachingSessions(runnerId);
     }
   }, []);
+
+  const handleNavClick = () => {
+    setOpenMobile(false);
+  };
 
   const fetchCoachingSessions = async (runnerId: string) => {
     setLoadingSessions(true);
@@ -79,15 +85,10 @@ export function AppSidebar() {
               {menuItems.map((item) => {
                 // Set dynamic URL for My Profile and Edit Profile
                 let itemUrl = item.url;
-                if (item.title === "My Profile" && currentRunnerId) {
-                  itemUrl = `/runner/${currentRunnerId}`;
-                } else if (item.title === "Edit Profile" && currentRunnerId) {
-                  itemUrl = `/runner/${currentRunnerId}?edit=true`;
-                }
-                
-                // Don't show My Profile or Edit Profile if no runner ID yet
-                if ((item.title === "My Profile" || item.title === "Edit Profile") && !currentRunnerId) {
-                  return null;
+                if (item.title === "My Profile") {
+                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/connect";
+                } else if (item.title === "Edit Profile") {
+                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}?edit=true` : "/connect";
                 }
 
                 return (
@@ -98,6 +99,7 @@ export function AppSidebar() {
                         end={item.url === "/"} 
                         className="hover:bg-muted/50" 
                         activeClassName="bg-muted text-primary font-medium"
+                        onClick={handleNavClick}
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -123,6 +125,7 @@ export function AppSidebar() {
                     to="/coach" 
                     className="hover:bg-muted/50" 
                     activeClassName="bg-muted text-primary font-medium"
+                    onClick={handleNavClick}
                   >
                     <Sparkles className="h-4 w-4" />
                     <span>AI Coach</span>
@@ -155,6 +158,7 @@ export function AppSidebar() {
                           to={`/coach?session=${session.id}`}
                           className="hover:bg-muted/50" 
                           activeClassName="bg-muted text-primary font-medium"
+                          onClick={handleNavClick}
                         >
                           <MessageSquare className="h-4 w-4" />
                           <span className="truncate">{session.title}</span>
