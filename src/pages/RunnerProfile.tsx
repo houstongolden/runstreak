@@ -7,7 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain, RefreshCw, Medal, Share2 } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Flame, 
+  Calendar, 
+  TrendingUp, 
+  Award, 
+  Clock, 
+  Mountain, 
+  RefreshCw, 
+  Medal, 
+  Share2,
+  Pencil
+} from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
@@ -16,6 +28,7 @@ import ProfileEditor from "@/components/ProfileEditor";
 import BestEfforts from "@/components/BestEfforts";
 import { FollowButton } from "@/components/FollowButton";
 import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
+import { StreakHistory } from "@/components/StreakHistory";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -29,6 +42,7 @@ export default function RunnerProfile() {
   const [followingCount, setFollowingCount] = useState(0);
   const currentRunnerId = localStorage.getItem("current_runner_id");
   const isOwnProfile = currentRunnerId === id;
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
 
   useEffect(() => {
     const fetchRunner = async () => {
@@ -161,6 +175,16 @@ export default function RunnerProfile() {
             </Button>
           </div>
           <div className="flex items-center gap-2">
+            {isOwnProfile && (
+              <Button 
+                variant="outline"
+                onClick={() => setShowProfileEditor(true)}
+                className="gap-2"
+              >
+                <Pencil className="h-4 w-4" />
+                <span>Edit</span>
+              </Button>
+            )}
             <Button 
               variant="outline"
               onClick={() => {
@@ -279,9 +303,24 @@ export default function RunnerProfile() {
           </CardContent>
         </Card>
 
-        {/* Profile Info Section */}
+        {/* Profile Editor Modal/Dialog */}
+        {showProfileEditor && (
+          <div className="mb-6">
+            <ProfileEditor 
+              runner={runner} 
+              onUpdate={(updated) => {
+                setRunner(updated);
+                setShowProfileEditor(false);
+              }}
+              onCancel={() => setShowProfileEditor(false)}
+              defaultEditing={true}
+            />
+          </div>
+        )}
+
+        {/* Streak History Section */}
         <div className="mb-6">
-          <ProfileEditor runner={runner} onUpdate={setRunner} />
+          <StreakHistory runnerId={runner.id} />
         </div>
 
         {/* AI Analysis Section */}

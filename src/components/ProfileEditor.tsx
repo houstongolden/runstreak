@@ -14,11 +14,13 @@ import { Runner } from "@/types";
 interface ProfileEditorProps {
   runner: Runner;
   onUpdate: (updatedRunner: Runner) => void;
+  onCancel?: () => void;
+  defaultEditing?: boolean;
 }
 
-export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) {
+export default function ProfileEditor({ runner, onUpdate, onCancel, defaultEditing = false }: ProfileEditorProps) {
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(defaultEditing);
   const [username, setUsername] = useState(runner.username || "");
   const [xProfile, setXProfile] = useState(runner.x_profile || "");
   const [bio, setBio] = useState(runner.bio || "");
@@ -132,6 +134,7 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
     setState(runner.state || "");
     setCountry(runner.country || "");
     setIsEditing(false);
+    onCancel?.();
   };
 
   if (!isEditing && !runner.username && !runner.x_profile && !runner.bio && !runner.city && !runner.state && !runner.country) {

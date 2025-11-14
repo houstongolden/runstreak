@@ -343,6 +343,53 @@ export type Database = {
         }
         Relationships: []
       }
+      streak_history: {
+        Row: {
+          average_miles_per_day: number
+          created_at: string
+          days_count: number
+          end_date: string
+          id: string
+          runner_id: string
+          start_date: string
+          total_miles: number
+          total_runs: number
+          updated_at: string
+        }
+        Insert: {
+          average_miles_per_day: number
+          created_at?: string
+          days_count: number
+          end_date: string
+          id?: string
+          runner_id: string
+          start_date: string
+          total_miles: number
+          total_runs: number
+          updated_at?: string
+        }
+        Update: {
+          average_miles_per_day?: number
+          created_at?: string
+          days_count?: number
+          end_date?: string
+          id?: string
+          runner_id?: string
+          start_date?: string
+          total_miles?: number
+          total_runs?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_history_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_follows: {
         Row: {
           created_at: string
