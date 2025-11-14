@@ -19,7 +19,7 @@ export default function RunnerProfile() {
   const [runner, setRunner] = useState<Runner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [streakView, setStreakView] = useState<"current" | "longest">("current");
+  const [streakView, setStreakView] = useState<"current" | "longest" | "fiveday">("current");
 
   useEffect(() => {
     const fetchRunner = async () => {
@@ -186,14 +186,26 @@ export default function RunnerProfile() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Streak Stats</h2>
-            <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest")}>
+            <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest" | "fiveday")}>
               <TabsList>
                 <TabsTrigger value="current">Current Streak</TabsTrigger>
                 <TabsTrigger value="longest">Longest Streak</TabsTrigger>
+                <TabsTrigger value="fiveday">5-Day Week</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {streakView === "fiveday" ? (
+              <Card className="col-span-full">
+                <CardContent className="pt-6 text-center">
+                  <h3 className="text-lg font-semibold mb-2">5-Day Week Streak</h3>
+                  <p className="text-muted-foreground">
+                    Coming soon: Track your longest streak of running at least 5 days per week (1+ mile per day).
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Streak Days</CardTitle>
@@ -266,6 +278,8 @@ export default function RunnerProfile() {
                 </p>
               </CardContent>
             </Card>
+              </>
+            )}
           </div>
         </div>
 
