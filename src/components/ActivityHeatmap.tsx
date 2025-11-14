@@ -105,14 +105,12 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Heatmap</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div>
+        <h3 className="text-sm font-medium mb-2">Activity Heatmap</h3>
+        <div className="bg-card rounded-lg p-3 border">
           <div className="text-muted-foreground text-sm">Loading activity data...</div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -120,14 +118,9 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Activity Heatmap</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Daily running activity over the past year
-        </p>
-      </CardHeader>
-      <CardContent>
+    <div>
+      <h3 className="text-sm font-medium mb-2">Activity Heatmap</h3>
+      <div className="bg-card rounded-lg p-3 border">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full">
             {/* Month labels */}
@@ -222,7 +215,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
