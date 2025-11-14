@@ -29,6 +29,7 @@ import BestEfforts from "@/components/BestEfforts";
 import { FollowButton } from "@/components/FollowButton";
 import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
 import { StreakHistory } from "@/components/StreakHistory";
+import { DaysOnStreakCard } from "@/components/DaysOnStreakCard";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -317,6 +318,20 @@ export default function RunnerProfile() {
             />
           </div>
         )}
+
+        {/* Days on Streak - Primary Metric */}
+        <div className="mb-6">
+          <DaysOnStreakCard
+            daysOnStreak30={runner.days_on_streak_last_30 || 0}
+            daysOnStreak60={runner.days_on_streak_last_60 || 0}
+            daysOnStreak90={runner.days_on_streak_last_90 || 0}
+            daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
+            totalDaysSinceJoining={runner.total_days_since_joining || 0}
+            daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
+            totalDaysBeforeJoining={runner.total_days_before_joining || 0}
+            joinedAt={runner.joined_runstreak_at}
+          />
+        </div>
 
         {/* Streak History Section */}
         <div className="mb-6">

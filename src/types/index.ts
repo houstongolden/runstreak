@@ -47,6 +47,15 @@ export interface Runner {
   clubs?: any[] | null;
   bikes?: any[] | null;
   shoes?: any[] | null;
+  // Days on Streak metrics
+  joined_runstreak_at?: string | null;
+  days_on_streak_since_joining?: number;
+  total_days_since_joining?: number;
+  days_on_streak_last_30?: number;
+  days_on_streak_last_60?: number;
+  days_on_streak_last_90?: number;
+  days_on_streak_before_joining?: number;
+  total_days_before_joining?: number;
 }
 
 export interface UserSettings {
