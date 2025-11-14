@@ -11,6 +11,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Flame } from "lucide-react";
+import { MobileLeaderboardCard } from "./MobileLeaderboardCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LeaderboardTableProps {
   runners: Runner[];
@@ -18,6 +20,8 @@ interface LeaderboardTableProps {
 }
 
 export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
+  const isMobile = useIsMobile();
+  
   // Sort by current streak days descending
   const sortedRunners = [...runners].sort(
     (a, b) => b.current_streak_days - a.current_streak_days
@@ -25,15 +29,27 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
 
   if (view === "fiveday") {
     return (
-      <div className="rounded-lg border border-border bg-card overflow-hidden p-8 text-center">
-        <h3 className="text-lg font-semibold mb-2">5-Day Week Streaks</h3>
-        <p className="text-muted-foreground">
+      <div className="rounded-lg border border-border bg-card overflow-hidden p-4 sm:p-8 text-center">
+        <h3 className="text-base sm:text-lg font-semibold mb-2">5-Day Week Streaks</h3>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Coming soon: Longest streaks for runners completing at least 5 days per week with 1+ mile daily.
         </p>
       </div>
     );
   }
 
+  // Mobile card view
+  if (isMobile) {
+    return (
+      <div className="space-y-3">
+        {sortedRunners.map((runner, index) => (
+          <MobileLeaderboardCard key={runner.id} runner={runner} rank={index} />
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop table view
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
       <Table>
