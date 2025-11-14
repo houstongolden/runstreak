@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +16,7 @@ interface ActivityHeatmapProps {
 export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -42,6 +43,15 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
 
     fetchActivities();
   }, [runnerId]);
+
+  useEffect(() => {
+    // Auto-scroll to show current date
+    if (scrollContainerRef.current && !isLoading) {
+      const container = scrollContainerRef.current;
+      // Scroll to the right (current date)
+      container.scrollLeft = container.scrollWidth - container.clientWidth;
+    }
+  }, [isLoading]);
 
   const generateHeatmapData = () => {
     const weeks: Array<Array<{ date: Date; distance: number; runCount: number } | null>> = [];
@@ -96,11 +106,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
 
   const getIntensityClass = (distance: number) => {
     if (distance === 0) return "bg-muted/30";
-    if (distance < 2) return "bg-[hsl(25_100%_60%)]/20";
-    if (distance < 4) return "bg-[hsl(25_100%_60%)]/40";
-    if (distance < 6) return "bg-[hsl(25_100%_60%)]/60";
-    if (distance < 8) return "bg-[hsl(25_100%_60%)]/80";
-    return "bg-[hsl(25_100%_60%)]";
+    if (distance < 2) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/20 to-[hsl(15_100%_50%)]/20";
+    if (distance < 4) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/40 to-[hsl(15_100%_50%)]/40";
+    if (distance < 6) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/60 to-[hsl(15_100%_50%)]/60";
+    if (distance < 8) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/80 to-[hsl(15_100%_50%)]/80";
+    return "bg-gradient-to-br from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)]";
   };
 
   if (isLoading) {
@@ -121,7 +131,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     <div>
       <h3 className="text-sm font-medium mb-2">Activity Heatmap</h3>
       <div className="bg-card rounded-lg p-3 border">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={scrollContainerRef}>
           <div className="inline-block min-w-full">
             {/* Month labels */}
             <div className="flex gap-[2px] mb-2 ml-6">
@@ -205,11 +215,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
               <span>Less</span>
               <div className="flex gap-1">
                 <div className="w-3 h-3 rounded-sm bg-muted/30" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_100%_60%)]/20" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_100%_60%)]/40" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_100%_60%)]/60" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_100%_60%)]/80" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_100%_60%)]" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/20 to-[hsl(15_100%_50%)]/20" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/40 to-[hsl(15_100%_50%)]/40" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/60 to-[hsl(15_100%_50%)]/60" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/80 to-[hsl(15_100%_50%)]/80" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)]" />
               </div>
               <span>More</span>
             </div>
