@@ -32,12 +32,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={collapsed ? "w-14" : "w-60"}
-      collapsible="icon"
+      variant="floating"
+      collapsible="offcanvas"
+      className="fixed left-0 top-0 z-50 h-screen"
     >
-      <SidebarContent>
+      <SidebarContent className="pt-14">
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
+          <SidebarGroupLabel>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -52,7 +53,7 @@ export function AppSidebar() {
                       activeClassName="bg-muted text-primary font-medium"
                     >
                       <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
