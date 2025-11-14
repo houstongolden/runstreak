@@ -33,7 +33,6 @@ const Index = () => {
       const { data, error } = await supabase
         .from("runners")
         .select("*")
-        .eq("streak_status", "active")
         .order("current_streak_days", { ascending: false });
 
       if (error) throw error;
