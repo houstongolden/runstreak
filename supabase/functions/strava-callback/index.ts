@@ -49,6 +49,35 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Fetch full athlete profile with all details
+    const athleteResponse = await fetch(
+      `https://www.strava.com/api/v3/athlete`,
+      {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+      }
+    );
+
+    if (!athleteResponse.ok) {
+      throw new Error('Failed to fetch athlete profile');
+    }
+
+    const athleteProfile = await athleteResponse.json();
+    console.log('Fetched athlete profile:', { id: athleteProfile.id, email: athleteProfile.email });
+
+    // Fetch athlete stats
+    const statsResponse = await fetch(
+      `https://www.strava.com/api/v3/athletes/${athleteProfile.id}/stats`,
+      {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+      }
+    );
+
+    let athleteStats = null;
+    if (statsResponse.ok) {
+      athleteStats = await statsResponse.json();
+      console.log('Fetched athlete stats');
+    }
+
     // Fetch athlete activities
     const activitiesResponse = await fetch(
       `https://www.strava.com/api/v3/athlete/activities?per_page=200`,
@@ -125,25 +154,52 @@ Deno.serve(async (req) => {
 
     const averageMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
 
+    // Prepare comprehensive runner data with all available stats
+    const runnerData: any = {
+      strava_user_id: athleteProfile.id,
+      strava_username: athleteProfile.username || `${athleteProfile.firstname} ${athleteProfile.lastname}`,
+      display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
+      avatar_url: athleteProfile.profile || athleteProfile.profile_medium,
+      email: athleteProfile.email, // Store email from Strava
+      sex: athleteProfile.sex,
+      weight: athleteProfile.weight,
+      city: athleteProfile.city,
+      state: athleteProfile.state,
+      country: athleteProfile.country,
+      created_at_strava: athleteProfile.created_at,
+      updated_at_strava: athleteProfile.updated_at,
+      follower_count: athleteProfile.follower_count,
+      friend_count: athleteProfile.friend_count,
+      athlete_type: athleteProfile.athlete_type ? String(athleteProfile.athlete_type) : null,
+      date_preference: athleteProfile.date_preference,
+      measurement_preference: athleteProfile.measurement_preference,
+      ftp: athleteProfile.ftp,
+      clubs: athleteProfile.clubs ? JSON.stringify(athleteProfile.clubs) : null,
+      bikes: athleteProfile.bikes ? JSON.stringify(athleteProfile.bikes) : null,
+      shoes: athleteProfile.shoes ? JSON.stringify(athleteProfile.shoes) : null,
+      strava_access_token: tokenData.access_token,
+      strava_refresh_token: tokenData.refresh_token,
+      token_expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
+      current_streak_days: currentStreakDays,
+      current_streak_miles: currentStreakMiles,
+      streak_start_date: streakStartDate,
+      last_activity_date: lastActivityDate,
+      longest_streak_ever: longestStreakEver,
+      average_miles_per_day: averageMilesPerDay,
+      streak_status: currentStreakDays > 0 ? 'active' : 'broken',
+      // Stats from Strava API
+      ytd_run_count: athleteStats?.ytd_run_totals?.count || 0,
+      ytd_distance: athleteStats?.ytd_run_totals?.distance || 0.0,
+      ytd_moving_time: athleteStats?.ytd_run_totals?.moving_time || 0,
+      ytd_elevation_gain: athleteStats?.ytd_run_totals?.elevation_gain || 0.0,
+      all_time_run_count: athleteStats?.all_run_totals?.count || 0,
+      all_time_distance: athleteStats?.all_run_totals?.distance || 0.0,
+    };
+
     // Upsert runner data
-    const { data: runnerData, error: upsertError } = await supabase
+    const { data: savedRunner, error: upsertError } = await supabase
       .from('runners')
-      .upsert({
-        strava_user_id: tokenData.athlete.id,
-        strava_username: tokenData.athlete.username || `${tokenData.athlete.firstname} ${tokenData.athlete.lastname}`,
-        display_name: `${tokenData.athlete.firstname} ${tokenData.athlete.lastname}`,
-        avatar_url: tokenData.athlete.profile,
-        strava_access_token: tokenData.access_token,
-        strava_refresh_token: tokenData.refresh_token,
-        token_expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
-        current_streak_days: currentStreakDays,
-        current_streak_miles: currentStreakMiles,
-        streak_start_date: streakStartDate,
-        last_activity_date: lastActivityDate,
-        longest_streak_ever: longestStreakEver,
-        average_miles_per_day: averageMilesPerDay,
-        streak_status: currentStreakDays > 0 ? 'active' : 'broken',
-      }, {
+      .upsert(runnerData, {
         onConflict: 'strava_user_id'
       })
       .select()
@@ -156,10 +212,31 @@ Deno.serve(async (req) => {
 
     console.log('Runner data saved successfully');
 
+    // Create or update user_settings with email
+    if (athleteProfile.email) {
+      const { error: settingsError } = await supabase
+        .from('user_settings')
+        .upsert({
+          runner_id: savedRunner.id,
+          email: athleteProfile.email,
+          ai_coach_enabled: true,
+          ai_coach_style: 'motivational',
+          ai_coach_frequency: 'daily',
+          ai_coach_time: '09:00'
+        }, {
+          onConflict: 'runner_id'
+        });
+
+      if (settingsError) {
+        console.error('Error creating user settings:', settingsError);
+      } else {
+        console.log('User settings created with email:', athleteProfile.email);
+      }
+    }
+
     // Redirect to app with runner ID
-    // Get the app URL from environment or use default
     const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
-    const runnerId = runnerData?.id || '';
+    const runnerId = savedRunner?.id || '';
     return new Response(null, {
       status: 302,
       headers: {
