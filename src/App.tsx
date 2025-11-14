@@ -28,6 +28,7 @@ const App = () => (
             <Route path="/" element={<AppLayout><Index /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
             <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
+            <Route path="/coach" element={<AppLayout><AICoach /></AppLayout>} />
             <Route path="/coach/:runnerId" element={<AppLayout><AICoach /></AppLayout>} />
             
             {/* Routes without sidebar layout */}
