@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
-import { AddRunnerModal } from "@/components/AddRunnerModal";
 import { AdvertiseModal } from "@/components/AdvertiseModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SponsorCarousel } from "@/components/SponsorCarousel";
@@ -24,7 +23,6 @@ type LeaderboardView = "total" | "percent";
 
 const Index = () => {
   const [runners, setRunners] = useState<Runner[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<LeaderboardView>("total");
@@ -113,14 +111,6 @@ const Index = () => {
             >
               <Flame className="h-5 w-5" />
               Connect with Strava
-            </Button>
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              className="gap-2"
-              size="lg"
-            >
-              <Plus className="h-5 w-5" />
-              Add runner
             </Button>
           </div>
         </div>
@@ -241,25 +231,11 @@ const Index = () => {
                   className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 />
               </div>
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                size="lg"
-                className="gap-2 whitespace-nowrap"
-              >
-                <Plus className="h-5 w-5" />
-                Add runner
-              </Button>
             </div>
           </div>
         </div>
 
       </div>
-
-      <AddRunnerModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSuccess={fetchRunners}
-      />
 
       <AdvertiseModal
         open={isAdvertiseModalOpen}
