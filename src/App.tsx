@@ -23,8 +23,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Landing page without sidebar */}
+            <Route path="/" element={<Index />} />
+            
             {/* Routes with sidebar layout */}
-            <Route path="/" element={<AppLayout><Index /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
             
             {/* Routes without sidebar layout */}
