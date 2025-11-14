@@ -1,4 +1,5 @@
 import { Runner } from "@/types";
+import { Link } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -38,18 +39,18 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
           {sortedRunners.map((runner, index) => (
             <TableRow
               key={runner.id}
-              className="hover:bg-muted/50 transition-colors"
+              className="hover:bg-muted/50 transition-colors cursor-pointer"
             >
               <TableCell className="font-medium">
-                <div className="flex items-center gap-2">
+                <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
                   {index === 0 && <span className="text-2xl">🥇</span>}
                   {index === 1 && <span className="text-2xl">🥈</span>}
                   {index === 2 && <span className="text-2xl">🥉</span>}
                   {index > 2 && <span className="text-muted-foreground">#{index + 1}</span>}
-                </div>
+                </Link>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-3">
+                <Link to={`/runner/${runner.id}`} className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={runner.avatar_url || undefined} />
                     <AvatarFallback>
@@ -62,19 +63,25 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
                       @{runner.strava_username}
                     </div>
                   </div>
-                </div>
+                </Link>
               </TableCell>
               <TableCell className="text-right">
-                <Badge variant="secondary" className="gap-1.5 font-semibold">
-                  <Flame className="h-4 w-4 text-orange-500" />
-                  {runner.current_streak_days} days
-                </Badge>
+                <Link to={`/runner/${runner.id}`}>
+                  <Badge variant="secondary" className="gap-1.5 font-semibold">
+                    <Flame className="h-4 w-4 text-orange-500" />
+                    {runner.current_streak_days} days
+                  </Badge>
+                </Link>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {runner.current_streak_miles.toFixed(1)} mi
+                <Link to={`/runner/${runner.id}`}>
+                  {runner.current_streak_miles.toFixed(1)} mi
+                </Link>
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
-                {runner.average_miles_per_day.toFixed(1)} mi
+                <Link to={`/runner/${runner.id}`}>
+                  {runner.average_miles_per_day.toFixed(1)} mi
+                </Link>
               </TableCell>
             </TableRow>
           ))}
