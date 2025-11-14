@@ -27,6 +27,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<LeaderboardView>("total");
   const [displayCount, setDisplayCount] = useState(10);
+  const [isConnected, setIsConnected] = useState(false);
 
   const fetchRunners = async () => {
     try {
@@ -51,6 +52,12 @@ const Index = () => {
 
   useEffect(() => {
     fetchRunners();
+    
+    // Check if user is already connected to Strava
+    const runnerId = localStorage.getItem('runnerId');
+    if (runnerId) {
+      setIsConnected(true);
+    }
   }, []);
 
   const displayedRunners = runners.slice(0, displayCount);
@@ -98,18 +105,38 @@ const Index = () => {
         </header>
 
         {/* Actions */}
-        <div className="mb-10 sm:mb-12">
-          <div className="flex justify-center">
-            <Button
-              onClick={() => window.location.href = '/connect'}
-              size="lg"
-              className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
-            >
-              <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
-              Connect with Strava
-            </Button>
+        {!isConnected ? (
+          <div className="mb-10 sm:mb-12">
+            <div className="flex justify-center">
+              <Button
+                onClick={() => window.location.href = '/connect'}
+                size="lg"
+                className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
+              >
+                <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
+                Connect with Strava
+              </Button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="mb-10 sm:mb-12">
+            <div className="flex justify-center gap-3">
+              <Button
+                onClick={() => {
+                  const runnerId = localStorage.getItem('runnerId');
+                  if (runnerId) {
+                    window.location.href = `/runner/${runnerId}`;
+                  }
+                }}
+                size="lg"
+                variant="default"
+                className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
+              >
+                View My Profile
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Leaderboard Section */}
         <div className="mb-6">

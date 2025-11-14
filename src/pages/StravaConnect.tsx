@@ -13,8 +13,13 @@ export default function StravaConnect() {
   useEffect(() => {
     const stravaStatus = searchParams.get('strava');
     const message = searchParams.get('message');
+    const runnerId = searchParams.get('runnerId');
     
     if (stravaStatus === 'success') {
+      // Store runner ID in localStorage
+      if (runnerId) {
+        localStorage.setItem('runnerId', runnerId);
+      }
       toast.success('Successfully connected to Strava!');
       setTimeout(() => navigate('/'), 2000);
     } else if (stravaStatus === 'error') {
