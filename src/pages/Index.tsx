@@ -104,7 +104,16 @@ const Index = () => {
 
         {/* Actions */}
         <div className="mb-8">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            <Button
+              onClick={() => window.location.href = '/connect'}
+              variant="outline"
+              className="gap-2"
+              size="lg"
+            >
+              <Flame className="h-5 w-5" />
+              Connect with Strava
+            </Button>
             <Button
               onClick={() => setIsModalOpen(true)}
               className="gap-2"
