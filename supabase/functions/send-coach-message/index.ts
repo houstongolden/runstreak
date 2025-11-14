@@ -40,17 +40,47 @@ serve(async (req) => {
 
     const settings = await settingsResponse.json();
     
+    let userSettings;
+    
+    // If no user settings exist, create default ones for app usage
     if (!settings || settings.length === 0) {
-      throw new Error('User settings not found');
+      if (source === 'app') {
+        // For app usage, create default settings
+        const createResponse = await fetch(
+          `${supabaseUrl}/rest/v1/user_settings`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              runner_id: runner_id,
+              ai_coach_enabled: true,
+              ai_coach_style: 'motivational',
+              ai_coach_frequency: 'daily',
+              ai_coach_time: '09:00'
+            })
+          }
+        );
+        const newSettings = await createResponse.json();
+        userSettings = Array.isArray(newSettings) ? newSettings[0] : newSettings;
+      } else {
+        throw new Error('User settings not found');
+      }
+    } else {
+      userSettings = settings[0];
     }
 
-    const userSettings = settings[0];
-
-    if (!userSettings.phone_verified) {
+    // Phone verification only required for SMS
+    if (source === 'sms' && !userSettings.phone_verified) {
       throw new Error('Phone number not verified');
     }
 
-    if (!userSettings.ai_coach_enabled && !message) {
+    // AI coach enabled check only for automated messages
+    if (source === 'sms' && !userSettings.ai_coach_enabled && !message) {
       throw new Error('AI coach not enabled');
     }
 

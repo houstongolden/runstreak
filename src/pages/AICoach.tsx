@@ -55,7 +55,7 @@ export default function AICoach() {
   }
 
   return (
-    <div className="container py-8 max-w-4xl">
+    <div className="h-full w-full">
       <AICoachChat runnerId={selectedRunnerId} />
     </div>
   );

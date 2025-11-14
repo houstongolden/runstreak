@@ -139,82 +139,75 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   };
 
   return (
-    <Card className="h-[600px] flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          AI Run Streak Coach
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 px-4" ref={scrollRef}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              Loading messages...
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center p-8">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Start a conversation with your AI coach
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Ask about your progress, get motivation, or discuss your goals
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4 py-4">
-              {messages.map((message) => (
+    <div className="h-[calc(100vh-4rem)] w-full flex flex-col bg-background">
+      <div className="border-b border-border bg-card px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold">AI Run Streak Coach</h1>
+        </div>
+      </div>
+      
+      <ScrollArea ref={scrollRef} className="flex-1 px-6">
+        {loading ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            <MessageSquare className="h-8 w-8 animate-pulse" />
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <Sparkles className="h-16 w-16 mb-4 text-primary/50" />
+            <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
+            <p className="text-muted-foreground max-w-md">
+              Ask your AI coach anything about your running, training, or goals!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4 py-6 max-w-4xl mx-auto">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
                 <div
-                  key={message.id}
-                  className={`flex ${
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
                   }`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      {message.source === 'sms' && (
-                        <Badge variant="outline" className="text-xs">
-                          SMS
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {formatTime(message.created_at)}
-                    </p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-xs opacity-70">{formatTime(message.created_at)}</p>
+                    {message.source === 'sms' && (
+                      <Badge variant="outline" className="text-xs">SMS</Badge>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-        <div className="border-t p-4">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              sendMessage();
-            }}
-            className="flex gap-2"
+              </div>
+            ))}
+          </div>
+        )}
+      </ScrollArea>
+      
+      <div className="border-t border-border bg-card px-6 py-4">
+        <div className="flex gap-2 max-w-4xl mx-auto">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && !sending && sendMessage()}
+            placeholder="Ask your coach anything..."
+            disabled={sending}
+            className="flex-1 bg-background"
+          />
+          <Button 
+            onClick={sendMessage} 
+            disabled={!input.trim() || sending}
+            size="icon"
+            className="h-10 w-10"
           >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask your coach anything..."
-              disabled={sending}
-            />
-            <Button type="submit" disabled={sending || !input.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+            <Send className="h-4 w-4" />
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
