@@ -16,6 +16,7 @@ interface ProfileEditorProps {
 export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [username, setUsername] = useState(runner.username || "");
   const [xProfile, setXProfile] = useState(runner.x_profile || "");
   const [bio, setBio] = useState(runner.bio || "");
   const [isSaving, setIsSaving] = useState(false);
@@ -23,9 +24,21 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // Validate username format (alphanumeric, underscore, hyphen only)
+      if (username && !/^[a-zA-Z0-9_-]+$/.test(username)) {
+        toast({
+          title: "Invalid Username",
+          description: "Username can only contain letters, numbers, underscores, and hyphens.",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+
       const { data, error } = await (supabase as any)
         .from("runners")
         .update({
+          username: username || null,
           x_profile: xProfile,
           bio: bio
         })
@@ -33,7 +46,19 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Username Taken",
+            description: "This username is already in use. Please choose another.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        setIsSaving(false);
+        return;
+      }
 
       onUpdate(data);
       setIsEditing(false);
@@ -54,12 +79,13 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
   };
 
   const handleCancel = () => {
+    setUsername(runner.username || "");
     setXProfile(runner.x_profile || "");
     setBio(runner.bio || "");
     setIsEditing(false);
   };
 
-  if (!isEditing && !runner.x_profile && !runner.bio) {
+  if (!isEditing && !runner.username && !runner.x_profile && !runner.bio) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -77,6 +103,18 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
       <CardContent className="pt-6 space-y-4">
         {isEditing ? (
           <>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Username</label>
+              <Input
+                placeholder="your-custom-username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">
+                Your shareable profile URL: runstreak.app/runner/{username || "your-username"}
+              </p>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">X Profile (Twitter)</label>
               <Input
@@ -107,6 +145,12 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
           </>
         ) : (
           <>
+            {runner.username && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Username</label>
+                <p className="text-sm mt-1 font-mono">@{runner.username}</p>
+              </div>
+            )}
             {runner.x_profile && (
               <div>
                 <label className="text-sm font-medium text-muted-foreground">X Profile</label>

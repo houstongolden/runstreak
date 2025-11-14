@@ -115,26 +115,34 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
           {efforts.map((effort) => (
             <div
               key={effort.distance}
-              className="p-4 rounded-lg bg-muted/50 border border-border/50 hover:bg-muted/70 transition-colors"
+              className="p-4 rounded-lg bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50 hover:border-primary/50 transition-all duration-200 group"
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="font-semibold text-foreground">
-                  {DISTANCE_LABELS[effort.distance] || `${effort.distance}m`}
-                </div>
-                <Trophy className="h-4 w-4 text-primary" />
-              </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-bold text-primary">
-                  {formatTime(effort.elapsed_time)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {formatPace(effort.distance, effort.elapsed_time)}
-                </div>
-                {effort.start_date && (
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(effort.start_date).toLocaleDateString()}
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <div className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                    {DISTANCE_LABELS[effort.distance] || `${effort.distance}m`}
                   </div>
-                )}
+                  {effort.start_date && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {new Date(effort.start_date).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </div>
+                  )}
+                </div>
+                <Trophy className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors" />
+              </div>
+              <div className="space-y-2 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Time</span>
+                  <span className="font-bold text-base text-foreground">{formatTime(effort.elapsed_time)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Pace</span>
+                  <span className="font-semibold text-sm text-primary">{formatPace(effort.distance, effort.elapsed_time)}</span>
+                </div>
               </div>
             </div>
           ))}
