@@ -70,60 +70,60 @@ const BadgeCustomizer = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Link to={`/runner/${id}`}>
-            <Button variant="ghost" size="sm" className="gap-2 mb-4">
+            <Button variant="ghost" size="sm" className="gap-2 mb-3 sm:mb-4">
               <ArrowLeft className="h-4 w-4" />
               Back to Profile
             </Button>
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">Customize Your Badge</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Customize Your Badge</h1>
+          <p className="text-muted-foreground text-sm sm:text-base lg:text-lg">
             Create an embeddable badge to showcase your running streak
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {/* Customization Panel */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Badge Settings</CardTitle>
-                <CardDescription>Choose what to display on your badge</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Badge Settings</CardTitle>
+                <CardDescription className="text-sm">Choose what to display on your badge</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6">
                 {/* Stat Selection */}
-                <div className="space-y-3">
-                  <Label className="text-base font-semibold">Statistic</Label>
+                <div className="space-y-2 sm:space-y-3">
+                  <Label className="text-sm sm:text-base font-semibold">Statistic</Label>
                   <RadioGroup value={stat} onValueChange={(v) => setStat(v as StatType)}>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="streak" id="streak" />
                       <Label htmlFor="streak" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Current Streak</div>
-                        <div className="text-sm text-muted-foreground">Show days in your active streak</div>
+                        <div className="font-medium text-sm sm:text-base">Current Streak</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show days in your active streak</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="rank" id="rank" />
                       <Label htmlFor="rank" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Leaderboard Rank</div>
-                        <div className="text-sm text-muted-foreground">Show your position on the leaderboard</div>
+                        <div className="font-medium text-sm sm:text-base">Leaderboard Rank</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show your position on the leaderboard</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="miles" id="miles" />
                       <Label htmlFor="miles" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Total Miles</div>
-                        <div className="text-sm text-muted-foreground">Show total miles in your streak</div>
+                        <div className="font-medium text-sm sm:text-base">Total Miles</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show total miles in your streak</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="avg" id="avg" />
                       <Label htmlFor="avg" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Average Miles/Day</div>
-                        <div className="text-sm text-muted-foreground">Show your daily average</div>
+                        <div className="font-medium text-sm sm:text-base">Average Miles/Day</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show your daily average</div>
                       </Label>
                     </div>
                   </RadioGroup>
@@ -132,28 +132,28 @@ const BadgeCustomizer = () => {
                 <Separator />
 
                 {/* Theme Selection */}
-                <div className="space-y-3">
-                  <Label className="text-base font-semibold">Theme</Label>
+                <div className="space-y-2 sm:space-y-3">
+                  <Label className="text-sm sm:text-base font-semibold">Theme</Label>
                   <RadioGroup value={theme} onValueChange={(v) => setTheme(v as ThemeType)}>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="light" id="light" />
                       <Label htmlFor="light" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Light</div>
-                        <div className="text-sm text-muted-foreground">Clean white background</div>
+                        <div className="font-medium text-sm sm:text-base">Light</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Clean white background</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="dark" id="dark" />
                       <Label htmlFor="dark" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Dark</div>
-                        <div className="text-sm text-muted-foreground">Dark mode friendly</div>
+                        <div className="font-medium text-sm sm:text-base">Dark</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Dark mode friendly</div>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value="fire" id="fire" />
                       <Label htmlFor="fire" className="flex-1 cursor-pointer">
-                        <div className="font-medium">Fire</div>
-                        <div className="text-sm text-muted-foreground">Gradient orange to red</div>
+                        <div className="font-medium text-sm sm:text-base">Fire</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Gradient orange to red</div>
                       </Label>
                     </div>
                   </RadioGroup>
@@ -164,11 +164,11 @@ const BadgeCustomizer = () => {
             {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Need Help?</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Need Help?</CardTitle>
               </CardHeader>
               <CardContent>
                 <Link to="/badge-docs">
-                  <Button variant="outline" className="w-full gap-2">
+                  <Button variant="outline" className="w-full gap-2 text-sm sm:text-base">
                     <ExternalLink className="h-4 w-4" />
                     View Documentation
                   </Button>
@@ -178,14 +178,14 @@ const BadgeCustomizer = () => {
           </div>
 
           {/* Preview & Code Panel */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Preview */}
             <Card>
               <CardHeader>
-                <CardTitle>Preview</CardTitle>
-                <CardDescription>This is how your badge will look</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Preview</CardTitle>
+                <CardDescription className="text-sm">This is how your badge will look</CardDescription>
               </CardHeader>
-              <CardContent className="flex items-center justify-center p-8 bg-muted/30 rounded-lg">
+              <CardContent className="flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-muted/30 rounded-lg min-h-[120px]">
                 <img 
                   src={badgeUrl} 
                   alt="Badge Preview" 
@@ -197,58 +197,58 @@ const BadgeCustomizer = () => {
             {/* Embed Code */}
             <Card>
               <CardHeader>
-                <CardTitle>Embed Code</CardTitle>
-                <CardDescription>Copy and paste into your website or README</CardDescription>
+                <CardTitle className="text-lg sm:text-xl">Embed Code</CardTitle>
+                <CardDescription className="text-sm">Copy and paste into your website or README</CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="html" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="html">HTML</TabsTrigger>
-                    <TabsTrigger value="markdown">Markdown</TabsTrigger>
-                    <TabsTrigger value="url">URL</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10">
+                    <TabsTrigger value="html" className="text-xs sm:text-sm">HTML</TabsTrigger>
+                    <TabsTrigger value="markdown" className="text-xs sm:text-sm">Markdown</TabsTrigger>
+                    <TabsTrigger value="url" className="text-xs sm:text-sm">URL</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="html" className="space-y-3">
+                  <TabsContent value="html" className="space-y-3 mt-3 sm:mt-4">
                     <div className="relative">
-                      <pre className="p-4 bg-muted rounded-lg text-sm overflow-x-auto">
-                        <code>{embedCode.html}</code>
+                      <pre className="p-3 sm:p-4 bg-muted rounded-lg text-xs sm:text-sm overflow-x-auto max-w-full">
+                        <code className="break-all">{embedCode.html}</code>
                       </pre>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="absolute top-2 right-2"
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 h-7 w-7 sm:h-8 sm:w-8 p-0"
                         onClick={() => copyToClipboard(embedCode.html)}
                       >
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
                       </Button>
                     </div>
                   </TabsContent>
-                  <TabsContent value="markdown" className="space-y-3">
+                  <TabsContent value="markdown" className="space-y-3 mt-3 sm:mt-4">
                     <div className="relative">
-                      <pre className="p-4 bg-muted rounded-lg text-sm overflow-x-auto">
-                        <code>{embedCode.markdown}</code>
+                      <pre className="p-3 sm:p-4 bg-muted rounded-lg text-xs sm:text-sm overflow-x-auto max-w-full">
+                        <code className="break-all">{embedCode.markdown}</code>
                       </pre>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="absolute top-2 right-2"
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 h-7 w-7 sm:h-8 sm:w-8 p-0"
                         onClick={() => copyToClipboard(embedCode.markdown)}
                       >
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
                       </Button>
                     </div>
                   </TabsContent>
-                  <TabsContent value="url" className="space-y-3">
+                  <TabsContent value="url" className="space-y-3 mt-3 sm:mt-4">
                     <div className="relative">
-                      <pre className="p-4 bg-muted rounded-lg text-sm overflow-x-auto">
+                      <pre className="p-3 sm:p-4 bg-muted rounded-lg text-xs sm:text-sm overflow-x-auto max-w-full">
                         <code className="break-all">{embedCode.url}</code>
                       </pre>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="absolute top-2 right-2"
+                        className="absolute top-1 right-1 sm:top-2 sm:right-2 h-7 w-7 sm:h-8 sm:w-8 p-0"
                         onClick={() => copyToClipboard(embedCode.url)}
                       >
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copied ? <Check className="h-3 w-3 sm:h-4 sm:w-4" /> : <Copy className="h-3 w-3 sm:h-4 sm:w-4" />}
                       </Button>
                     </div>
                   </TabsContent>
