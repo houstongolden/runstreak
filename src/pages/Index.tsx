@@ -30,7 +30,7 @@ const Index = () => {
 
   const fetchRunners = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("runners")
         .select("*")
         .order("current_streak_days", { ascending: false });

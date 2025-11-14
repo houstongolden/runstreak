@@ -26,7 +26,7 @@ export default function RunnerProfile() {
       if (!id) return;
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from("runners")
           .select("*")
           .eq("id", id)
@@ -61,7 +61,7 @@ export default function RunnerProfile() {
       });
 
       // Refresh runner data
-      const { data, error: fetchError } = await supabase
+      const { data, error: fetchError } = await (supabase as any)
         .from("runners")
         .select("*")
         .eq("id", id)

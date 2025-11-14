@@ -25,7 +25,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
         const oneYearAgo = new Date();
         oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from("daily_activities")
           .select("activity_date, distance, run_count")
           .eq("runner_id", runnerId)
