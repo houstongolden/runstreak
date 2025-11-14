@@ -130,8 +130,8 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   return (
     <div>
       <h3 className="text-sm font-medium mb-2">Activity Heatmap</h3>
-      <div className="bg-card rounded-lg p-3 border">
-        <div className="overflow-x-auto" ref={scrollContainerRef}>
+      <div className="bg-card rounded-lg p-3 border relative">
+        <div className="overflow-x-auto pr-32" ref={scrollContainerRef}>
           <div className="inline-block min-w-full">
             {/* Month labels */}
             <div className="flex gap-[2px] mb-2 ml-6">
@@ -209,21 +209,21 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                 ))}
               </TooltipProvider>
             </div>
-
-            {/* Legend */}
-            <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
-              <span>Less</span>
-              <div className="flex gap-1">
-                <div className="w-3 h-3 rounded-sm bg-muted/20" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_80%_85%)]" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(25_90%_70%)]" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(22_95%_60%)]" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(20_100%_52%)]" />
-                <div className="w-3 h-3 rounded-sm bg-[hsl(15_100%_45%)]" />
-              </div>
-              <span>More</span>
-            </div>
           </div>
+        </div>
+
+        {/* Fixed Legend on Right */}
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 text-xs text-muted-foreground bg-card/95 backdrop-blur-sm p-2 rounded-md border">
+          <span>Less</span>
+          <div className="flex gap-1">
+            <div className="w-3 h-3 rounded-sm bg-muted/20" />
+            <div className="w-3 h-3 rounded-sm bg-[hsl(25_80%_85%)]" />
+            <div className="w-3 h-3 rounded-sm bg-[hsl(25_90%_70%)]" />
+            <div className="w-3 h-3 rounded-sm bg-[hsl(22_95%_60%)]" />
+            <div className="w-3 h-3 rounded-sm bg-[hsl(20_100%_52%)]" />
+            <div className="w-3 h-3 rounded-sm bg-[hsl(15_100%_45%)]" />
+          </div>
+          <span>More</span>
         </div>
       </div>
     </div>
