@@ -255,6 +255,59 @@ Deno.serve(async (req) => {
         });
     }
 
+    // Calculate days on streak metrics
+    const allActivityDates = Array.from(activityDates);
+    
+    // Calculate days on streak for last 30/60/90 days
+    const getDaysWithActivity = (daysPast: number) => {
+      const startDate = new Date(today);
+      startDate.setDate(startDate.getDate() - daysPast);
+      return allActivityDates.filter(dateStr => {
+        const date = new Date(dateStr);
+        return date >= startDate && date <= today;
+      }).length;
+    };
+    
+    const daysOnStreak30 = getDaysWithActivity(30);
+    const daysOnStreak60 = getDaysWithActivity(60);
+    const daysOnStreak90 = getDaysWithActivity(90);
+    
+    // Calculate days since joining vs before joining
+    const joinedDate = runner.joined_runstreak_at ? new Date(runner.joined_runstreak_at) : null;
+    let daysOnStreakSinceJoining = 0;
+    let totalDaysSinceJoining = 0;
+    let daysOnStreakBeforeJoining = 0;
+    let totalDaysBeforeJoining = 0;
+    
+    if (joinedDate) {
+      joinedDate.setHours(0, 0, 0, 0);
+      totalDaysSinceJoining = Math.floor((today.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Count days with activity since joining
+      daysOnStreakSinceJoining = allActivityDates.filter(dateStr => {
+        const date = new Date(dateStr);
+        return date >= joinedDate;
+      }).length;
+      
+      // Find earliest activity date for "before joining" calculation
+      const earliestActivityDate = allActivityDates.length > 0 
+        ? new Date(Math.min(...allActivityDates.map(d => new Date(d).getTime())))
+        : null;
+      
+      if (earliestActivityDate) {
+        earliestActivityDate.setHours(0, 0, 0, 0);
+        
+        // Only calculate if there are activities before joining
+        if (earliestActivityDate < joinedDate) {
+          totalDaysBeforeJoining = Math.floor((joinedDate.getTime() - earliestActivityDate.getTime()) / (1000 * 60 * 60 * 24));
+          daysOnStreakBeforeJoining = allActivityDates.filter(dateStr => {
+            const date = new Date(dateStr);
+            return date < joinedDate;
+          }).length;
+        }
+      }
+    }
+
     // Update runner stats
     await supabase
       .from('runners')
@@ -266,6 +319,13 @@ Deno.serve(async (req) => {
         streak_status: streakStatus,
         last_activity_date: lastActivityDate,
         streak_start_date: streakStartDate?.toISOString().split('T')[0],
+        days_on_streak_last_30: daysOnStreak30,
+        days_on_streak_last_60: daysOnStreak60,
+        days_on_streak_last_90: daysOnStreak90,
+        days_on_streak_since_joining: daysOnStreakSinceJoining,
+        total_days_since_joining: totalDaysSinceJoining,
+        days_on_streak_before_joining: daysOnStreakBeforeJoining,
+        total_days_before_joining: totalDaysBeforeJoining,
         ytd_run_count: stats.ytd_run_totals?.count || 0,
         ytd_distance: (stats.ytd_run_totals?.distance || 0) / 1609.34,
         ytd_moving_time: stats.ytd_run_totals?.moving_time || 0,
