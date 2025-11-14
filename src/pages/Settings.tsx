@@ -38,6 +38,7 @@ export default function Settings() {
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
+  const [sendingTestMessage, setSendingTestMessage] = useState(false);
   const [settings, setSettings] = useState<UserSettings>({
     runner_id: "temp-id", // This would come from auth in a real app
     email: "",
@@ -175,6 +176,40 @@ export default function Settings() {
       });
     } finally {
       setVerifyingCode(false);
+    }
+  };
+
+  const handleSendTestMessage = async () => {
+    if (!settings.phone_verified) {
+      toast({
+        title: "Error",
+        description: "Please verify your phone number first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingTestMessage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-coach-message", {
+        body: { runner_id: settings.runner_id },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Test message sent!",
+        description: "Check your phone for the AI coach message. You can reply to start a conversation.",
+      });
+    } catch (error) {
+      console.error("Error sending test message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send test message",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingTestMessage(false);
     }
   };
 
@@ -361,6 +396,18 @@ export default function Settings() {
                   disabled={!settings.phone_verified}
                 />
               </div>
+
+              {settings.phone_verified && (
+                <Button
+                  onClick={handleSendTestMessage}
+                  disabled={sendingTestMessage}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {sendingTestMessage ? "Sending..." : "Send Test Message & Chat"}
+                </Button>
+              )}
 
               {settings.ai_coach_enabled && (
                 <>
