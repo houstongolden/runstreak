@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
         });
     }
 
-    // Update runner
+    // Update runner stats
     await supabase
       .from('runners')
       .update({
@@ -275,6 +275,97 @@ Deno.serve(async (req) => {
         updated_at: new Date().toISOString(),
       })
       .eq('id', runnerId);
+
+    // Generate AI analysis after sync (background task)
+    console.log('Generating AI analysis...');
+    try {
+      const { data: runnerData } = await supabase
+        .from('runners')
+        .select('*')
+        .eq('id', runnerId)
+        .single();
+
+      if (runnerData) {
+        const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+        if (LOVABLE_API_KEY) {
+          const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-2.5-flash',
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are an expert running coach analyzing performance data. Provide 3 specific, actionable insights based on the runner\'s data. Keep each insight under 100 words.'
+                },
+                {
+                  role: 'user',
+                  content: `Analyze this runner's performance:
+- Current streak: ${runnerData.current_streak_days} days, ${runnerData.current_streak_miles?.toFixed(1)} miles
+- Longest streak: ${runnerData.longest_streak_ever} days
+- YTD: ${runnerData.ytd_run_count} runs, ${runnerData.ytd_distance?.toFixed(1)} miles
+- All-time: ${runnerData.all_time_run_count} runs, ${runnerData.all_time_distance?.toFixed(1)} miles
+- Streak status: ${runnerData.streak_status}
+- Last activity: ${runnerData.last_activity_date || 'N/A'}
+
+Provide exactly 3 insights with titles and descriptions.`
+                }
+              ],
+              tools: [{
+                type: 'function',
+                function: {
+                  name: 'provide_insights',
+                  description: 'Provide running performance insights',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      insights: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            title: { type: 'string' },
+                            description: { type: 'string' }
+                          },
+                          required: ['title', 'description']
+                        }
+                      }
+                    },
+                    required: ['insights']
+                  }
+                }
+              }],
+              tool_choice: { type: 'function', function: { name: 'provide_insights' } }
+            })
+          });
+
+          if (aiResponse.ok) {
+            const aiData = await aiResponse.json();
+            const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+            if (toolCall?.function?.arguments) {
+              const analysis = JSON.parse(toolCall.function.arguments);
+              
+              // Cache AI analysis
+              await supabase
+                .from('runners')
+                .update({
+                  ai_analysis: analysis,
+                  ai_analysis_updated_at: new Date().toISOString()
+                })
+                .eq('id', runnerId);
+              
+              console.log('AI analysis cached successfully');
+            }
+          }
+        }
+      }
+    } catch (aiError) {
+      console.error('Error generating AI analysis:', aiError);
+      // Don't fail the sync if AI generation fails
+    }
 
     return new Response(
       JSON.stringify({ success: true, message: 'Strava data synced successfully' }),
