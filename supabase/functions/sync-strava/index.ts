@@ -196,29 +196,55 @@ Deno.serve(async (req) => {
         });
     }
 
-    // Extract and store best efforts from activities
+    // Fetch best efforts from individual activity details
+    // Strava only provides best_efforts in detailed activity endpoint, not in list
+    console.log('Fetching best efforts from activity details...');
     const bestEffortsMap = new Map<number, any>();
     
-    for (const activity of allActivities) {
-      if (activity.best_efforts && Array.isArray(activity.best_efforts)) {
-        for (const effort of activity.best_efforts) {
-          const distance = effort.distance;
-          const existing = bestEffortsMap.get(distance);
-          
-          // Keep the fastest effort for each distance
-          if (!existing || effort.elapsed_time < existing.elapsed_time) {
-            bestEffortsMap.set(distance, {
-              runner_id: runnerId,
-              distance: Math.round(distance),
-              elapsed_time: effort.elapsed_time,
-              moving_time: effort.moving_time,
-              start_date: effort.start_date,
-              activity_id: activity.id,
-            });
+    // Limit to recent activities to avoid rate limits (last 100 runs)
+    const activitiesToFetch = sortedActivities.slice(0, 100);
+    
+    for (const activity of activitiesToFetch) {
+      try {
+        const detailResponse = await fetch(
+          `https://www.strava.com/api/v3/activities/${activity.id}`,
+          { headers: { 'Authorization': `Bearer ${accessToken}` } }
+        );
+        
+        if (!detailResponse.ok) {
+          console.log(`Failed to fetch details for activity ${activity.id}`);
+          continue;
+        }
+        
+        const detailedActivity = await detailResponse.json();
+        
+        if (detailedActivity.best_efforts && Array.isArray(detailedActivity.best_efforts)) {
+          for (const effort of detailedActivity.best_efforts) {
+            const distance = effort.distance;
+            const existing = bestEffortsMap.get(distance);
+            
+            // Keep the fastest effort for each distance
+            if (!existing || effort.elapsed_time < existing.elapsed_time) {
+              bestEffortsMap.set(distance, {
+                runner_id: runnerId,
+                distance: Math.round(distance),
+                elapsed_time: effort.elapsed_time,
+                moving_time: effort.moving_time,
+                start_date: effort.start_date,
+                activity_id: activity.id,
+              });
+            }
           }
         }
+        
+        // Add small delay to respect rate limits (100 requests per 15 min = ~9 seconds between)
+        await new Promise(resolve => setTimeout(resolve, 200));
+      } catch (error) {
+        console.error(`Error fetching activity ${activity.id}:`, error);
       }
     }
+
+    console.log(`Found ${bestEffortsMap.size} unique best effort distances`);
 
     // Upsert best efforts
     for (const effort of bestEffortsMap.values()) {
