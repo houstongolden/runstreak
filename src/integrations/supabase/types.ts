@@ -157,20 +157,32 @@ export type Database = {
           ai_analysis_updated_at: string | null
           all_time_distance: number | null
           all_time_run_count: number | null
+          athlete_type: string | null
           avatar_url: string | null
           average_miles_per_day: number | null
+          bikes: Json | null
           bio: string | null
           city: string | null
+          clubs: Json | null
           country: string | null
           created_at: string
+          created_at_strava: string | null
           current_streak_days: number | null
           current_streak_miles: number | null
+          date_preference: string | null
           display_name: string
+          email: string | null
+          follower_count: number | null
+          friend_count: number | null
+          ftp: number | null
           id: string
           last_activity_date: string | null
           latitude: number | null
           longest_streak_ever: number | null
           longitude: number | null
+          measurement_preference: string | null
+          sex: string | null
+          shoes: Json | null
           state: string | null
           strava_access_token: string | null
           strava_refresh_token: string | null
@@ -180,7 +192,9 @@ export type Database = {
           streak_status: string | null
           token_expires_at: string | null
           updated_at: string
+          updated_at_strava: string | null
           username: string | null
+          weight: number | null
           x_profile: string | null
           ytd_distance: number | null
           ytd_elevation_gain: number | null
@@ -192,20 +206,32 @@ export type Database = {
           ai_analysis_updated_at?: string | null
           all_time_distance?: number | null
           all_time_run_count?: number | null
+          athlete_type?: string | null
           avatar_url?: string | null
           average_miles_per_day?: number | null
+          bikes?: Json | null
           bio?: string | null
           city?: string | null
+          clubs?: Json | null
           country?: string | null
           created_at?: string
+          created_at_strava?: string | null
           current_streak_days?: number | null
           current_streak_miles?: number | null
+          date_preference?: string | null
           display_name: string
+          email?: string | null
+          follower_count?: number | null
+          friend_count?: number | null
+          ftp?: number | null
           id?: string
           last_activity_date?: string | null
           latitude?: number | null
           longest_streak_ever?: number | null
           longitude?: number | null
+          measurement_preference?: string | null
+          sex?: string | null
+          shoes?: Json | null
           state?: string | null
           strava_access_token?: string | null
           strava_refresh_token?: string | null
@@ -215,7 +241,9 @@ export type Database = {
           streak_status?: string | null
           token_expires_at?: string | null
           updated_at?: string
+          updated_at_strava?: string | null
           username?: string | null
+          weight?: number | null
           x_profile?: string | null
           ytd_distance?: number | null
           ytd_elevation_gain?: number | null
@@ -227,20 +255,32 @@ export type Database = {
           ai_analysis_updated_at?: string | null
           all_time_distance?: number | null
           all_time_run_count?: number | null
+          athlete_type?: string | null
           avatar_url?: string | null
           average_miles_per_day?: number | null
+          bikes?: Json | null
           bio?: string | null
           city?: string | null
+          clubs?: Json | null
           country?: string | null
           created_at?: string
+          created_at_strava?: string | null
           current_streak_days?: number | null
           current_streak_miles?: number | null
+          date_preference?: string | null
           display_name?: string
+          email?: string | null
+          follower_count?: number | null
+          friend_count?: number | null
+          ftp?: number | null
           id?: string
           last_activity_date?: string | null
           latitude?: number | null
           longest_streak_ever?: number | null
           longitude?: number | null
+          measurement_preference?: string | null
+          sex?: string | null
+          shoes?: Json | null
           state?: string | null
           strava_access_token?: string | null
           strava_refresh_token?: string | null
@@ -250,7 +290,9 @@ export type Database = {
           streak_status?: string | null
           token_expires_at?: string | null
           updated_at?: string
+          updated_at_strava?: string | null
           username?: string | null
+          weight?: number | null
           x_profile?: string | null
           ytd_distance?: number | null
           ytd_elevation_gain?: number | null

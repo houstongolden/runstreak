@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
       throw new Error('STRAVA_CLIENT_ID not configured');
     }
 
-    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=activity:read_all`;
+    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=read,activity:read_all,profile:read_all`;
 
     return new Response(
       JSON.stringify({ authUrl }),
