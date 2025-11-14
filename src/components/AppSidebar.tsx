@@ -49,6 +49,9 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
+                // Skip AI Coach link if no runner context
+                if (item.dynamic && !runnerId) return null;
+                
                 const itemUrl = item.dynamic && runnerId ? `${item.url}/${runnerId}` : item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
