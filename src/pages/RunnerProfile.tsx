@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain } from "lucide-react";
+import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain, RefreshCw } from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
+import { useToast } from "@/hooks/use-toast";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [runner, setRunner] = useState<Runner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const fetchRunner = async () => {
@@ -38,6 +41,43 @@ export default function RunnerProfile() {
 
     fetchRunner();
   }, [id]);
+
+  const handleSync = async () => {
+    if (!id) return;
+    
+    setIsSyncing(true);
+    try {
+      const { error } = await supabase.functions.invoke('sync-strava', {
+        body: { runnerId: id }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sync Complete",
+        description: "Your Strava data has been refreshed successfully.",
+      });
+
+      // Refresh runner data
+      const { data, error: fetchError } = await supabase
+        .from("runners")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+      setRunner(data as Runner);
+    } catch (error) {
+      console.error("Error syncing Strava data:", error);
+      toast({
+        title: "Sync Failed",
+        description: "Failed to refresh your Strava data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -82,34 +122,51 @@ export default function RunnerProfile() {
         {/* Profile Header */}
         <Card className="mb-6">
           <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src={runner.avatar_url || undefined} />
-                <AvatarFallback className="text-2xl">
-                  {runner.display_name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+            <div className="flex flex-col lg:flex-row items-start gap-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1">
+                <Avatar className="h-32 w-32">
+                  <AvatarImage src={runner.avatar_url || undefined} />
+                  <AvatarFallback className="text-2xl">
+                    {runner.display_name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
 
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-3xl font-bold mb-2">{runner.display_name}</h1>
-                <p className="text-muted-foreground mb-4">@{runner.strava_username}</p>
-                
-                <Badge variant={streakActive ? "default" : "secondary"} className="mb-4">
-                  {streakActive ? (
-                    <>
-                      <Flame className="h-4 w-4 mr-1" />
-                      Active Streak
-                    </>
-                  ) : (
-                    "Streak Broken"
+                <div className="flex-1 text-center sm:text-left">
+                  <h1 className="text-3xl font-bold mb-2">{runner.display_name}</h1>
+                  <p className="text-muted-foreground mb-4">@{runner.strava_username}</p>
+                  
+                  <div className="flex items-center gap-2 justify-center sm:justify-start mb-4">
+                    <Badge variant={streakActive ? "default" : "secondary"}>
+                      {streakActive ? (
+                        <>
+                          <Flame className="h-4 w-4 mr-1" />
+                          Active Streak
+                        </>
+                      ) : (
+                        "Streak Broken"
+                      )}
+                    </Badge>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleSync}
+                      disabled={isSyncing}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                      Sync
+                    </Button>
+                  </div>
+
+                  {runner.last_activity_date && (
+                    <p className="text-sm text-muted-foreground">
+                      Last activity: {new Date(runner.last_activity_date).toLocaleDateString()}
+                    </p>
                   )}
-                </Badge>
-
-                {runner.last_activity_date && (
-                  <p className="text-sm text-muted-foreground">
-                    Last activity: {new Date(runner.last_activity_date).toLocaleDateString()}
-                  </p>
-                )}
+                </div>
+              </div>
+              
+              <div className="w-full lg:w-auto lg:min-w-[300px]">
+                <ActivityHeatmap runnerId={runner.id} />
               </div>
             </div>
           </CardContent>
@@ -273,11 +330,6 @@ export default function RunnerProfile() {
               </CardContent>
             </Card>
           </div>
-        </div>
-
-        {/* Activity Heatmap */}
-        <div className="mb-6">
-          <ActivityHeatmap runnerId={runner.id} />
         </div>
 
         {/* Streak Timeline */}
