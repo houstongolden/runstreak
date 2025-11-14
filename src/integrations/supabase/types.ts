@@ -14,7 +14,224 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_activities: {
+        Row: {
+          activity_date: string
+          created_at: string
+          distance: number
+          elevation_gain: number
+          id: string
+          moving_time: number
+          run_count: number
+          runner_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_date: string
+          created_at?: string
+          distance?: number
+          elevation_gain?: number
+          id?: string
+          moving_time?: number
+          run_count?: number
+          runner_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_date?: string
+          created_at?: string
+          distance?: number
+          elevation_gain?: number
+          id?: string
+          moving_time?: number
+          run_count?: number
+          runner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_activities_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phone_verification_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          phone_number: string
+          verified: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone_number: string
+          verified?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone_number?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      runners: {
+        Row: {
+          all_time_distance: number | null
+          all_time_run_count: number | null
+          avatar_url: string | null
+          average_miles_per_day: number | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          current_streak_days: number | null
+          current_streak_miles: number | null
+          display_name: string
+          id: string
+          last_activity_date: string | null
+          latitude: number | null
+          longest_streak_ever: number | null
+          longitude: number | null
+          state: string | null
+          strava_access_token: string | null
+          strava_refresh_token: string | null
+          strava_user_id: number | null
+          strava_username: string
+          streak_start_date: string | null
+          streak_status: string | null
+          token_expires_at: string | null
+          updated_at: string
+          x_profile: string | null
+          ytd_distance: number | null
+          ytd_elevation_gain: number | null
+          ytd_moving_time: number | null
+          ytd_run_count: number | null
+        }
+        Insert: {
+          all_time_distance?: number | null
+          all_time_run_count?: number | null
+          avatar_url?: string | null
+          average_miles_per_day?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          current_streak_days?: number | null
+          current_streak_miles?: number | null
+          display_name: string
+          id?: string
+          last_activity_date?: string | null
+          latitude?: number | null
+          longest_streak_ever?: number | null
+          longitude?: number | null
+          state?: string | null
+          strava_access_token?: string | null
+          strava_refresh_token?: string | null
+          strava_user_id?: number | null
+          strava_username: string
+          streak_start_date?: string | null
+          streak_status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          x_profile?: string | null
+          ytd_distance?: number | null
+          ytd_elevation_gain?: number | null
+          ytd_moving_time?: number | null
+          ytd_run_count?: number | null
+        }
+        Update: {
+          all_time_distance?: number | null
+          all_time_run_count?: number | null
+          avatar_url?: string | null
+          average_miles_per_day?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          current_streak_days?: number | null
+          current_streak_miles?: number | null
+          display_name?: string
+          id?: string
+          last_activity_date?: string | null
+          latitude?: number | null
+          longest_streak_ever?: number | null
+          longitude?: number | null
+          state?: string | null
+          strava_access_token?: string | null
+          strava_refresh_token?: string | null
+          strava_user_id?: number | null
+          strava_username?: string
+          streak_start_date?: string | null
+          streak_status?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+          x_profile?: string | null
+          ytd_distance?: number | null
+          ytd_elevation_gain?: number | null
+          ytd_moving_time?: number | null
+          ytd_run_count?: number | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          ai_coach_enabled: boolean | null
+          ai_coach_frequency: string | null
+          ai_coach_style: string | null
+          ai_coach_time: string | null
+          created_at: string
+          email: string | null
+          email_verified: boolean | null
+          free_month_claimed: boolean | null
+          id: string
+          phone_number: string | null
+          phone_verified: boolean | null
+          runner_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_coach_enabled?: boolean | null
+          ai_coach_frequency?: string | null
+          ai_coach_style?: string | null
+          ai_coach_time?: string | null
+          created_at?: string
+          email?: string | null
+          email_verified?: boolean | null
+          free_month_claimed?: boolean | null
+          id?: string
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          runner_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_coach_enabled?: boolean | null
+          ai_coach_frequency?: string | null
+          ai_coach_style?: string | null
+          ai_coach_time?: string | null
+          created_at?: string
+          email?: string | null
+          email_verified?: boolean | null
+          free_month_claimed?: boolean | null
+          id?: string
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          runner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
