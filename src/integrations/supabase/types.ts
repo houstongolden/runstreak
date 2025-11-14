@@ -148,6 +148,7 @@ export type Database = {
           streak_status: string | null
           token_expires_at: string | null
           updated_at: string
+          username: string | null
           x_profile: string | null
           ytd_distance: number | null
           ytd_elevation_gain: number | null
@@ -180,6 +181,7 @@ export type Database = {
           streak_status?: string | null
           token_expires_at?: string | null
           updated_at?: string
+          username?: string | null
           x_profile?: string | null
           ytd_distance?: number | null
           ytd_elevation_gain?: number | null
@@ -212,6 +214,7 @@ export type Database = {
           streak_status?: string | null
           token_expires_at?: string | null
           updated_at?: string
+          username?: string | null
           x_profile?: string | null
           ytd_distance?: number | null
           ytd_elevation_gain?: number | null
