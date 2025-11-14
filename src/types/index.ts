@@ -32,6 +32,21 @@ export interface Runner {
   longitude?: number | null;
   ai_analysis?: { insights: { title: string; description: string }[] } | null;
   ai_analysis_updated_at?: string | null;
+  // New Strava fields
+  email?: string | null;
+  sex?: string | null;
+  weight?: number | null;
+  created_at_strava?: string | null;
+  updated_at_strava?: string | null;
+  follower_count?: number | null;
+  friend_count?: number | null;
+  athlete_type?: string | null;
+  date_preference?: string | null;
+  measurement_preference?: string | null;
+  ftp?: number | null;
+  clubs?: any[] | null;
+  bikes?: any[] | null;
+  shoes?: any[] | null;
 }
 
 export interface UserSettings {

@@ -1,6 +1,8 @@
 import { Home, Settings, User, Trophy, Sparkles } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 import {
   Sidebar,
@@ -16,6 +18,7 @@ import {
 
 const menuItems = [
   { title: "Leaderboard", url: "/", icon: Trophy },
+  { title: "My Profile", url: "", icon: User }, // URL will be dynamic
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -24,10 +27,16 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const currentPath = location.pathname;
+  const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
 
-  // Extract runner ID from current path if available
-  const runnerIdMatch = currentPath.match(/\/runner\/([^/]+)/);
-  const runnerId = runnerIdMatch ? runnerIdMatch[1] : null;
+  useEffect(() => {
+    const fetchCurrentRunner = async () => {
+      // Get current runner from localStorage (set during Strava connection)
+      const runnerId = localStorage.getItem('current_runner_id');
+      setCurrentRunnerId(runnerId);
+    };
+    fetchCurrentRunner();
+  }, []);
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -48,11 +57,21 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
+                // Set dynamic URL for My Profile
+                const itemUrl = item.title === "My Profile" && currentRunnerId
+                  ? `/runner/${currentRunnerId}`
+                  : item.url;
+                
+                // Don't show My Profile if no runner ID yet
+                if (item.title === "My Profile" && !currentRunnerId) {
+                  return null;
+                }
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink 
-                        to={item.url} 
+                        to={itemUrl} 
                         end={item.url === "/"} 
                         className="hover:bg-muted/50" 
                         activeClassName="bg-muted text-primary font-medium"

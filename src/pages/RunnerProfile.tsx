@@ -184,23 +184,66 @@ export default function RunnerProfile() {
 
                 <div className="flex-1 text-center sm:text-left">
                   <h1 className="text-3xl font-bold mb-2">{runner.display_name}</h1>
-                  <p className="text-muted-foreground mb-4">@{runner.strava_username}</p>
+                  <p className="text-muted-foreground mb-2">@{runner.strava_username}</p>
                   
-                  <Badge variant={streakActive ? "default" : "secondary"} className="mb-4">
-                    {streakActive ? (
-                      <>
-                        <Flame className="h-4 w-4 mr-1" />
-                        Active Streak
-                      </>
-                    ) : (
-                      "0d Streak"
+                  {/* Public Strava Info */}
+                  <div className="flex flex-wrap gap-2 mb-4 justify-center sm:justify-start">
+                    <Badge variant={streakActive ? "default" : "secondary"}>
+                      {streakActive ? (
+                        <>
+                          <Flame className="h-4 w-4 mr-1" />
+                          Active Streak
+                        </>
+                      ) : (
+                        "0d Streak"
+                      )}
+                    </Badge>
+                    
+                    {runner.athlete_type && (
+                      <Badge variant="outline" className="capitalize">
+                        {runner.athlete_type}
+                      </Badge>
                     )}
-                  </Badge>
+                    
+                    {runner.follower_count !== null && runner.follower_count !== undefined && (
+                      <Badge variant="outline">
+                        {runner.follower_count} Followers
+                      </Badge>
+                    )}
+                    
+                    {runner.friend_count !== null && runner.friend_count !== undefined && (
+                      <Badge variant="outline">
+                        {runner.friend_count} Following
+                      </Badge>
+                    )}
+                  </div>
+
+                  {runner.created_at_strava && (
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Member since {new Date(runner.created_at_strava).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long' 
+                      })}
+                    </p>
+                  )}
 
                   {runner.last_activity_date && (
                     <p className="text-sm text-muted-foreground">
                       Last activity: {new Date(runner.last_activity_date).toLocaleDateString()}
                     </p>
+                  )}
+                  
+                  {runner.clubs && Array.isArray(runner.clubs) && runner.clubs.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">CLUBS</p>
+                      <div className="flex flex-wrap gap-1">
+                        {runner.clubs.map((club: any, idx: number) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {club.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
