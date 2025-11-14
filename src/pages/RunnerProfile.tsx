@@ -30,6 +30,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
 import { StreakHistory } from "@/components/StreakHistory";
 import { DaysOnStreakCard } from "@/components/DaysOnStreakCard";
+import { AccountabilityPartnersSection } from "@/components/AccountabilityPartnersSection";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -345,6 +346,13 @@ export default function RunnerProfile() {
         <div className="mb-6">
           <StreakHistory runnerId={runner.id} />
         </div>
+
+        {/* Accountability Partners Section - Only on own profile */}
+        {isOwnProfile && (
+          <div className="mb-6">
+            <AccountabilityPartnersSection runnerId={runner.id} />
+          </div>
+        )}
 
         {/* AI Analysis Section */}
         <div className="mb-6">
