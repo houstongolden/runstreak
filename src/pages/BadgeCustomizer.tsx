@@ -11,13 +11,14 @@ import { ArrowLeft, Copy, Check, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 
-type StatType = 'streak' | 'rank' | 'miles' | 'avg';
+type StatType = 'streak' | 'miles' | 'avg' | 'none';
 type ThemeType = 'light' | 'dark' | 'fire';
 
 const BadgeCustomizer = () => {
   const { id } = useParams();
   const [runner, setRunner] = useState<Runner | null>(null);
-  const [stat, setStat] = useState<StatType>('streak');
+  const [stat1, setStat1] = useState<StatType>('streak');
+  const [stat2, setStat2] = useState<StatType>('miles');
   const [theme, setTheme] = useState<ThemeType>('light');
   const [copied, setCopied] = useState(false);
 
@@ -42,7 +43,7 @@ const BadgeCustomizer = () => {
     fetchRunner();
   }, [id]);
 
-  const badgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/badge?id=${id}&stat=${stat}&theme=${theme}`;
+  const badgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/badge?id=${id}&stat1=${stat1}&stat2=${stat2}&theme=${theme}`;
   
   const embedCode = {
     html: `<img src="${badgeUrl}" alt="RunStreak Badge" />`,
@@ -94,36 +95,66 @@ const BadgeCustomizer = () => {
                 <CardDescription className="text-sm">Choose what to display on your badge</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
-                {/* Stat Selection */}
+                {/* Primary Stat */}
                 <div className="space-y-2 sm:space-y-3">
-                  <Label className="text-sm sm:text-base font-semibold">Statistic</Label>
-                  <RadioGroup value={stat} onValueChange={(v) => setStat(v as StatType)}>
+                  <Label className="text-sm sm:text-base font-semibold">Primary Stat</Label>
+                  <RadioGroup value={stat1} onValueChange={(v) => setStat1(v as StatType)}>
                     <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="streak" id="streak" />
-                      <Label htmlFor="streak" className="flex-1 cursor-pointer">
+                      <RadioGroupItem value="streak" id="stat1-streak" />
+                      <Label htmlFor="stat1-streak" className="flex-1 cursor-pointer">
                         <div className="font-medium text-sm sm:text-base">Current Streak</div>
                         <div className="text-xs sm:text-sm text-muted-foreground">Show days in your active streak</div>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="rank" id="rank" />
-                      <Label htmlFor="rank" className="flex-1 cursor-pointer">
-                        <div className="font-medium text-sm sm:text-base">Leaderboard Rank</div>
-                        <div className="text-xs sm:text-sm text-muted-foreground">Show your position on the leaderboard</div>
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="miles" id="miles" />
-                      <Label htmlFor="miles" className="flex-1 cursor-pointer">
+                      <RadioGroupItem value="miles" id="stat1-miles" />
+                      <Label htmlFor="stat1-miles" className="flex-1 cursor-pointer">
                         <div className="font-medium text-sm sm:text-base">Total Miles</div>
                         <div className="text-xs sm:text-sm text-muted-foreground">Show total miles in your streak</div>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="avg" id="avg" />
-                      <Label htmlFor="avg" className="flex-1 cursor-pointer">
+                      <RadioGroupItem value="avg" id="stat1-avg" />
+                      <Label htmlFor="stat1-avg" className="flex-1 cursor-pointer">
                         <div className="font-medium text-sm sm:text-base">Average Miles/Day</div>
                         <div className="text-xs sm:text-sm text-muted-foreground">Show your daily average</div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <Separator />
+
+                {/* Secondary Stat */}
+                <div className="space-y-2 sm:space-y-3">
+                  <Label className="text-sm sm:text-base font-semibold">Secondary Stat</Label>
+                  <RadioGroup value={stat2} onValueChange={(v) => setStat2(v as StatType)}>
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="miles" id="stat2-miles" />
+                      <Label htmlFor="stat2-miles" className="flex-1 cursor-pointer">
+                        <div className="font-medium text-sm sm:text-base">Total Miles</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show total miles in your streak</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="avg" id="stat2-avg" />
+                      <Label htmlFor="stat2-avg" className="flex-1 cursor-pointer">
+                        <div className="font-medium text-sm sm:text-base">Average Miles/Day</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show your daily average</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="streak" id="stat2-streak" />
+                      <Label htmlFor="stat2-streak" className="flex-1 cursor-pointer">
+                        <div className="font-medium text-sm sm:text-base">Current Streak</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Show days in your active streak</div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-2.5 sm:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="none" id="stat2-none" />
+                      <Label htmlFor="stat2-none" className="flex-1 cursor-pointer">
+                        <div className="font-medium text-sm sm:text-base">None (Single Stat)</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">Only show primary stat</div>
                       </Label>
                     </div>
                   </RadioGroup>
