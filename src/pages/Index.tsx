@@ -67,11 +67,11 @@ const Index = () => {
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 lg:px-[240px] py-6 sm:py-12">
         {/* Header */}
-        <header className="text-center mb-6 sm:mb-10 px-0 sm:px-4">
-          <div className="flex items-center justify-center mb-2 sm:mb-3">
-            <h1 className="text-2xl sm:text-3xl font-instrument-serif font-normal flex items-center gap-2">
+        <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
+          <div className="flex items-center justify-center mb-3 sm:mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-instrument-serif font-normal flex items-center gap-2.5 sm:gap-3">
               <Flame 
-                className="h-6 w-6 sm:h-7 sm:w-7 animate-shiny-text"
+                className="h-7 w-7 sm:h-9 sm:w-9 lg:h-10 lg:w-10 animate-shiny-text"
                 style={{
                   stroke: 'url(#gradient-logo)',
                   fill: 'none',
@@ -89,29 +89,23 @@ const Index = () => {
               </svg>
             </h1>
           </div>
-          <h2 className="text-[1.15rem] sm:text-[1.75rem] lg:text-[2.25rem] font-instrument font-medium mb-2 sm:mb-2.5 tracking-tight leading-[1.15] px-2 sm:px-0">
-            The verified leaderboard
-            <br />
-            for runners keeping their streak
+          <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-instrument font-semibold mb-4 sm:mb-5 tracking-tight leading-tight px-1 sm:px-0">
+            The verified leaderboard for runners<br className="hidden sm:block" /> keeping their streak alive
           </h2>
-          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl mx-auto font-inter font-light leading-relaxed mb-2 sm:mb-3 px-2 sm:px-0">
-            Every runner claims they run daily. Now they can prove it.
-          </p>
-          <p className="text-xs sm:text-sm lg:text-base text-muted-foreground/80 max-w-xl mx-auto font-inter font-light leading-relaxed px-2 sm:px-0">
-            Maintain your streak by running at least 1 mile per day. Connect your Strava account to track and verify your daily running activity.
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-inter leading-relaxed">
+            Connect your Strava. Prove you run every day. Join the leaderboard.
           </p>
         </header>
 
         {/* Actions */}
-        <div className="mb-8">
-          <div className="flex justify-end gap-3">
+        <div className="mb-10 sm:mb-12">
+          <div className="flex justify-center">
             <Button
               onClick={() => window.location.href = '/connect'}
-              variant="outline"
-              className="gap-2"
               size="lg"
+              className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
             >
-              <Flame className="h-5 w-5" />
+              <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
               Connect with Strava
             </Button>
           </div>
@@ -119,20 +113,20 @@ const Index = () => {
 
         {/* Leaderboard Section */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div className="flex items-center gap-4">
-              <h3 className="text-base sm:text-2xl font-bold">Leaderboard</h3>
-              <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)}>
-                <TabsList>
-                  <TabsTrigger value="total">Daily Streaks</TabsTrigger>
-                  <TabsTrigger value="fiveday">5-Day Week</TabsTrigger>
-                  <TabsTrigger value="percent">Most Miles</TabsTrigger>
+          <div className="flex flex-col gap-5 sm:gap-4 mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold">Leaderboard</h3>
+              <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
+                <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
+                  <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
+                  <TabsTrigger value="fiveday" className="text-xs sm:text-sm">5-Day Week</TabsTrigger>
+                  <TabsTrigger value="percent" className="text-xs sm:text-sm">Most Miles</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Select defaultValue="streak">
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -141,7 +135,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
               <Select defaultValue="all">
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm">
                   <SelectValue placeholder="Time period" />
                 </SelectTrigger>
                 <SelectContent>
@@ -154,11 +148,11 @@ const Index = () => {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-16 sm:py-20 text-muted-foreground text-base sm:text-lg">
               Loading runners...
             </div>
           ) : runners.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-16 sm:py-20 text-muted-foreground text-base sm:text-lg">
               No runners yet. Be the first to add yours!
             </div>
           ) : (
