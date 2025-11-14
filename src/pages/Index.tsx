@@ -113,37 +113,33 @@ const Index = () => {
 
         {/* Leaderboard Section */}
         <div className="mb-6">
-          <div className="flex flex-col gap-5 sm:gap-4 mb-6 sm:mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
-                <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
-                  <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
-                  <TabsTrigger value="fiveday" className="text-xs sm:text-sm">5-Day Week</TabsTrigger>
-                  <TabsTrigger value="percent" className="text-xs sm:text-sm">Most Miles</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <Select defaultValue="streak">
-                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm bg-gradient-to-br from-[hsl(25_100%_55%)] to-[hsl(15_100%_45%)] text-primary-foreground border-[hsl(25_100%_40%)] hover:from-[hsl(25_100%_50%)] hover:to-[hsl(15_100%_40%)]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="streak">Longest streak</SelectItem>
-                  <SelectItem value="miles">Most miles</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select defaultValue="all">
-                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm bg-gradient-to-br from-[hsl(25_100%_55%)] to-[hsl(15_100%_45%)] text-primary-foreground border-[hsl(25_100%_40%)] hover:from-[hsl(25_100%_50%)] hover:to-[hsl(15_100%_40%)]">
-                  <SelectValue placeholder="Time period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All time</SelectItem>
-                  <SelectItem value="year">This year</SelectItem>
-                  <SelectItem value="month">This month</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
+            <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
+              <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
+                <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
+                <TabsTrigger value="fiveday" className="text-xs sm:text-sm">5-Day Week</TabsTrigger>
+                <TabsTrigger value="percent" className="text-xs sm:text-sm">Most Miles</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Select defaultValue="streak">
+              <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border-border bg-background hover:bg-muted/50">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="streak">Longest streak</SelectItem>
+                <SelectItem value="miles">Most miles</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select defaultValue="all">
+              <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border-border bg-background hover:bg-muted/50">
+                <SelectValue placeholder="Time period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All time</SelectItem>
+                <SelectItem value="year">This year</SelectItem>
+                <SelectItem value="month">This month</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {isLoading ? (
