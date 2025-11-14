@@ -308,6 +308,118 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Calculate historical streaks for streak_history table
+    console.log('Calculating historical streaks...');
+    const historicalStreaks: Array<{
+      start_date: string;
+      end_date: string;
+      days_count: number;
+      total_miles: number;
+      total_runs: number;
+    }> = [];
+    
+    const sortedActivityDates = Array.from(activityDates).sort();
+    let currentHistoricalStreak: {
+      start: Date;
+      end: Date;
+      dates: Set<string>;
+    } | null = null;
+    
+    for (let i = 0; i < sortedActivityDates.length; i++) {
+      const dateStr = sortedActivityDates[i];
+      const currentDate = new Date(dateStr);
+      
+      if (!currentHistoricalStreak) {
+        // Start new streak
+        currentHistoricalStreak = {
+          start: currentDate,
+          end: currentDate,
+          dates: new Set([dateStr])
+        };
+      } else {
+        const prevDateStr = sortedActivityDates[i - 1];
+        const prevDate = new Date(prevDateStr);
+        const daysDiff = Math.floor((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === 1) {
+          // Continue streak
+          currentHistoricalStreak.end = currentDate;
+          currentHistoricalStreak.dates.add(dateStr);
+        } else {
+          // Streak broken, save the previous one if it's 5+ days
+          if (currentHistoricalStreak.dates.size >= 5) {
+            const streakActivities = allActivities.filter((a: any) => {
+              const aDate = new Date(a.start_date).toISOString().split('T')[0];
+              return currentHistoricalStreak!.dates.has(aDate);
+            });
+            
+            const totalMiles = streakActivities.reduce((sum: number, a: any) => 
+              sum + (a.distance / 1609.34), 0
+            );
+            const totalRuns = streakActivities.length;
+            
+            historicalStreaks.push({
+              start_date: currentHistoricalStreak.start.toISOString().split('T')[0],
+              end_date: currentHistoricalStreak.end.toISOString().split('T')[0],
+              days_count: currentHistoricalStreak.dates.size,
+              total_miles: totalMiles,
+              total_runs: totalRuns
+            });
+          }
+          
+          // Start new streak
+          currentHistoricalStreak = {
+            start: currentDate,
+            end: currentDate,
+            dates: new Set([dateStr])
+          };
+        }
+      }
+    }
+    
+    // Don't forget the last streak
+    if (currentHistoricalStreak && currentHistoricalStreak.dates.size >= 5) {
+      const streakActivities = allActivities.filter((a: any) => {
+        const aDate = new Date(a.start_date).toISOString().split('T')[0];
+        return currentHistoricalStreak!.dates.has(aDate);
+      });
+      
+      const totalMiles = streakActivities.reduce((sum: number, a: any) => 
+        sum + (a.distance / 1609.34), 0
+      );
+      const totalRuns = streakActivities.length;
+      
+      historicalStreaks.push({
+        start_date: currentHistoricalStreak.start.toISOString().split('T')[0],
+        end_date: currentHistoricalStreak.end.toISOString().split('T')[0],
+        days_count: currentHistoricalStreak.dates.size,
+        total_miles: totalMiles,
+        total_runs: totalRuns
+      });
+    }
+    
+    console.log(`Found ${historicalStreaks.length} historical streaks (5+ days)`);
+    
+    // Clear old streak history and insert new ones
+    await supabase
+      .from('streak_history')
+      .delete()
+      .eq('runner_id', runnerId);
+    
+    for (const streak of historicalStreaks) {
+      await supabase
+        .from('streak_history')
+        .insert({
+          runner_id: runnerId,
+          start_date: streak.start_date,
+          end_date: streak.end_date,
+          days_count: streak.days_count,
+          total_miles: streak.total_miles,
+          total_runs: streak.total_runs,
+          average_miles_per_day: streak.total_miles / streak.days_count
+        });
+    }
+
     // Update runner stats
     await supabase
       .from('runners')
