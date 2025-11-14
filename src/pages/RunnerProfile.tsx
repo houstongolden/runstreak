@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Runner } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ import { DaysOnStreakCard } from "@/components/DaysOnStreakCard";
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [runner, setRunner] = useState<Runner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +45,13 @@ export default function RunnerProfile() {
   const currentRunnerId = localStorage.getItem("current_runner_id");
   const isOwnProfile = currentRunnerId === id;
   const [showProfileEditor, setShowProfileEditor] = useState(false);
+
+  // Check if we should auto-open the profile editor from URL parameter
+  useEffect(() => {
+    if (searchParams.get('edit') === 'true' && isOwnProfile) {
+      setShowProfileEditor(true);
+    }
+  }, [searchParams, isOwnProfile]);
 
   useEffect(() => {
     const fetchRunner = async () => {

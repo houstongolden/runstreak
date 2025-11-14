@@ -132,6 +132,7 @@ export type Database = {
           id: string
           role: string
           runner_id: string
+          session_id: string | null
           source: string
           updated_at: string
         }
@@ -141,6 +142,7 @@ export type Database = {
           id?: string
           role: string
           runner_id: string
+          session_id?: string | null
           source: string
           updated_at?: string
         }
@@ -150,10 +152,54 @@ export type Database = {
           id?: string
           role?: string
           runner_id?: string
+          session_id?: string | null
           source?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "coach_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "coaching_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coaching_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          runner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          runner_id: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          runner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coaching_sessions_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       daily_activities: {
         Row: {
