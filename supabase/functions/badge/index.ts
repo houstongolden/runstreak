@@ -27,8 +27,8 @@ const generateBadgeSVG = (
       border: '#e5e7eb',
       text: '#111827',
       label: '#6b7280',
-      accent1: '#f97316',
-      accent2: '#fb923c',
+      gradientStart: '#ff7a3d',
+      gradientEnd: '#ff5a1f',
       rankBg: '#fef3c7',
       rankText: '#92400e',
     },
@@ -37,8 +37,8 @@ const generateBadgeSVG = (
       border: '#27272a',
       text: '#fafafa',
       label: '#a1a1aa',
-      accent1: '#f97316',
-      accent2: '#fb923c',
+      gradientStart: '#ff7a3d',
+      gradientEnd: '#ff5a1f',
       rankBg: '#292524',
       rankText: '#fbbf24',
     },
@@ -47,8 +47,8 @@ const generateBadgeSVG = (
       border: '#dc2626',
       text: '#ffffff',
       label: '#fde68a',
-      accent1: '#f97316',
-      accent2: '#fb923c',
+      gradientStart: '#ff7a3d',
+      gradientEnd: '#ff5a1f',
       rankBg: '#7c2d12',
       rankText: '#fef3c7',
     },
@@ -60,22 +60,17 @@ const generateBadgeSVG = (
   return `
 <svg width="480" height="180" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="flame-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:${colors.accent1};stop-opacity:1" />
-      <stop offset="100%" style="stop-color:${colors.accent2};stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:${colors.accent1};stop-opacity:0.1" />
-      <stop offset="100%" style="stop-color:${colors.accent2};stop-opacity:0.05" />
+    <linearGradient id="brand-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:${colors.gradientStart};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:${colors.gradientEnd};stop-opacity:1" />
     </linearGradient>
     <filter id="shadow">
       <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.1"/>
     </filter>
   </defs>
   
-  <!-- Background with subtle gradient -->
+  <!-- Background -->
   <rect width="480" height="180" rx="16" fill="${colors.bg}" stroke="${colors.border}" stroke-width="2"/>
-  <rect width="480" height="180" rx="16" fill="url(#glow)" opacity="0.5"/>
   
   <!-- Rank Badge (Top Right) -->
   <g transform="translate(415, 20)">
@@ -84,18 +79,16 @@ const generateBadgeSVG = (
           fill="${colors.rankText}" text-anchor="middle">#${rank}</text>
   </g>
   
-  <!-- Logo: Flame Icon with Gradient -->
+  <!-- Flame Icon with Brand Gradient -->
   <g transform="translate(24, 24)">
-    <path d="M20 12 L16 4 L14 8 L10 2 L8 10 L4 6 L6 14 C6 18.4 9.6 22 14 22 C18.4 22 22 18.4 22 14 L20 12 Z" 
-          fill="url(#flame-gradient)" 
-          stroke="url(#flame-gradient)" 
-          stroke-width="1" 
+    <path d="M12 2C12 2 6 8 6 13C6 16.31 8.69 19 12 19C15.31 19 18 16.31 18 13C18 8 12 2 12 2Z M12 17C9.79 17 8 15.21 8 13C8 10.5 10 7.5 12 5.5C14 7.5 16 10.5 16 13C16 15.21 14.21 17 12 17Z M13.5 13C13.5 13 12.5 11.5 12.5 10.5C12.5 9.67 13.17 9 14 9C14.83 9 15.5 9.67 15.5 10.5C15.5 11.5 13.5 13 13.5 13Z" 
+          fill="url(#brand-gradient)" 
           filter="url(#shadow)"/>
   </g>
   
-  <!-- RunStreak Text -->
-  <text x="65" y="40" font-family="'Instrument Serif', serif" font-size="22" font-weight="600" 
-        fill="${colors.text}" letter-spacing="0.5">RunStreak</text>
+  <!-- RunStreak Text with Brand Gradient -->
+  <text x="68" y="42" font-family="'Instrument Serif', serif" font-size="26" font-weight="600" 
+        fill="url(#brand-gradient)" letter-spacing="0.5">RunStreak</text>
   
   <!-- Runner Name -->
   <text x="24" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="500" 
