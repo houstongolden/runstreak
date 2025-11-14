@@ -14,6 +14,8 @@ import ActivityHeatmap from "@/components/ActivityHeatmap";
 import AIAnalysisCards from "@/components/AIAnalysisCards";
 import ProfileEditor from "@/components/ProfileEditor";
 import BestEfforts from "@/components/BestEfforts";
+import { FollowButton } from "@/components/FollowButton";
+import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +25,10 @@ export default function RunnerProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [streakView, setStreakView] = useState<"current" | "longest" | "fiveday">("current");
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const currentRunnerId = localStorage.getItem("current_runner_id");
+  const isOwnProfile = currentRunnerId === id;
 
   useEffect(() => {
     const fetchRunner = async () => {
@@ -44,7 +50,29 @@ export default function RunnerProfile() {
       }
     };
 
+    const fetchFollowCounts = async () => {
+      if (!id) return;
+
+      try {
+        const { count: followers } = await supabase
+          .from("user_follows")
+          .select("*", { count: "exact", head: true })
+          .eq("following_id", id);
+
+        const { count: following } = await supabase
+          .from("user_follows")
+          .select("*", { count: "exact", head: true })
+          .eq("follower_id", id);
+
+        setFollowerCount(followers || 0);
+        setFollowingCount(following || 0);
+      } catch (error) {
+        console.error("Error fetching follow counts:", error);
+      }
+    };
+
     fetchRunner();
+    fetchFollowCounts();
   }, [id]);
 
   const handleSync = async () => {
@@ -193,6 +221,34 @@ export default function RunnerProfile() {
                     <p className="text-sm text-muted-foreground mb-3">
                       📍 {[runner.city, runner.state, runner.country].filter(Boolean).join(', ')}
                     </p>
+                  )}
+
+                  {/* Follower/Following Counts */}
+                  <div className="flex gap-4 mb-3 justify-center sm:justify-start">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-foreground">{followerCount}</div>
+                      <div className="text-xs text-muted-foreground">Followers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-foreground">{followingCount}</div>
+                      <div className="text-xs text-muted-foreground">Following</div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  {!isOwnProfile && (
+                    <div className="flex gap-2 mb-3 flex-wrap justify-center sm:justify-start">
+                      <FollowButton
+                        targetRunnerId={runner.id}
+                        currentRunnerId={currentRunnerId}
+                        onFollowChange={(_, newCount) => setFollowerCount(newCount)}
+                      />
+                      <AccountabilityPartnerButton
+                        targetRunnerId={runner.id}
+                        targetRunnerName={runner.display_name}
+                        currentRunnerId={currentRunnerId}
+                      />
+                    </div>
                   )}
                   
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">

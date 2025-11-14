@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Save, X } from "lucide-react";
@@ -23,6 +26,30 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
   const [state, setState] = useState(runner.state || "");
   const [country, setCountry] = useState(runner.country || "");
   const [isSaving, setIsSaving] = useState(false);
+  const [accountabilityNotifications, setAccountabilityNotifications] = useState(true);
+  const [stravaFollowPrompt, setStravaFollowPrompt] = useState(true);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [runner.id]);
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_settings")
+        .select("accountability_notifications_enabled, show_strava_follow_prompt")
+        .eq("runner_id", runner.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setAccountabilityNotifications(data.accountability_notifications_enabled ?? true);
+        setStravaFollowPrompt(data.show_strava_follow_prompt ?? true);
+      }
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -64,6 +91,19 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
         }
         setIsSaving(false);
         return;
+      }
+
+      // Update settings
+      const { error: settingsError } = await supabase
+        .from("user_settings")
+        .update({
+          accountability_notifications_enabled: accountabilityNotifications,
+          show_strava_follow_prompt: stravaFollowPrompt,
+        })
+        .eq("runner_id", runner.id);
+
+      if (settingsError) {
+        console.error("Error updating settings:", settingsError);
       }
 
       onUpdate(data);
@@ -180,7 +220,42 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+
+            <Separator className="my-6" />
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Social & Notifications</h3>
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="accountability-notifications">Accountability Partner Notifications</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Get notified when your accountability partners complete their runs
+                  </p>
+                </div>
+                <Switch
+                  id="accountability-notifications"
+                  checked={accountabilityNotifications}
+                  onCheckedChange={setAccountabilityNotifications}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="strava-follow-prompt">Strava Follow Prompts</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show reminders to follow users on Strava when you follow them here
+                  </p>
+                </div>
+                <Switch
+                  id="strava-follow-prompt"
+                  checked={stravaFollowPrompt}
+                  onCheckedChange={setStravaFollowPrompt}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
               <Button onClick={handleSave} disabled={isSaving} className="gap-2">
                 <Save className="h-4 w-4" />
                 {isSaving ? "Saving..." : "Save"}
