@@ -55,7 +55,7 @@ export default function AICoach() {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-screen w-full flex flex-col">
       <AICoachChat runnerId={selectedRunnerId} />
     </div>
   );

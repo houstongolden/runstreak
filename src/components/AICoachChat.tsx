@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Sparkles, MessageSquare } from "lucide-react";
+import { Send, Sparkles, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -25,7 +23,8 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [streamingContent, setStreamingContent] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,10 +55,8 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
 
   useEffect(() => {
     // Auto-scroll to bottom when new messages arrive
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, streamingContent]);
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -88,37 +85,82 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || sending) return;
 
     setSending(true);
     const userMessage = input.trim();
     setInput("");
 
+    // Add user message to UI immediately
+    const tempUserMsg: Message = {
+      id: `temp-${Date.now()}`,
+      content: userMessage,
+      role: 'user',
+      source: 'app',
+      created_at: new Date().toISOString()
+    };
+    setMessages(prev => [...prev, tempUserMsg]);
+
     try {
-      // Save user message (app source)
-      const { error: insertError } = await supabase
-        .from('coach_messages')
-        .insert({
-          runner_id: runnerId,
-          content: userMessage,
-          role: 'user',
-          source: 'app'
-        });
-
-      if (insertError) throw insertError;
-
-      // Call edge function to get AI response (app source, not SMS)
-      const { data, error } = await supabase.functions.invoke('send-coach-message', {
-        body: { 
+      // Stream AI response using fetch for SSE
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-coach-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+        },
+        body: JSON.stringify({
           runner_id: runnerId,
           message: userMessage,
-          source: 'app' // Tell backend this is from app, don't send SMS
-        },
+          source: 'app'
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) throw new Error('Failed to send message');
 
-      // AI response is automatically saved by the edge function and will appear via realtime
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+              
+              try {
+                const parsed = JSON.parse(data);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  accumulatedContent += content;
+                  setStreamingContent(accumulatedContent);
+                }
+              } catch (e) {
+                // Ignore parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+      }
+
+      // Save the complete AI response to database
+      if (accumulatedContent) {
+        await supabase.from('coach_messages').insert({
+          runner_id: runnerId,
+          content: accumulatedContent,
+          role: 'assistant',
+          source: 'app'
+        });
+      }
+
+      setStreamingContent("");
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -139,44 +181,42 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] w-full flex flex-col bg-background">
-      <div className="border-b border-border bg-card px-6 py-4">
-        <div className="flex items-center gap-3">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">AI Run Streak Coach</h1>
-        </div>
-      </div>
-      
-      <ScrollArea ref={scrollRef} className="flex-1 px-6">
+    <div className="flex flex-col h-full w-full bg-background">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <MessageSquare className="h-8 w-8 animate-pulse" />
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <Sparkles className="h-16 w-16 mb-4 text-primary/50" />
-            <h2 className="text-xl font-semibold mb-2">Start a conversation</h2>
-            <p className="text-muted-foreground max-w-md">
-              Ask your AI coach anything about your running, training, or goals!
+        ) : messages.length === 0 && !streamingContent ? (
+          <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Sparkles className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-2">AI Run Streak Coach</h2>
+            <p className="text-muted-foreground">
+              Ask me anything about your running, training, or goals!
             </p>
           </div>
         ) : (
-          <div className="space-y-4 py-6 max-w-4xl mx-auto">
+          <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-xs opacity-70">{formatTime(message.created_at)}</p>
+              <div key={message.id} className={`flex gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                  message.role === 'user' ? 'bg-primary' : 'bg-muted'
+                }`}>
+                  {message.role === 'user' ? (
+                    <span className="text-primary-foreground text-sm font-medium">U</span>
+                  ) : (
+                    <Sparkles className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap m-0">{message.content}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
                     {message.source === 'sms' && (
                       <Badge variant="outline" className="text-xs">SMS</Badge>
                     )}
@@ -184,28 +224,57 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
                 </div>
               </div>
             ))}
+            
+            {/* Streaming message */}
+            {streamingContent && (
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1">
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap m-0">{streamingContent}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
           </div>
         )}
-      </ScrollArea>
-      
-      <div className="border-t border-border bg-card px-6 py-4">
-        <div className="flex gap-2 max-w-4xl mx-auto">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !sending && sendMessage()}
-            placeholder="Ask your coach anything..."
-            disabled={sending}
-            className="flex-1 bg-background"
-          />
-          <Button 
-            onClick={sendMessage} 
-            disabled={!input.trim() || sending}
-            size="icon"
-            className="h-10 w-10"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+      </div>
+
+      {/* Input Area - Fixed at bottom */}
+      <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="flex gap-2 items-end">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
+              placeholder="Message AI Coach..."
+              disabled={sending}
+              className="min-h-[52px] max-h-[200px] resize-none bg-muted/50 border-muted-foreground/20"
+              rows={1}
+            />
+            <Button 
+              onClick={sendMessage} 
+              disabled={!input.trim() || sending}
+              size="icon"
+              className="h-[52px] w-[52px] shrink-0"
+            >
+              {sending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

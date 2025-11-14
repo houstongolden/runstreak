@@ -16,7 +16,6 @@ import {
 
 const menuItems = [
   { title: "Leaderboard", url: "/", icon: Trophy },
-  { title: "AI Coach", url: "/coach", icon: Sparkles, dynamic: true },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -49,12 +48,11 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
-                const itemUrl = item.dynamic && runnerId ? `${item.url}/${runnerId}` : item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
                       <NavLink 
-                        to={itemUrl} 
+                        to={item.url} 
                         end={item.url === "/"} 
                         className="hover:bg-muted/50" 
                         activeClassName="bg-muted text-primary font-medium"
@@ -66,6 +64,29 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* AI Assistant Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
+            AI Assistant
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <NavLink 
+                    to="/coach" 
+                    className="hover:bg-muted/50" 
+                    activeClassName="bg-muted text-primary font-medium"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>AI Coach</span>
+                  </NavLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
