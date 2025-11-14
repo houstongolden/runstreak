@@ -50,6 +50,36 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          runner_id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          runner_id: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          runner_id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_activities: {
         Row: {
           activity_date: string
