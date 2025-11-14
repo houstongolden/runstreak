@@ -19,7 +19,7 @@ import { Plus, Flame } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import ShinyText from "@/components/ui/shiny-text";
 
-type LeaderboardView = "total" | "percent";
+type LeaderboardView = "total" | "percent" | "fiveday";
 
 const Index = () => {
   const [runners, setRunners] = useState<Runner[]>([]);
@@ -124,7 +124,8 @@ const Index = () => {
               <h3 className="text-base sm:text-2xl font-bold">Leaderboard</h3>
               <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)}>
                 <TabsList>
-                  <TabsTrigger value="total">Longest Streaks</TabsTrigger>
+                  <TabsTrigger value="total">Daily Streaks</TabsTrigger>
+                  <TabsTrigger value="fiveday">5-Day Week</TabsTrigger>
                   <TabsTrigger value="percent">Most Miles</TabsTrigger>
                 </TabsList>
               </Tabs>

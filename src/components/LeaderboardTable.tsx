@@ -14,7 +14,7 @@ import { Flame } from "lucide-react";
 
 interface LeaderboardTableProps {
   runners: Runner[];
-  view: "total" | "percent";
+  view: "total" | "percent" | "fiveday";
 }
 
 export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
@@ -22,6 +22,17 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
   const sortedRunners = [...runners].sort(
     (a, b) => b.current_streak_days - a.current_streak_days
   );
+
+  if (view === "fiveday") {
+    return (
+      <div className="rounded-lg border border-border bg-card overflow-hidden p-8 text-center">
+        <h3 className="text-lg font-semibold mb-2">5-Day Week Streaks</h3>
+        <p className="text-muted-foreground">
+          Coming soon: Longest streaks for runners completing at least 5 days per week with 1+ mile daily.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
