@@ -207,8 +207,7 @@ export default function RunnerProfile() {
 
         {/* Streak Stats with Toggle */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Streak Stats</h2>
+          <div className="flex items-center justify-end mb-4">
             <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest" | "fiveday")}>
               <TabsList>
                 <TabsTrigger value="current">Current Streak</TabsTrigger>

@@ -24,4 +24,25 @@ export interface Runner {
   updated_at: string;
   x_profile?: string | null;
   bio?: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface UserSettings {
+  id?: string;
+  runner_id: string;
+  email: string;
+  phone_number: string;
+  phone_verified: boolean;
+  email_verified: boolean;
+  ai_coach_enabled: boolean;
+  ai_coach_frequency: string;
+  ai_coach_time: string;
+  ai_coach_style: string;
+  free_month_claimed: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
