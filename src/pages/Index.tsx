@@ -351,6 +351,11 @@ const Index = () => {
                     Leaderboard
                   </a>
                 </li>
+                <li>
+                  <a href="/badge-docs" className="hover:text-foreground transition-colors">
+                    Badge Documentation
+                  </a>
+                </li>
               </ul>
             </div>
 

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain, RefreshCw } from "lucide-react";
+import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain, RefreshCw, Medal } from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
@@ -129,15 +129,25 @@ export default function RunnerProfile() {
               Back to Leaderboard
             </Button>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleSync}
-            disabled={isSyncing}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Strava'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="default" 
+              onClick={() => navigate(`/runner/${id}/badge`)}
+              className="gap-2"
+            >
+              <Medal className="h-4 w-4" />
+              <span className="hidden sm:inline">Get Badge</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
+            </Button>
+          </div>
         </div>
 
         {/* Profile Header */}
