@@ -89,13 +89,16 @@ const Index = () => {
               </svg>
             </h1>
           </div>
-          <h2 className="text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] font-instrument font-medium mb-2.5 tracking-tight leading-[1.15] px-2 sm:px-0">
+          <h2 className="text-[1.25rem] sm:text-[1.75rem] lg:text-[2.25rem] font-instrument font-medium mb-2.5 tracking-tight leading-[1.15] px-2 sm:px-0">
             The verified leaderboard
             <br />
             for runners keeping their streak
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-inter font-light leading-relaxed">
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-inter font-light leading-relaxed mb-3">
             Every runner claims they run daily. Now they can prove it.
+          </p>
+          <p className="text-sm sm:text-base text-muted-foreground/80 max-w-xl mx-auto font-inter font-light leading-relaxed">
+            Maintain your streak by running at least 1 mile per day. Connect your Strava account to track and verify your daily running activity.
           </p>
         </header>
 
