@@ -10,6 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Mail, Phone, Sparkles } from "lucide-react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 interface UserSettings {
   id?: string;
@@ -29,6 +34,10 @@ export default function Settings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
   const [settings, setSettings] = useState<UserSettings>({
     runner_id: "temp-id", // This would come from auth in a real app
     email: "",
@@ -95,10 +104,78 @@ export default function Settings() {
   };
 
   const handleVerifyPhone = async () => {
-    toast({
-      title: "Verification SMS sent",
-      description: "Check your phone for the verification code.",
-    });
+    if (!settings.phone_number) {
+      toast({
+        title: "Error",
+        description: "Please enter a phone number first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-verification-sms", {
+        body: { phoneNumber: settings.phone_number },
+      });
+
+      if (error) throw error;
+
+      setShowCodeInput(true);
+      toast({
+        title: "Verification code sent",
+        description: "Check your phone for the 6-digit code.",
+      });
+    } catch (error) {
+      console.error("Error sending verification code:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send verification code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (verificationCode.length !== 6) {
+      toast({
+        title: "Error",
+        description: "Please enter the complete 6-digit code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      const { error } = await supabase.functions.invoke("verify-sms-code", {
+        body: { 
+          phoneNumber: settings.phone_number,
+          code: verificationCode 
+        },
+      });
+
+      if (error) throw error;
+
+      setSettings({ ...settings, phone_verified: true });
+      setShowCodeInput(false);
+      setVerificationCode("");
+      toast({
+        title: "Phone verified!",
+        description: "Your phone number has been successfully verified.",
+      });
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      toast({
+        title: "Error",
+        description: "Invalid or expired code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifyingCode(false);
+    }
   };
 
   if (loading) {
@@ -164,8 +241,13 @@ export default function Settings() {
                     id="phone"
                     type="tel"
                     value={settings.phone_number}
-                    onChange={(e) => setSettings({ ...settings, phone_number: e.target.value })}
+                    onChange={(e) => {
+                      setSettings({ ...settings, phone_number: e.target.value });
+                      setShowCodeInput(false);
+                      setVerificationCode("");
+                    }}
                     placeholder="+1 (555) 000-0000"
+                    disabled={settings.phone_verified}
                   />
                   {settings.phone_verified ? (
                     <Badge variant="secondary" className="flex items-center gap-1 whitespace-nowrap">
@@ -173,11 +255,55 @@ export default function Settings() {
                       Verified
                     </Badge>
                   ) : (
-                    <Button onClick={handleVerifyPhone} variant="outline" size="sm">
-                      Verify
+                    <Button 
+                      onClick={handleVerifyPhone} 
+                      variant="outline" 
+                      size="sm"
+                      disabled={sendingCode || !settings.phone_number}
+                    >
+                      {sendingCode ? "Sending..." : "Verify"}
                     </Button>
                   )}
                 </div>
+                
+                {showCodeInput && !settings.phone_verified && (
+                  <div className="space-y-3 pt-2">
+                    <Label htmlFor="verification-code">Enter 6-digit code</Label>
+                    <div className="flex items-center gap-2">
+                      <InputOTP
+                        maxLength={6}
+                        value={verificationCode}
+                        onChange={setVerificationCode}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                      <Button 
+                        onClick={handleVerifyCode}
+                        disabled={verifyingCode || verificationCode.length !== 6}
+                        size="sm"
+                      >
+                        {verifyingCode ? "Verifying..." : "Verify Code"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Didn't receive the code?{" "}
+                      <button
+                        onClick={handleVerifyPhone}
+                        disabled={sendingCode}
+                        className="text-primary hover:underline"
+                      >
+                        Resend
+                      </button>
+                    </p>
+                  </div>
+                )}
               </div>
 
               {canClaimFreeMonth && (
