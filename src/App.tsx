@@ -11,6 +11,7 @@ import RunnerProfile from "./pages/RunnerProfile";
 import BadgeCustomizer from "./pages/BadgeCustomizer";
 import BadgeDocs from "./pages/BadgeDocs";
 import Settings from "./pages/Settings";
+import AICoach from "./pages/AICoach";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,10 +27,11 @@ const App = () => (
             {/* Routes with sidebar layout */}
             <Route path="/" element={<AppLayout><Index /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+            <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
+            <Route path="/coach/:runnerId" element={<AppLayout><AICoach /></AppLayout>} />
             
             {/* Routes without sidebar layout */}
             <Route path="/connect" element={<StravaConnect />} />
-            <Route path="/runner/:id" element={<RunnerProfile />} />
             <Route path="/runner/:id/badge" element={<BadgeCustomizer />} />
             <Route path="/badge-docs" element={<BadgeDocs />} />
             <Route path="*" element={<NotFound />} />
