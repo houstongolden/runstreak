@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     const averageMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
 
     // Upsert runner data
-    const { error: upsertError } = await supabase
+    const { data: runnerData, error: upsertError } = await supabase
       .from('runners')
       .upsert({
         strava_user_id: tokenData.athlete.id,
@@ -145,7 +145,9 @@ Deno.serve(async (req) => {
         streak_status: currentStreakDays > 0 ? 'active' : 'broken',
       }, {
         onConflict: 'strava_user_id'
-      });
+      })
+      .select()
+      .single();
 
     if (upsertError) {
       console.error('Error upserting runner:', upsertError);
@@ -154,20 +156,24 @@ Deno.serve(async (req) => {
 
     console.log('Runner data saved successfully');
 
-    // Redirect to app
+    // Redirect to app with runner ID
+    // Get the app URL from environment or use default
+    const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
+    const runnerId = runnerData?.id || '';
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': 'https://runstreak.lovable.app/?strava=success',
+        'Location': `${appUrl}/?strava=success&runnerId=${runnerId}`,
       },
     });
   } catch (error) {
     console.error('Error in strava-callback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': `https://runstreak.lovable.app/?strava=error&message=${encodeURIComponent(errorMessage)}`,
+        'Location': `${appUrl}/?strava=error&message=${encodeURIComponent(errorMessage)}`,
       },
     });
   }
