@@ -30,6 +30,8 @@ export interface Runner {
   country?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  ai_analysis?: { insights: { title: string; description: string }[] } | null;
+  ai_analysis_updated_at?: string | null;
 }
 
 export interface UserSettings {

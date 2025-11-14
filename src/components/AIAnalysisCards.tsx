@@ -20,27 +20,34 @@ export default function AIAnalysisCards({ runner }: AIAnalysisCardsProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAnalysis = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('analyze-runner', {
-          body: { runnerData: runner }
-        });
+    // Use cached AI analysis if available
+    if (runner.ai_analysis?.insights && Array.isArray(runner.ai_analysis.insights)) {
+      setInsights(runner.ai_analysis.insights);
+      setIsLoading(false);
+    } else {
+      // Fallback: fetch fresh analysis if cache is empty
+      const fetchAnalysis = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('analyze-runner', {
+            body: { runnerData: runner }
+          });
 
-        if (error) throw error;
-        setInsights(data.insights || []);
-      } catch (error) {
-        console.error('Error fetching AI analysis:', error);
-        setInsights([
-          { title: "Analysis Unavailable", description: "Unable to generate insights at this time." },
-          { title: "Keep Running", description: "Your dedication speaks for itself!" },
-          { title: "Data Tracking", description: "Continue logging your runs for better insights." }
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+          if (error) throw error;
+          setInsights(data.insights || []);
+        } catch (error) {
+          console.error('Error fetching AI analysis:', error);
+          setInsights([
+            { title: "Analysis Unavailable", description: "Unable to generate insights at this time." },
+            { title: "Keep Running", description: "Your dedication speaks for itself!" },
+            { title: "Data Tracking", description: "Continue logging your runs for better insights." }
+          ]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchAnalysis();
+      fetchAnalysis();
+    }
   }, [runner]);
 
   if (isLoading) {

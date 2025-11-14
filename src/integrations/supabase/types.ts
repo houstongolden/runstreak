@@ -123,6 +123,8 @@ export type Database = {
       }
       runners: {
         Row: {
+          ai_analysis: Json | null
+          ai_analysis_updated_at: string | null
           all_time_distance: number | null
           all_time_run_count: number | null
           avatar_url: string | null
@@ -156,6 +158,8 @@ export type Database = {
           ytd_run_count: number | null
         }
         Insert: {
+          ai_analysis?: Json | null
+          ai_analysis_updated_at?: string | null
           all_time_distance?: number | null
           all_time_run_count?: number | null
           avatar_url?: string | null
@@ -189,6 +193,8 @@ export type Database = {
           ytd_run_count?: number | null
         }
         Update: {
+          ai_analysis?: Json | null
+          ai_analysis_updated_at?: string | null
           all_time_distance?: number | null
           all_time_run_count?: number | null
           avatar_url?: string | null
