@@ -115,7 +115,6 @@ const Index = () => {
         <div className="mb-6">
           <div className="flex flex-col gap-5 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold hidden sm:block">Leaderboard</h3>
               <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
                 <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
                   <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
@@ -126,7 +125,7 @@ const Index = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <Select defaultValue="streak">
-                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm">
+                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm bg-gradient-to-br from-[hsl(25_100%_55%)] to-[hsl(15_100%_45%)] text-primary-foreground border-[hsl(25_100%_40%)] hover:from-[hsl(25_100%_50%)] hover:to-[hsl(15_100%_40%)]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -135,7 +134,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
               <Select defaultValue="all">
-                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm">
+                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm bg-gradient-to-br from-[hsl(25_100%_55%)] to-[hsl(15_100%_45%)] text-primary-foreground border-[hsl(25_100%_40%)] hover:from-[hsl(25_100%_50%)] hover:to-[hsl(15_100%_40%)]">
                   <SelectValue placeholder="Time period" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,7 +161,6 @@ const Index = () => {
               {hasMore && (
                 <div className="mt-8 flex flex-col items-center gap-4">
                   <Button
-                    variant="secondary"
                     size="lg"
                     onClick={() => setDisplayCount(prev => Math.min(prev + 10, runners.length))}
                     className="min-w-[200px]"
