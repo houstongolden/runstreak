@@ -74,11 +74,14 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
       setMessages((data || []) as Message[]);
     } catch (error) {
       console.error('Error fetching messages:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load messages",
-        variant: "destructive",
-      });
+      // Only show error if it's an actual database error, not empty results
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load messages",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
