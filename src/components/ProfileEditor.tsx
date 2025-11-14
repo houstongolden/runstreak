@@ -19,6 +19,9 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
   const [username, setUsername] = useState(runner.username || "");
   const [xProfile, setXProfile] = useState(runner.x_profile || "");
   const [bio, setBio] = useState(runner.bio || "");
+  const [city, setCity] = useState(runner.city || "");
+  const [state, setState] = useState(runner.state || "");
+  const [country, setCountry] = useState(runner.country || "");
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -40,7 +43,10 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
         .update({
           username: username || null,
           x_profile: xProfile,
-          bio: bio
+          bio: bio,
+          city: city || null,
+          state: state || null,
+          country: country || null
         })
         .eq("id", runner.id)
         .select()
@@ -82,10 +88,13 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
     setUsername(runner.username || "");
     setXProfile(runner.x_profile || "");
     setBio(runner.bio || "");
+    setCity(runner.city || "");
+    setState(runner.state || "");
+    setCountry(runner.country || "");
     setIsEditing(false);
   };
 
-  if (!isEditing && !runner.username && !runner.x_profile && !runner.bio) {
+  if (!isEditing && !runner.username && !runner.x_profile && !runner.bio && !runner.city && !runner.state && !runner.country) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -132,6 +141,26 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
                 className="min-h-[100px]"
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Location</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <Input
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+                <Input
+                  placeholder="State/Province"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                />
+                <Input
+                  placeholder="Country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              </div>
+            </div>
             <div className="flex gap-2">
               <Button onClick={handleSave} disabled={isSaving} className="gap-2">
                 <Save className="h-4 w-4" />
@@ -168,6 +197,14 @@ export default function ProfileEditor({ runner, onUpdate }: ProfileEditorProps) 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Bio</label>
                 <p className="text-sm mt-1">{runner.bio}</p>
+              </div>
+            )}
+            {(runner.city || runner.state || runner.country) && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Location</label>
+                <p className="text-sm mt-1">
+                  {[runner.city, runner.state, runner.country].filter(Boolean).join(', ')}
+                </p>
               </div>
             )}
             <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="gap-2">
