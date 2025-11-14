@@ -86,7 +86,7 @@ Deno.serve(async (req) => {
     
     while (true) {
       const activitiesResponse = await fetch(
-        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}`,
+        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}&include_all_efforts=true`,
         { headers: { 'Authorization': `Bearer ${accessToken}` } }
       );
 
