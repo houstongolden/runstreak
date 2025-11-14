@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      accountability_partners: {
+        Row: {
+          created_at: string
+          id: string
+          partner_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["accountability_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          partner_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["accountability_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          partner_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["accountability_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accountability_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accountability_partners_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       best_efforts: {
         Row: {
           activity_id: number | null
@@ -301,8 +343,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_settings: {
         Row: {
+          accountability_notifications_enabled: boolean | null
           ai_coach_enabled: boolean | null
           ai_coach_frequency: string | null
           ai_coach_style: string | null
@@ -315,9 +394,11 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           runner_id: string
+          show_strava_follow_prompt: boolean | null
           updated_at: string
         }
         Insert: {
+          accountability_notifications_enabled?: boolean | null
           ai_coach_enabled?: boolean | null
           ai_coach_frequency?: string | null
           ai_coach_style?: string | null
@@ -330,9 +411,11 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           runner_id: string
+          show_strava_follow_prompt?: boolean | null
           updated_at?: string
         }
         Update: {
+          accountability_notifications_enabled?: boolean | null
           ai_coach_enabled?: boolean | null
           ai_coach_frequency?: string | null
           ai_coach_style?: string | null
@@ -345,6 +428,7 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           runner_id?: string
+          show_strava_follow_prompt?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -357,7 +441,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      accountability_status: "pending" | "accepted" | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -484,6 +568,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      accountability_status: ["pending", "accepted", "declined"],
+    },
   },
 } as const
