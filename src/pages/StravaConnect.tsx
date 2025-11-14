@@ -16,9 +16,9 @@ export default function StravaConnect() {
     const runnerId = searchParams.get('runnerId');
     
     if (stravaStatus === 'success') {
-      // Store runner ID in localStorage
+      // Store runner ID in localStorage for sidebar navigation
       if (runnerId) {
-        localStorage.setItem('runnerId', runnerId);
+        localStorage.setItem('current_runner_id', runnerId);
       }
       toast.success('Successfully connected to Strava!');
       setTimeout(() => navigate('/'), 2000);
