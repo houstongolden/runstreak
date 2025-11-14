@@ -65,7 +65,7 @@ export default function Settings() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_settings")
         .upsert(settings, { onConflict: "runner_id" });
 

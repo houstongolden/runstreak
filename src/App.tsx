@@ -22,18 +22,18 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/connect" element={<StravaConnect />} />
-              <Route path="/runner/:id" element={<RunnerProfile />} />
-              <Route path="/runner/:id/badge" element={<BadgeCustomizer />} />
-              <Route path="/badge-docs" element={<BadgeDocs />} />
-              <Route path="/settings" element={<Settings />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppLayout>
+          <Routes>
+            {/* Routes with sidebar layout */}
+            <Route path="/" element={<AppLayout><Index /></AppLayout>} />
+            <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+            
+            {/* Routes without sidebar layout */}
+            <Route path="/connect" element={<StravaConnect />} />
+            <Route path="/runner/:id" element={<RunnerProfile />} />
+            <Route path="/runner/:id/badge" element={<BadgeCustomizer />} />
+            <Route path="/badge-docs" element={<BadgeDocs />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
