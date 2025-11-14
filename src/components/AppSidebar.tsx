@@ -1,4 +1,4 @@
-import { Settings, User, Trophy, Sparkles, Edit, MessageSquare } from "lucide-react";
+import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import {
 const menuItems = [
   { title: "Leaderboard", url: "/", icon: Trophy },
   { title: "My Profile", url: "", icon: User }, // URL will be dynamic
+  { title: "Activities", url: "/activities", icon: Activity },
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "Edit Profile", url: "", icon: Edit }, // URL will be dynamic
 ];

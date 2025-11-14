@@ -12,6 +12,7 @@ import BadgeCustomizer from "./pages/BadgeCustomizer";
 import BadgeDocs from "./pages/BadgeDocs";
 import Settings from "./pages/Settings";
 import AICoach from "./pages/AICoach";
+import Activities from "./pages/Activities";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<AppLayout><Index /></AppLayout>} />
             <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
             <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
+            <Route path="/activities" element={<AppLayout><Activities /></AppLayout>} />
             <Route path="/coach" element={<AppLayout><AICoach /></AppLayout>} />
             <Route path="/coach/:runnerId" element={<AppLayout><AICoach /></AppLayout>} />
             
