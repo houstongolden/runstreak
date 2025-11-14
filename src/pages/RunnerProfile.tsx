@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain, RefreshCw } from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ export default function RunnerProfile() {
   const [runner, setRunner] = useState<Runner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [streakView, setStreakView] = useState<"current" | "longest">("current");
 
   useEffect(() => {
     const fetchRunner = async () => {
@@ -112,6 +114,12 @@ export default function RunnerProfile() {
         {/* Header with Logo, Back Button, and Sync */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Flame className="h-8 w-8 text-primary" />
+              <span className="hidden sm:inline text-2xl font-bold font-instrument-serif bg-gradient-to-r from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)] bg-clip-text text-transparent">
+                RunStreak
+              </span>
+            </div>
             <Button
               variant="ghost"
               onClick={() => navigate("/")}
@@ -120,12 +128,6 @@ export default function RunnerProfile() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Leaderboard
             </Button>
-            <div className="flex items-center gap-2">
-              <Flame className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold bg-gradient-to-r from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)] bg-clip-text text-transparent">
-                RunStreak
-              </span>
-            </div>
           </div>
           <Button 
             variant="outline" 
@@ -180,9 +182,17 @@ export default function RunnerProfile() {
           </CardContent>
         </Card>
 
-        {/* Current Streak Stats */}
+        {/* Streak Stats with Toggle */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Current Streak</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Streak Stats</h2>
+            <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest")}>
+              <TabsList>
+                <TabsTrigger value="current">Current Streak</TabsTrigger>
+                <TabsTrigger value="longest">Longest Streak</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -190,38 +200,55 @@ export default function RunnerProfile() {
                 <Flame className="h-4 w-4 text-[hsl(25_100%_60%)]" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{runner.current_streak_days}</div>
+                <div className="text-3xl font-bold">
+                  {streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever}
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {runner.current_streak_days === 1 ? "day" : "days"} in a row
+                  {(streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever) === 1 ? "day" : "days"} {streakView === "current" ? "in a row" : "best"}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Streak Miles</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {streakView === "current" ? "Streak Miles" : "Total Miles"}
+                </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
-                  {formatNumber(runner.current_streak_miles)}
+                  {formatNumber(streakView === "current" ? runner.current_streak_miles : runner.all_time_distance)}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  total distance
+                  {streakView === "current" ? "total distance" : "all time"}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Longest Streak</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {streakView === "current" ? "Status" : "Total Runs"}
+                </CardTitle>
                 <Award className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{runner.longest_streak_ever}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {runner.longest_streak_ever === 1 ? "day" : "days"} best
-                </p>
+                {streakView === "current" ? (
+                  <>
+                    <div className="text-3xl font-bold capitalize">{runner.streak_status}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      current state
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-3xl font-bold">{runner.all_time_run_count}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      all time runs
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
 

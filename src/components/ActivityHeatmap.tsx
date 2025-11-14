@@ -105,11 +105,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   };
 
   const getIntensityClass = (distance: number) => {
-    if (distance === 0) return "bg-muted/30";
-    if (distance < 2) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/20 to-[hsl(15_100%_50%)]/20";
-    if (distance < 4) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/40 to-[hsl(15_100%_50%)]/40";
-    if (distance < 6) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/60 to-[hsl(15_100%_50%)]/60";
-    if (distance < 8) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/80 to-[hsl(15_100%_50%)]/80";
+    if (distance === 0) return "bg-muted/20";
+    if (distance < 2) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/30 to-[hsl(15_100%_50%)]/30";
+    if (distance < 4) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/50 to-[hsl(15_100%_50%)]/50";
+    if (distance < 6) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/70 to-[hsl(15_100%_50%)]/70";
+    if (distance < 8) return "bg-gradient-to-br from-[hsl(25_100%_60%)]/85 to-[hsl(15_100%_50%)]/85";
     return "bg-gradient-to-br from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)]";
   };
 
@@ -214,11 +214,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
             <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
               <span>Less</span>
               <div className="flex gap-1">
-                <div className="w-3 h-3 rounded-sm bg-muted/30" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/20 to-[hsl(15_100%_50%)]/20" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/40 to-[hsl(15_100%_50%)]/40" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/60 to-[hsl(15_100%_50%)]/60" />
-                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/80 to-[hsl(15_100%_50%)]/80" />
+                <div className="w-3 h-3 rounded-sm bg-muted/20" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/30 to-[hsl(15_100%_50%)]/30" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/50 to-[hsl(15_100%_50%)]/50" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/70 to-[hsl(15_100%_50%)]/70" />
+                <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)]/85 to-[hsl(15_100%_50%)]/85" />
                 <div className="w-3 h-3 rounded-sm bg-gradient-to-br from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)]" />
               </div>
               <span>More</span>
