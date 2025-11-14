@@ -131,15 +131,25 @@ serve(async (req) => {
       const timeOfDay = new Date().getHours();
       const greeting = timeOfDay < 12 ? 'morning' : timeOfDay < 18 ? 'afternoon' : 'evening';
 
+      // Calculate average pace from YTD data
+      const avgPaceMinutes = runner.ytd_moving_time && runner.ytd_distance 
+        ? Math.floor((runner.ytd_moving_time / 60) / (runner.ytd_distance / 1609.34))
+        : 10;
+      const avgPaceSeconds = runner.ytd_moving_time && runner.ytd_distance
+        ? Math.round(((runner.ytd_moving_time / 60) / (runner.ytd_distance / 1609.34) % 1) * 60)
+        : 0;
+
       const systemPrompt = `${coachingStylePrompts[userSettings.ai_coach_style as keyof typeof coachingStylePrompts] || coachingStylePrompts.motivational}
 
 Runner Stats:
 - Name: ${runner.display_name}
 - Current streak: ${runner.current_streak_days || 0} days (${((runner.current_streak_miles || 0) / 1609.34).toFixed(1)} miles)
 - Year-to-date: ${runner.ytd_run_count || 0} runs, ${((runner.ytd_distance || 0) / 1609.34).toFixed(1)} miles
+- Average pace: ${avgPaceMinutes}'${avgPaceSeconds}" per mile
 - Last activity: ${runner.last_activity_date || 'Unknown'}
 
-Generate a personalized coaching message for this ${greeting}. Keep it under 160 characters for SMS. Be specific about their stats and encouraging.`;
+Generate a personalized coaching message for this ${greeting}. Keep it under 160 characters for SMS. Be specific about their stats and encouraging.
+IMPORTANT: Include an encouraging reminder like "It'll only take you about ${avgPaceMinutes} minutes to keep your streak alive today—you'll never regret it!"`;
 
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',

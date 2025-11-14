@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import CoachSessionHistory from "./CoachSessionHistory";
 
 interface Message {
   id: string;
@@ -23,6 +25,8 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -168,8 +172,65 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
     );
   }
 
+  const handleNewSession = () => {
+    setCurrentSessionId(null);
+    setMessages([]);
+    setSheetOpen(false);
+  };
+
+  const handleSessionSelect = async (sessionId: string) => {
+    setCurrentSessionId(sessionId);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('coach_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages((data || []) as Message[]);
+    } catch (error) {
+      console.error('Error loading session:', error);
+    } finally {
+      setLoading(false);
+      setSheetOpen(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-background">
+      {/* Header with Session History */}
+      <div className="border-b bg-card px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold">AI Running Coach</h1>
+            <p className="text-xs text-muted-foreground">Your personal training assistant</p>
+          </div>
+        </div>
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-80">
+            <SheetHeader>
+              <SheetTitle>Chat History</SheetTitle>
+            </SheetHeader>
+            <CoachSessionHistory
+              runnerId={runnerId}
+              currentSessionId={currentSessionId || undefined}
+              onSessionSelect={handleSessionSelect}
+              onNewSession={handleNewSession}
+            />
+          </SheetContent>
+        </Sheet>
+      </div>
+
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
