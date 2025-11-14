@@ -102,12 +102,16 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
               </TableCell>
               <TableCell className="text-right font-medium">
                 <Link to={`/runner/${runner.id}`}>
-                  {runner.current_streak_miles.toFixed(1)} mi
+                  {runner.current_streak_days > 0 
+                    ? `${runner.current_streak_miles.toFixed(1)} mi` 
+                    : `${runner.ytd_distance.toFixed(1)} mi (YTD)`}
                 </Link>
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
                 <Link to={`/runner/${runner.id}`}>
-                  {runner.average_miles_per_day.toFixed(1)} mi
+                  {runner.current_streak_days > 0 
+                    ? `${runner.average_miles_per_day.toFixed(1)} mi` 
+                    : `${(runner.ytd_distance / Math.max(new Date().getDate(), 1)).toFixed(1)} mi (YTD)`}
                 </Link>
               </TableCell>
             </TableRow>

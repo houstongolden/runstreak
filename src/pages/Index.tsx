@@ -115,7 +115,7 @@ const Index = () => {
         <div className="mb-6">
           <div className="flex flex-col gap-5 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold">Leaderboard</h3>
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold hidden sm:block">Leaderboard</h3>
               <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
                 <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
                   <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
