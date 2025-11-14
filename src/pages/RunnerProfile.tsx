@@ -109,15 +109,34 @@ export default function RunnerProfile() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6 hover:bg-accent"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Leaderboard
-        </Button>
+        {/* Header with Logo, Back Button, and Sync */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className="hover:bg-accent"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Leaderboard
+            </Button>
+            <div className="flex items-center gap-2">
+              <Flame className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)] bg-clip-text text-transparent">
+                RunStreak
+              </span>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={handleSync}
+            disabled={isSyncing}
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Syncing...' : 'Sync Strava'}
+          </Button>
+        </div>
 
         {/* Profile Header */}
         <Card className="mb-6">
@@ -135,27 +154,16 @@ export default function RunnerProfile() {
                   <h1 className="text-3xl font-bold mb-2">{runner.display_name}</h1>
                   <p className="text-muted-foreground mb-4">@{runner.strava_username}</p>
                   
-                  <div className="flex items-center gap-2 justify-center sm:justify-start mb-4">
-                    <Badge variant={streakActive ? "default" : "secondary"}>
-                      {streakActive ? (
-                        <>
-                          <Flame className="h-4 w-4 mr-1" />
-                          Active Streak
-                        </>
-                      ) : (
-                        "Streak Broken"
-                      )}
-                    </Badge>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleSync}
-                      disabled={isSyncing}
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-                      Sync
-                    </Button>
-                  </div>
+                  <Badge variant={streakActive ? "default" : "secondary"} className="mb-4">
+                    {streakActive ? (
+                      <>
+                        <Flame className="h-4 w-4 mr-1" />
+                        Active Streak
+                      </>
+                    ) : (
+                      "Streak Broken"
+                    )}
+                  </Badge>
 
                   {runner.last_activity_date && (
                     <p className="text-sm text-muted-foreground">
