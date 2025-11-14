@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      best_efforts: {
+        Row: {
+          activity_id: number | null
+          created_at: string
+          distance: number
+          elapsed_time: number
+          id: string
+          moving_time: number
+          runner_id: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: number | null
+          created_at?: string
+          distance: number
+          elapsed_time: number
+          id?: string
+          moving_time: number
+          runner_id: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: number | null
+          created_at?: string
+          distance?: number
+          elapsed_time?: number
+          id?: string
+          moving_time?: number
+          runner_id?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_activities: {
         Row: {
           activity_date: string

@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
 import AIAnalysisCards from "@/components/AIAnalysisCards";
 import ProfileEditor from "@/components/ProfileEditor";
+import BestEfforts from "@/components/BestEfforts";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -203,6 +204,11 @@ export default function RunnerProfile() {
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">AI Performance Insights</h2>
           <AIAnalysisCards runner={runner} />
+        </div>
+
+        {/* Best Efforts Section */}
+        <div className="mb-6">
+          <BestEfforts runnerId={runner.id} />
         </div>
 
         {/* Streak Stats with Toggle */}

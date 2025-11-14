@@ -196,6 +196,39 @@ Deno.serve(async (req) => {
         });
     }
 
+    // Extract and store best efforts from activities
+    const bestEffortsMap = new Map<number, any>();
+    
+    for (const activity of allActivities) {
+      if (activity.best_efforts && Array.isArray(activity.best_efforts)) {
+        for (const effort of activity.best_efforts) {
+          const distance = effort.distance;
+          const existing = bestEffortsMap.get(distance);
+          
+          // Keep the fastest effort for each distance
+          if (!existing || effort.elapsed_time < existing.elapsed_time) {
+            bestEffortsMap.set(distance, {
+              runner_id: runnerId,
+              distance: Math.round(distance),
+              elapsed_time: effort.elapsed_time,
+              moving_time: effort.moving_time,
+              start_date: effort.start_date,
+              activity_id: activity.id,
+            });
+          }
+        }
+      }
+    }
+
+    // Upsert best efforts
+    for (const effort of bestEffortsMap.values()) {
+      await supabase
+        .from('best_efforts')
+        .upsert(effort, {
+          onConflict: 'runner_id,distance'
+        });
+    }
+
     // Update runner
     await supabase
       .from('runners')
