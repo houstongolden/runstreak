@@ -1,8 +1,7 @@
-import { Home, Settings, User, Trophy, Sparkles } from "lucide-react";
+import { Settings, User, Trophy, Sparkles } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 import {
   Sidebar,
@@ -13,7 +12,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -23,25 +21,14 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
   const location = useLocation();
-  const currentPath = location.pathname;
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCurrentRunner = async () => {
-      // Get current runner from localStorage (set during Strava connection)
-      const runnerId = localStorage.getItem('current_runner_id');
-      setCurrentRunnerId(runnerId);
-    };
-    fetchCurrentRunner();
+    // Get current runner from localStorage (set during Strava connection)
+    const runnerId = localStorage.getItem('current_runner_id');
+    setCurrentRunnerId(runnerId);
   }, []);
-
-  const isActive = (path: string) => {
-    if (path === "/") return currentPath === "/";
-    return currentPath.startsWith(path);
-  };
 
   return (
     <Sidebar

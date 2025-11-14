@@ -154,6 +154,70 @@ Deno.serve(async (req) => {
 
     const averageMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
 
+    // Calculate all historical streaks (5+ days)
+    const allStreaks: Array<{
+      start_date: string;
+      end_date: string;
+      days_count: number;
+      total_miles: number;
+      average_miles_per_day: number;
+      total_runs: number;
+    }> = [];
+
+    let currentStreakGroup: string[] = [];
+    let currentStreakMileage = 0;
+    let currentStreakRunCount = 0;
+
+    for (let i = 0; i < sortedDates.length; i++) {
+      const currentDate = new Date(sortedDates[i]);
+      
+      if (i === 0) {
+        currentStreakGroup.push(sortedDates[i]);
+        currentStreakMileage += activityDates.get(sortedDates[i]);
+        currentStreakRunCount++;
+      } else {
+        const prevDate = new Date(sortedDates[i - 1]);
+        const dayDiff = (prevDate.getTime() - currentDate.getTime()) / 86400000;
+        
+        if (dayDiff === 1) {
+          // Consecutive day
+          currentStreakGroup.push(sortedDates[i]);
+          currentStreakMileage += activityDates.get(sortedDates[i]);
+          currentStreakRunCount++;
+        } else {
+          // Streak broken - save if 5+ days
+          if (currentStreakGroup.length >= 5) {
+            allStreaks.push({
+              start_date: currentStreakGroup[currentStreakGroup.length - 1],
+              end_date: currentStreakGroup[0],
+              days_count: currentStreakGroup.length,
+              total_miles: currentStreakMileage,
+              average_miles_per_day: currentStreakMileage / currentStreakGroup.length,
+              total_runs: currentStreakRunCount,
+            });
+          }
+          // Start new streak
+          currentStreakGroup = [sortedDates[i]];
+          currentStreakMileage = activityDates.get(sortedDates[i]);
+          currentStreakRunCount = 1;
+        }
+      }
+    }
+
+    // Don't forget the last streak
+    if (currentStreakGroup.length >= 5) {
+      allStreaks.push({
+        start_date: currentStreakGroup[currentStreakGroup.length - 1],
+        end_date: currentStreakGroup[0],
+        days_count: currentStreakGroup.length,
+        total_miles: currentStreakMileage,
+        average_miles_per_day: currentStreakMileage / currentStreakGroup.length,
+        total_runs: currentStreakRunCount,
+      });
+    }
+
+    console.log(`Identified ${allStreaks.length} historical streaks (5+ days)`);
+
     // Prepare comprehensive runner data with all available stats
     const runnerData: any = {
       strava_user_id: athleteProfile.id,
@@ -211,6 +275,35 @@ Deno.serve(async (req) => {
     }
 
     console.log('Runner data saved successfully');
+
+    // Save streak history
+    if (allStreaks.length > 0) {
+      // Delete existing streaks for this runner to avoid duplicates
+      const { error: deleteError } = await supabase
+        .from('streak_history')
+        .delete()
+        .eq('runner_id', savedRunner.id);
+
+      if (deleteError) {
+        console.error('Error deleting old streak history:', deleteError);
+      }
+
+      // Insert all streaks
+      const streakRecords = allStreaks.map(streak => ({
+        runner_id: savedRunner.id,
+        ...streak
+      }));
+
+      const { error: streakError } = await supabase
+        .from('streak_history')
+        .insert(streakRecords);
+
+      if (streakError) {
+        console.error('Error saving streak history:', streakError);
+      } else {
+        console.log(`Saved ${allStreaks.length} streaks to history`);
+      }
+    }
 
     // Create or update user_settings with email
     if (athleteProfile.email) {
