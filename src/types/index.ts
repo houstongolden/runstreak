@@ -14,6 +14,12 @@ export interface Runner {
   longest_streak_ever: number;
   average_miles_per_day: number;
   streak_status: 'active' | 'broken';
+  ytd_run_count: number;
+  ytd_distance: number;
+  ytd_moving_time: number;
+  ytd_elevation_gain: number;
+  all_time_run_count: number;
+  all_time_distance: number;
   created_at: string;
   updated_at: string;
 }

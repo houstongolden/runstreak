@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Flame, Calendar, TrendingUp, Award } from "lucide-react";
+import { ArrowLeft, Flame, Calendar, TrendingUp, Award, Clock, Mountain } from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
+import ActivityHeatmap from "@/components/ActivityHeatmap";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +28,7 @@ export default function RunnerProfile() {
           .maybeSingle();
 
         if (error) throw error;
-        setRunner(data);
+        setRunner(data as Runner);
       } catch (error) {
         console.error("Error fetching runner:", error);
       } finally {
@@ -59,14 +60,20 @@ export default function RunnerProfile() {
 
   const streakActive = runner.streak_status === "active";
 
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
-          className="mb-6"
+          className="mb-6 hover:bg-accent"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Leaderboard
@@ -108,63 +115,169 @@ export default function RunnerProfile() {
           </CardContent>
         </Card>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-              <Flame className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{runner.current_streak_days}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {runner.current_streak_days === 1 ? "day" : "days"} in a row
-              </p>
-            </CardContent>
-          </Card>
+        {/* Current Streak Stats */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Current Streak</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Streak Days</CardTitle>
+                <Flame className="h-4 w-4 text-[hsl(25_100%_60%)]" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{runner.current_streak_days}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {runner.current_streak_days === 1 ? "day" : "days"} in a row
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Miles</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {formatNumber(runner.current_streak_miles)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                during current streak
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Streak Miles</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatNumber(runner.current_streak_miles)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  total distance
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Longest Streak Ever</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{runner.longest_streak_ever}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {runner.longest_streak_ever === 1 ? "day" : "days"}
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Longest Streak</CardTitle>
+                <Award className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{runner.longest_streak_ever}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {runner.longest_streak_ever === 1 ? "day" : "days"} best
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Daily Miles</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                {formatNumber(runner.average_miles_per_day)}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                miles per day
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Avg Daily Miles</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatNumber(runner.average_miles_per_day)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  per day
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Year-to-Date Stats */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Year-to-Date Stats</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Runs</CardTitle>
+                <Flame className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{runner.ytd_run_count || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  this year
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatNumber(runner.ytd_distance || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  miles
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Time</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatTime(runner.ytd_moving_time || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  moving time
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Elevation Gain</CardTitle>
+                <Mountain className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatNumber(runner.ytd_elevation_gain || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  feet
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* All-Time Stats */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">All-Time Stats</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Runs</CardTitle>
+                <Flame className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{runner.all_time_run_count || 0}</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  all time
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatNumber(runner.all_time_distance || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  miles all time
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Activity Heatmap */}
+        <div className="mb-6">
+          <ActivityHeatmap runnerId={runner.id} />
         </div>
 
         {/* Streak Timeline */}
