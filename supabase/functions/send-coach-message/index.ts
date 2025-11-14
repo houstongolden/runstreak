@@ -190,6 +190,7 @@ Runner Stats:
 
 Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 characters for SMS.' : ''}`;
 
+      // Stream response for app, non-stream for SMS
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -204,9 +205,23 @@ Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 
             { role: 'user', content: message }
           ],
           max_tokens: source === 'sms' ? 100 : 300,
+          stream: source === 'app', // Enable streaming for app
         }),
       });
 
+      // If streaming for app, return the stream directly
+      if (source === 'app') {
+        return new Response(aiResponse.body, {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+          },
+        });
+      }
+
+      // For SMS, get the full response
       const aiData = await aiResponse.json();
       messageToSend = aiData.choices[0].message.content;
     }
