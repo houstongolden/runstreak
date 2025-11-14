@@ -1,7 +1,8 @@
-import { Settings, User, Trophy, Sparkles } from "lucide-react";
+import { Settings, User, Trophy, Sparkles, Edit, MessageSquare } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 import {
   Sidebar,
@@ -18,17 +19,49 @@ const menuItems = [
   { title: "Leaderboard", url: "/", icon: Trophy },
   { title: "My Profile", url: "", icon: User }, // URL will be dynamic
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Edit Profile", url: "", icon: Edit }, // URL will be dynamic
 ];
+
+interface CoachingSession {
+  id: string;
+  title: string;
+  last_message_at: string;
+}
 
 export function AppSidebar() {
   const location = useLocation();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
+  const [coachingSessions, setCoachingSessions] = useState<CoachingSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
 
   useEffect(() => {
     // Get current runner from localStorage (set during Strava connection)
     const runnerId = localStorage.getItem('current_runner_id');
     setCurrentRunnerId(runnerId);
+    
+    if (runnerId) {
+      fetchCoachingSessions(runnerId);
+    }
   }, []);
+
+  const fetchCoachingSessions = async (runnerId: string) => {
+    setLoadingSessions(true);
+    try {
+      const { data, error } = await supabase
+        .from('coaching_sessions')
+        .select('*')
+        .eq('runner_id', runnerId)
+        .order('last_message_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      setCoachingSessions(data || []);
+    } catch (error) {
+      console.error('Error fetching coaching sessions:', error);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
 
   return (
     <Sidebar
@@ -44,13 +77,16 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
-                // Set dynamic URL for My Profile
-                const itemUrl = item.title === "My Profile" && currentRunnerId
-                  ? `/runner/${currentRunnerId}`
-                  : item.url;
+                // Set dynamic URL for My Profile and Edit Profile
+                let itemUrl = item.url;
+                if (item.title === "My Profile" && currentRunnerId) {
+                  itemUrl = `/runner/${currentRunnerId}`;
+                } else if (item.title === "Edit Profile" && currentRunnerId) {
+                  itemUrl = `/runner/${currentRunnerId}?edit=true`;
+                }
                 
-                // Don't show My Profile if no runner ID yet
-                if (item.title === "My Profile" && !currentRunnerId) {
+                // Don't show My Profile or Edit Profile if no runner ID yet
+                if ((item.title === "My Profile" || item.title === "Edit Profile") && !currentRunnerId) {
                   return null;
                 }
 
@@ -96,6 +132,47 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Coaching Sessions Section */}
+        {currentRunnerId && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
+              Coaching Sessions
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {loadingSessions ? (
+                  <SidebarMenuItem>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      Loading...
+                    </div>
+                  </SidebarMenuItem>
+                ) : coachingSessions.length > 0 ? (
+                  coachingSessions.map((session) => (
+                    <SidebarMenuItem key={session.id}>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to={`/coach?session=${session.id}`}
+                          className="hover:bg-muted/50" 
+                          activeClassName="bg-muted text-primary font-medium"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          <span className="truncate">{session.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                ) : (
+                  <SidebarMenuItem>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">
+                      No sessions yet
+                    </div>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
