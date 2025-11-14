@@ -51,6 +51,26 @@ serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
+    // Save user message to database
+    await fetch(
+      `${supabaseUrl}/rest/v1/coach_messages`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          runner_id: userSettings.runner_id,
+          content: body,
+          role: 'user',
+          source: 'sms',
+        }),
+      }
+    );
+
     // Get runner data for context
     const runnerResponse = await fetch(
       `${supabaseUrl}/rest/v1/runners?id=eq.${userSettings.runner_id}&select=*`,
@@ -102,6 +122,26 @@ Keep responses under 160 characters for SMS. Be conversational and personal.`;
 
     const aiData = await aiResponse.json();
     const aiMessage = aiData.choices[0].message.content;
+
+    // Save AI response to database
+    await fetch(
+      `${supabaseUrl}/rest/v1/coach_messages`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          runner_id: userSettings.runner_id,
+          content: aiMessage,
+          role: 'assistant',
+          source: 'sms',
+        }),
+      }
+    );
 
     // Send SMS response via Twilio
     const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
