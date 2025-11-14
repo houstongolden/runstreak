@@ -65,13 +65,13 @@ const Index = () => {
       {/* Top Carousel (Mobile only) */}
       <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:px-[240px] py-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 lg:px-[240px] py-6 sm:py-12">
         {/* Header */}
-        <header className="text-center mb-10 px-0 sm:px-4">
-          <div className="flex items-center justify-center mb-3">
-            <h1 className="text-3xl font-instrument-serif font-normal flex items-center gap-2">
+        <header className="text-center mb-6 sm:mb-10 px-0 sm:px-4">
+          <div className="flex items-center justify-center mb-2 sm:mb-3">
+            <h1 className="text-2xl sm:text-3xl font-instrument-serif font-normal flex items-center gap-2">
               <Flame 
-                className="h-7 w-7 animate-shiny-text" 
+                className="h-6 w-6 sm:h-7 sm:w-7 animate-shiny-text"
                 style={{
                   stroke: 'url(#gradient-logo)',
                   fill: 'none',
@@ -89,15 +89,15 @@ const Index = () => {
               </svg>
             </h1>
           </div>
-          <h2 className="text-[1.25rem] sm:text-[1.75rem] lg:text-[2.25rem] font-instrument font-medium mb-2.5 tracking-tight leading-[1.15] px-2 sm:px-0">
+          <h2 className="text-[1.15rem] sm:text-[1.75rem] lg:text-[2.25rem] font-instrument font-medium mb-2 sm:mb-2.5 tracking-tight leading-[1.15] px-2 sm:px-0">
             The verified leaderboard
             <br />
             for runners keeping their streak
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto font-inter font-light leading-relaxed mb-3">
+          <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl mx-auto font-inter font-light leading-relaxed mb-2 sm:mb-3 px-2 sm:px-0">
             Every runner claims they run daily. Now they can prove it.
           </p>
-          <p className="text-sm sm:text-base text-muted-foreground/80 max-w-xl mx-auto font-inter font-light leading-relaxed">
+          <p className="text-xs sm:text-sm lg:text-base text-muted-foreground/80 max-w-xl mx-auto font-inter font-light leading-relaxed px-2 sm:px-0">
             Maintain your streak by running at least 1 mile per day. Connect your Strava account to track and verify your daily running activity.
           </p>
         </header>

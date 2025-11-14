@@ -110,12 +110,12 @@ export default function RunnerProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
         {/* Header with Logo, Back Button, and Sync */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <div className="flex items-center gap-2">
-              <Flame className="h-8 w-8 text-primary" />
+              <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               <span className="hidden sm:inline text-2xl font-bold font-instrument-serif bg-gradient-to-r from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)] bg-clip-text text-transparent">
                 RunStreak
               </span>
