@@ -1,0 +1,166 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface SendMessageRequest {
+  runner_id: string;
+  message?: string; // Optional: if not provided, will generate AI message
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { runner_id, message }: SendMessageRequest = await req.json();
+
+    if (!runner_id) {
+      throw new Error('runner_id is required');
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Get user settings
+    const settingsResponse = await fetch(
+      `${supabaseUrl}/rest/v1/user_settings?runner_id=eq.${runner_id}&select=*`,
+      {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+      }
+    );
+
+    const settings = await settingsResponse.json();
+    
+    if (!settings || settings.length === 0) {
+      throw new Error('User settings not found');
+    }
+
+    const userSettings = settings[0];
+
+    if (!userSettings.phone_verified) {
+      throw new Error('Phone number not verified');
+    }
+
+    if (!userSettings.ai_coach_enabled && !message) {
+      throw new Error('AI coach not enabled');
+    }
+
+    let messageToSend = message;
+
+    // If no message provided, generate one with AI
+    if (!messageToSend) {
+      // Get runner data for context
+      const runnerResponse = await fetch(
+        `${supabaseUrl}/rest/v1/runners?id=eq.${runner_id}&select=*`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+
+      const runners = await runnerResponse.json();
+      const runner = runners[0];
+
+      const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+      
+      const coachingStylePrompts = {
+        motivational: "You are an enthusiastic and motivating running coach. Be upbeat and encouraging.",
+        analytical: "You are a data-driven running coach. Focus on metrics, trends, and objective analysis.",
+        supportive: "You are a supportive and empathetic running coach. Be understanding and patient.",
+        challenging: "You are a challenging running coach who pushes athletes to their limits. Be direct and demanding."
+      };
+
+      const timeOfDay = new Date().getHours();
+      const greeting = timeOfDay < 12 ? 'morning' : timeOfDay < 18 ? 'afternoon' : 'evening';
+
+      const systemPrompt = `${coachingStylePrompts[userSettings.ai_coach_style as keyof typeof coachingStylePrompts] || coachingStylePrompts.motivational}
+
+Runner Stats:
+- Name: ${runner.display_name}
+- Current streak: ${runner.current_streak_days || 0} days (${((runner.current_streak_miles || 0) / 1609.34).toFixed(1)} miles)
+- Year-to-date: ${runner.ytd_run_count || 0} runs, ${((runner.ytd_distance || 0) / 1609.34).toFixed(1)} miles
+- Last activity: ${runner.last_activity_date || 'Unknown'}
+
+Generate a personalized coaching message for this ${greeting}. Keep it under 160 characters for SMS. Be specific about their stats and encouraging.`;
+
+      const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: 'Send me a coaching message' }
+          ],
+          max_tokens: 100,
+        }),
+      });
+
+      const aiData = await aiResponse.json();
+      messageToSend = aiData.choices[0].message.content;
+    }
+
+    // Send SMS via Twilio
+    const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
+
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
+    
+    const twilioResponse = await fetch(twilioUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        To: userSettings.phone_number,
+        From: TWILIO_PHONE_NUMBER!,
+        Body: messageToSend!,
+      }),
+    });
+
+    if (!twilioResponse.ok) {
+      const errorText = await twilioResponse.text();
+      console.error('Twilio error:', errorText);
+      throw new Error('Failed to send SMS');
+    }
+
+    const twilioData = await twilioResponse.json();
+    console.log('Message sent successfully:', twilioData.sid);
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: messageToSend,
+        message_sid: twilioData.sid 
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
+    );
+  } catch (error) {
+    console.error('Error in send-coach-message:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
+      }
+    );
+  }
+});
