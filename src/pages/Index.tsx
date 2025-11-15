@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -25,6 +26,7 @@ import { AppDownloadSection } from "@/components/AppDownloadSection";
 type LeaderboardView = "total" | "percent" | "fiveday";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [runners, setRunners] = useState<Runner[]>([]);
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,12 +58,37 @@ const Index = () => {
   useEffect(() => {
     fetchRunners();
     
-    // Check if user is already connected to Strava
-    const runnerId = localStorage.getItem('runnerId');
-    if (runnerId) {
+    // Check if user is already connected to Strava and handle success callback
+    const searchParams = new URLSearchParams(window.location.search);
+    const stravaStatus = searchParams.get('strava');
+    const runnerId = searchParams.get('runnerId');
+    
+    if (stravaStatus === 'success' && runnerId) {
+      // Store runner ID and navigate to profile
+      localStorage.setItem('current_runner_id', runnerId);
+      toast({
+        title: "Connected!",
+        description: "Successfully connected to Strava.",
+      });
+      // Clean up URL and redirect to profile
+      window.history.replaceState({}, '', '/');
+      setTimeout(() => navigate(`/runner/${runnerId}`), 1000);
+    } else if (stravaStatus === 'error') {
+      const message = searchParams.get('message');
+      toast({
+        title: "Connection Failed",
+        description: message || "Failed to connect to Strava.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/');
+    }
+    
+    // Check if user is already connected
+    const currentRunnerId = localStorage.getItem('current_runner_id');
+    if (currentRunnerId) {
       setIsConnected(true);
     }
-  }, []);
+  }, [navigate, toast]);
 
   const displayedRunners = runners.slice(0, displayCount);
   const hasMore = displayCount < runners.length;
