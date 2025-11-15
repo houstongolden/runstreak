@@ -20,12 +20,15 @@ export default function AdminSetup() {
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+    
+    if (trimmedPassword !== trimmedConfirmPassword) {
       toast.error("Passwords don't match");
       return;
     }
 
-    if (password.length < 8) {
+    if (trimmedPassword.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
     }
@@ -34,7 +37,7 @@ export default function AdminSetup() {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-admin', {
-        body: { email, password, setupKey }
+        body: { email: email.trim(), password: trimmedPassword, setupKey: setupKey.trim() }
       });
 
       if (error) throw error;
