@@ -31,6 +31,7 @@ import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerB
 import { StreakHistory } from "@/components/StreakHistory";
 import { DaysOnStreakCard } from "@/components/DaysOnStreakCard";
 import { AccountabilityPartnersSection } from "@/components/AccountabilityPartnersSection";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +44,7 @@ export default function RunnerProfile() {
   const [streakView, setStreakView] = useState<"current" | "longest" | "fiveday">("current");
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
-  const currentRunnerId = localStorage.getItem("current_runner_id");
+  const { runnerId: currentRunnerId } = useAuth();
   const isOwnProfile = currentRunnerId === id;
   const [showProfileEditor, setShowProfileEditor] = useState(false);
 

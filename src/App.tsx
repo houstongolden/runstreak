@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppLayout } from "./components/AppLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import StravaConnect from "./pages/StravaConnect";
 import RunnerProfile from "./pages/RunnerProfile";
@@ -31,15 +32,17 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              {/* Routes with sidebar layout */}
+              {/* Public routes */}
               <Route path="/" element={<AppLayout><Index /></AppLayout>} />
-              <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
-              <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
-              <Route path="/activities" element={<AppLayout><Activities /></AppLayout>} />
-              <Route path="/feed" element={<AppLayout><SocialFeed /></AppLayout>} />
               <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
-              <Route path="/coach" element={<AppLayout><AICoach /></AppLayout>} />
-              <Route path="/coach/:runnerId" element={<AppLayout><AICoach /></AppLayout>} />
+              <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
+              
+              {/* Protected routes - require authentication */}
+              <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+              <Route path="/activities" element={<ProtectedRoute><AppLayout><Activities /></AppLayout></ProtectedRoute>} />
+              <Route path="/feed" element={<ProtectedRoute><AppLayout><SocialFeed /></AppLayout></ProtectedRoute>} />
+              <Route path="/coach" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
+              <Route path="/coach/:runnerId" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               
               {/* Routes without sidebar layout */}
               <Route path="/connect" element={<StravaConnect />} />

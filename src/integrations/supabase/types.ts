@@ -441,6 +441,7 @@ export type Database = {
           total_days_since_joining: number | null
           updated_at: string
           updated_at_strava: string | null
+          user_id: string | null
           username: string | null
           weight: number | null
           x_profile: string | null
@@ -498,6 +499,7 @@ export type Database = {
           total_days_since_joining?: number | null
           updated_at?: string
           updated_at_strava?: string | null
+          user_id?: string | null
           username?: string | null
           weight?: number | null
           x_profile?: string | null
@@ -555,6 +557,7 @@ export type Database = {
           total_days_since_joining?: number | null
           updated_at?: string
           updated_at_strava?: string | null
+          user_id?: string | null
           username?: string | null
           weight?: number | null
           x_profile?: string | null

@@ -12,6 +12,7 @@ import { formatDistance, formatDuration } from "@/lib/formatters";
 import { Calendar, Flame, MapPin, TrendingUp, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FeedActivity {
   runner_id: string;
@@ -27,20 +28,17 @@ interface FeedActivity {
 
 export default function SocialFeed() {
   const navigate = useNavigate();
+  const { runnerId: currentRunnerId } = useAuth();
   const [activities, setActivities] = useState<FeedActivity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
 
   useEffect(() => {
-    const runnerId = localStorage.getItem('current_runner_id');
-    setCurrentRunnerId(runnerId);
-    
-    if (runnerId) {
-      loadFeed(runnerId);
+    if (currentRunnerId) {
+      loadFeed(currentRunnerId);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [currentRunnerId]);
 
   const loadFeed = async (runnerId: string) => {
     try {
