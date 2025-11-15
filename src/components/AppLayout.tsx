@@ -38,8 +38,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <defs>
                     <linearGradient id="gradient-logo-header" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="hsl(22 93% 55%)" />
-                      <stop offset="50%" stopColor="hsl(15 100% 50%)" />
-                      <stop offset="100%" stopColor="hsl(340 82% 52%)" />
+                      <stop offset="100%" stopColor="hsl(30 100% 60%)" />
                     </linearGradient>
                   </defs>
                 </svg>
