@@ -253,7 +253,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           {currentStep > 1 && <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)} className="flex-1">Back</Button>}
           {currentStep < steps.length && <Button variant="ghost" onClick={handleSkip} className="flex-1">Skip</Button>}
           <Button onClick={handleNext} className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90">
-            {currentStep === steps.length ? <></>Start Your Journey <ArrowRight className="ml-2 h-5 w-5" /></> : <>Continue <ChevronRight className="ml-2 h-4 w-4" /></>}
+            {currentStep === steps.length ? <>Start Your Journey <ArrowRight className="ml-2 h-5 w-5" /></> : <>Continue <ChevronRight className="ml-2 h-4 w-4" /></>}
           </Button>
         </div>
       </DialogContent>
