@@ -10,13 +10,14 @@ import { Tables } from "@/integrations/supabase/types";
 import { FollowButton } from "@/components/FollowButton";
 import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Runner = Tables<"runners">;
 
 export default function Discover() {
   const [runners, setRunners] = useState<Runner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
+  const { runnerId: currentRunnerId } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,12 +33,6 @@ export default function Discover() {
         .limit(50);
 
       if (error) throw error;
-
-      // Get current runner ID from first runner for demo purposes
-      // In a real app, you'd get this from authentication
-      if (data && data.length > 0) {
-        setCurrentRunnerId(data[0].id);
-      }
 
       setRunners(data || []);
     } catch (error) {
