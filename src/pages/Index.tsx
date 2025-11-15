@@ -20,6 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import ShinyText from "@/components/ui/shiny-text";
 import { RunStreakPhilosophy } from "@/components/RunStreakPhilosophy";
 import { AggregateStatsCard } from "@/components/AggregateStatsCard";
+import { AppDownloadSection } from "@/components/AppDownloadSection";
 
 type LeaderboardView = "total" | "percent" | "fiveday";
 
@@ -366,6 +367,9 @@ const Index = () => {
 
       {/* Aggregate Stats */}
       <AggregateStatsCard />
+
+      {/* App Download Section */}
+      <AppDownloadSection />
 
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background">
