@@ -21,6 +21,7 @@ import SocialFeed from "./pages/SocialFeed";
 import Discover from "./pages/Discover";
 import Auth from "./pages/Auth";
 import AdminSetup from "./pages/AdminSetup";
+import AdminLogin from "./pages/AdminLogin";
 import VerifyPhone from "./pages/VerifyPhone";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +54,7 @@ const App = () => (
               {/* Routes without sidebar layout */}
               <Route path="/connect" element={<StravaConnect />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin-setup" element={<AdminSetup />} />
               <Route path="/verify-phone" element={<VerifyPhone />} />
               <Route path="/runner/:id/badge" element={<BadgeCustomizer />} />

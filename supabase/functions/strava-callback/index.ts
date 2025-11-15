@@ -466,52 +466,13 @@ Deno.serve(async (req) => {
         }
       }
       
-      // Check if phone is verified
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('phone_verified')
-        .eq('runner_id', savedRunner.id)
-        .maybeSingle();
-      
+      // Check if phone is verified - for now skip this requirement
+      // Redirect directly to home with welcome flag
       const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
       const runnerId = savedRunner?.id || '';
       const isNewUser = !existingRunner;
       
-      // Generate magic link for auto-login
-      let magicLinkUrl = '';
-      if (userId) {
-        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-          type: 'magiclink',
-          email: athleteProfile.email,
-          options: {
-            redirectTo: `${appUrl}/verify-phone?runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`
-          }
-        });
-        
-        if (!linkError && linkData) {
-          // Extract the token from the generated link
-          const url = new URL(linkData.properties.action_link);
-          const token = url.searchParams.get('token');
-          const tokenHash = url.searchParams.get('token_hash');
-          
-          if (token && tokenHash) {
-            magicLinkUrl = `${appUrl}/verify-phone?token=${token}&token_hash=${tokenHash}&type=magiclink&runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`;
-          }
-        }
-      }
-      
-      // If phone not verified (or settings don't exist yet), redirect to phone verification
-      if (!settings || !settings.phone_verified) {
-        console.log('Phone not verified, redirecting to verification');
-        return new Response(null, {
-          status: 302,
-          headers: {
-            'Location': magicLinkUrl || `${appUrl}/verify-phone?runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`,
-          },
-        });
-      }
-      
-      // Otherwise, redirect to app with success
+      // Always redirect to home with success, let onboarding modal handle phone verification
       return new Response(null, {
         status: 302,
         headers: {
