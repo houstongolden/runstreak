@@ -146,7 +146,7 @@ const Index = () => {
                   filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.5))'
                 }}
               />
-              <span className="text-xl font-instrument-serif font-normal" style={{ marginLeft: '-7px' }}>
+              <span className="text-xl font-instrument-serif font-normal" style={{ marginLeft: '-12px' }}>
                 <ShinyText text="RunStreak" speed={8} />
               </span>
               <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -180,7 +180,7 @@ const Index = () => {
                   filter: 'drop-shadow(0 0 12px hsl(22 93% 55% / 0.6)) drop-shadow(0 0 20px hsl(22 93% 55% / 0.3))'
                 }}
               />
-              <span style={{ marginLeft: '-7px' }}>
+              <span style={{ marginLeft: '-12px' }}>
                 <ShinyText text="RunStreak" speed={8} />
               </span>
               <svg width="0" height="0" style={{ position: 'absolute' }}>
