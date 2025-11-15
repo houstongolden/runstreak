@@ -19,15 +19,14 @@ const ShinyText: FC<ShinyTextProps> = ({
   return (
     <span
       className={cn(
-        "inline-block bg-clip-text text-transparent bg-gradient-to-r bg-[length:var(--shimmer-width)_100%] bg-[position:calc(-100%-var(--shimmer-width))_0]",
+        "inline-block bg-clip-text text-transparent bg-gradient-to-r bg-[length:200%_100%] bg-[position:200%_0]",
         !disabled && "animate-shiny-text",
         className
       )}
       style={
         {
-          "--shimmer-width": "200px",
           animationDuration,
-          backgroundImage: "linear-gradient(90deg, hsl(16 100% 50%) 0%, hsl(0 0% 100%) 20%, hsl(16 100% 55%) 40%, hsl(14 100% 48%) 60%, hsl(0 0% 100%) 80%, hsl(16 100% 50%) 100%)",
+          backgroundImage: "linear-gradient(90deg, hsl(16 100% 50%) 0%, hsl(22 100% 58%) 30%, hsl(25 100% 60%) 50%, hsl(22 100% 58%) 70%, hsl(16 100% 50%) 100%)",
         } as CSSProperties
       }
     >

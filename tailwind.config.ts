@@ -103,20 +103,17 @@ export default {
         },
         "shiny-text": {
           "0%": {
-            "background-position": "calc(-100% - var(--shimmer-width)) 0",
-          },
-          "50%": {
-            "background-position": "calc(100% + var(--shimmer-width)) 0",
+            "background-position": "200% 0",
           },
           "100%": {
-            "background-position": "calc(-100% - var(--shimmer-width)) 0",
+            "background-position": "-200% 0",
           },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "shiny-text": "shiny-text 5s linear infinite",
+        "shiny-text": "shiny-text 8s linear infinite",
       },
     },
   },
