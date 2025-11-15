@@ -156,7 +156,12 @@ Deno.serve(async (req) => {
     if (streakStartDate && lastDate) {
       const streakActivities = sortedActivities.filter((activity: any) => {
         const activityDate = new Date(activity.start_date);
-        return activityDate >= streakStartDate! && activityDate <= lastDate!;
+        activityDate.setHours(0, 0, 0, 0);
+        const streakStart = new Date(streakStartDate);
+        streakStart.setHours(0, 0, 0, 0);
+        const streakEnd = new Date(lastDate);
+        streakEnd.setHours(0, 0, 0, 0);
+        return activityDate >= streakStart && activityDate <= streakEnd;
       });
       currentStreakMiles = streakActivities.reduce((sum: number, a: any) => sum + (a.distance / 1609.34), 0);
     }
