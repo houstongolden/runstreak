@@ -1,4 +1,4 @@
-import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity, TrendingUp } from "lucide-react";
+import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity, TrendingUp, Users } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -21,6 +21,7 @@ const menuItems = [
   { title: "My Profile", url: "", icon: User }, // URL will be dynamic
   { title: "Activities", url: "/activities", icon: Activity },
   { title: "Social Feed", url: "/feed", icon: TrendingUp },
+  { title: "Discover", url: "/discover", icon: Users },
   { title: "Settings", url: "/settings", icon: Settings },
   { title: "Edit Profile", url: "", icon: Edit }, // URL will be dynamic
 ];
