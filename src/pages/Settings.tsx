@@ -16,6 +16,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import AICoachChat from "@/components/AICoachChat";
+import PrivacySettings from "@/components/PrivacySettings";
 
 interface UserSettings {
   id?: string;
@@ -490,12 +491,18 @@ export default function Settings() {
 
           <Separator />
 
+
           {/* AI Coach Chat Interface */}
           {settings.phone_verified && (
             <div>
               <AICoachChat runnerId={settings.runner_id} />
             </div>
           )}
+
+          <Separator />
+
+          {/* Privacy Settings */}
+          <PrivacySettings runnerId={settings.runner_id} />
 
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={saving} size="lg">

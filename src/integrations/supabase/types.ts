@@ -606,10 +606,15 @@ export type Database = {
       user_settings: {
         Row: {
           accountability_notifications_enabled: boolean | null
+          activity_sharing_mode:
+            | Database["public"]["Enums"]["activity_sharing_mode"]
+            | null
           ai_coach_enabled: boolean | null
           ai_coach_frequency: string | null
           ai_coach_style: string | null
           ai_coach_time: string | null
+          allow_follow_requests: boolean | null
+          auto_approve_followers: boolean | null
           created_at: string
           email: string | null
           email_verified: boolean | null
@@ -623,10 +628,15 @@ export type Database = {
         }
         Insert: {
           accountability_notifications_enabled?: boolean | null
+          activity_sharing_mode?:
+            | Database["public"]["Enums"]["activity_sharing_mode"]
+            | null
           ai_coach_enabled?: boolean | null
           ai_coach_frequency?: string | null
           ai_coach_style?: string | null
           ai_coach_time?: string | null
+          allow_follow_requests?: boolean | null
+          auto_approve_followers?: boolean | null
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
@@ -640,10 +650,15 @@ export type Database = {
         }
         Update: {
           accountability_notifications_enabled?: boolean | null
+          activity_sharing_mode?:
+            | Database["public"]["Enums"]["activity_sharing_mode"]
+            | null
           ai_coach_enabled?: boolean | null
           ai_coach_frequency?: string | null
           ai_coach_style?: string | null
           ai_coach_time?: string | null
+          allow_follow_requests?: boolean | null
+          auto_approve_followers?: boolean | null
           created_at?: string
           email?: string | null
           email_verified?: boolean | null
@@ -666,6 +681,7 @@ export type Database = {
     }
     Enums: {
       accountability_status: "pending" | "accepted" | "declined"
+      activity_sharing_mode: "public" | "followers" | "private"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -794,6 +810,7 @@ export const Constants = {
   public: {
     Enums: {
       accountability_status: ["pending", "accepted", "declined"],
+      activity_sharing_mode: ["public", "followers", "private"],
     },
   },
 } as const
