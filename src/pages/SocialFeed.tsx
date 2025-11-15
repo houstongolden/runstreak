@@ -4,14 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { FollowButton } from "@/components/FollowButton";
-import ActivityKudos from "@/components/ActivityKudos";
-import ActivityComments from "@/components/ActivityComments";
-import { formatDistance, formatDuration } from "@/lib/formatters";
-import { Calendar, Flame, MapPin, TrendingUp, Sparkles } from "lucide-react";
-import { format } from "date-fns";
-import { toast } from "sonner";
+import { Flame, TrendingUp } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface FeedActivity {
@@ -20,10 +13,6 @@ interface FeedActivity {
   runner_avatar: string;
   current_streak: number;
   activity_date: string;
-  distance: number;
-  moving_time: number;
-  run_count: number;
-  status_text?: string;
 }
 
 export default function SocialFeed() {
@@ -64,13 +53,7 @@ export default function SocialFeed() {
 
       const { data: recentActivities, error } = await supabase
         .from("daily_activities")
-        .select(`
-          runner_id,
-          activity_date,
-          distance,
-          moving_time,
-          run_count
-        `)
+        .select("runner_id, activity_date")
         .in("runner_id", followingIds)
         .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0])
         .order("activity_date", { ascending: false });
@@ -85,35 +68,15 @@ export default function SocialFeed() {
 
       if (!runners) return;
 
-      // Get activity statuses
-      const activityKeys = (recentActivities || []).map(a => ({
-        runner_id: a.runner_id,
-        activity_date: a.activity_date
-      }));
-
-      const { data: statuses } = await supabase
-        .from("activity_status")
-        .select("runner_id, activity_date, status_text")
-        .in("runner_id", followingIds)
-        .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0]);
-
-      // Combine activities with runner info and statuses
+      // Combine activities with runner info
       const feedItems: FeedActivity[] = (recentActivities || []).map((activity) => {
         const runner = runners.find((r) => r.id === activity.runner_id);
-        const status = statuses?.find(s => 
-          s.runner_id === activity.runner_id && 
-          s.activity_date === activity.activity_date
-        );
         return {
           runner_id: activity.runner_id,
           runner_name: runner?.display_name || "Unknown Runner",
           runner_avatar: runner?.avatar_url || "",
           current_streak: runner?.current_streak_days || 0,
           activity_date: activity.activity_date,
-          distance: activity.distance,
-          moving_time: activity.moving_time,
-          run_count: activity.run_count,
-          status_text: status?.status_text,
         };
       });
 
@@ -122,25 +85,6 @@ export default function SocialFeed() {
       console.error("Error loading feed:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const generateStatus = async (runnerId: string, activityDate: string) => {
-    try {
-      toast.info('Generating AI status...');
-      const { data, error } = await supabase.functions.invoke('generate-activity-status', {
-        body: { runnerId, activityDate }
-      });
-
-      if (error) throw error;
-      
-      toast.success('Status generated!');
-      if (currentRunnerId) {
-        loadFeed(currentRunnerId); // Refresh to show new status
-      }
-    } catch (error) {
-      console.error('Error generating status:', error);
-      toast.error('Failed to generate status');
     }
   };
 
@@ -213,95 +157,44 @@ export default function SocialFeed() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <TrendingUp className="h-8 w-8" />
-          Social Feed
+    <div className="container mx-auto p-4 sm:p-6 max-w-4xl space-y-4">
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <Flame className="h-6 w-6 text-orange-500" />
+          Streak Updates
         </h1>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {activities.map((activity, index) => (
-          <Card key={`${activity.runner_id}-${activity.activity_date}-${index}`} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <Avatar
-                  className="h-12 w-12 cursor-pointer"
-                  onClick={() => navigate(`/runner/${activity.runner_id}`)}
-                >
+          <Card 
+            key={`${activity.runner_id}-${activity.activity_date}-${index}`} 
+            className="hover:bg-muted/30 transition-colors cursor-pointer"
+            onClick={() => navigate(`/runner/${activity.runner_id}`)}
+          >
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 shrink-0">
                   <AvatarImage src={activity.runner_avatar} />
                   <AvatarFallback>
                     {activity.runner_name.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3
-                        className="font-semibold cursor-pointer hover:underline"
-                        onClick={() => navigate(`/runner/${activity.runner_id}`)}
-                      >
-                        {activity.runner_name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(activity.activity_date), "MMM d, yyyy")}
-                      </div>
-                    </div>
-                    <FollowButton
-                      targetRunnerId={activity.runner_id}
-                      currentRunnerId={currentRunnerId}
-                    />
+                <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="font-semibold truncate text-sm sm:text-base">
+                      {activity.runner_name}
+                    </span>
+                    <span className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
+                      kept their streak alive
+                    </span>
                   </div>
-
-                  <p className="text-muted-foreground">
-                    Completed {activity.run_count} run{activity.run_count !== 1 ? "s" : ""}
-                  </p>
-
-                  <div className="flex flex-wrap gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{formatDistance(activity.distance)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{formatDuration(activity.moving_time)}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Flame className="h-4 w-4 text-orange-500" />
-                      <span className="font-medium">{activity.current_streak} day streak</span>
-                    </div>
-                  </div>
-
-                  {activity.status_text && (
-                    <div className="p-3 bg-accent/50 rounded-lg">
-                      <p className="text-sm italic">{activity.status_text}</p>
-                    </div>
-                  )}
-
-                  {!activity.status_text && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => generateStatus(activity.runner_id, activity.activity_date)}
-                    >
-                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                      Generate AI Status
-                    </Button>
-                  )}
-
-                  <div className="space-y-2 pt-3 border-t">
-                    <ActivityKudos 
-                      runnerId={activity.runner_id}
-                      activityDate={activity.activity_date}
-                    />
-                    <ActivityComments
-                      activityRunnerId={activity.runner_id}
-                      activityDate={activity.activity_date}
-                      currentRunnerId={currentRunnerId || undefined}
-                    />
+                  
+                  <div className="flex items-center gap-1.5 shrink-0 bg-orange-500/10 px-2.5 py-1 rounded-full">
+                    <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" />
+                    <span className="font-bold text-sm sm:text-base">{activity.current_streak}</span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline">days</span>
                   </div>
                 </div>
               </div>
