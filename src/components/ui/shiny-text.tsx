@@ -27,7 +27,7 @@ const ShinyText: FC<ShinyTextProps> = ({
         {
           "--shimmer-width": "200px",
           animationDuration,
-          backgroundImage: "var(--gradient-yellow)",
+          backgroundImage: "var(--gradient-primary)",
         } as CSSProperties
       }
     >

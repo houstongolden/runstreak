@@ -17,27 +17,29 @@ export function AppLayout({ children }: AppLayoutProps) {
         
         <div className="flex flex-col min-h-screen">
           {/* Header */}
-          <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
             <div className="flex h-14 items-center px-4 gap-4">
               <SidebarTrigger />
               
-              <Link to="/" className="flex items-center gap-2">
+              <Link to="/" className="flex items-center gap-2 group">
                 <Flame 
-                  className="h-6 w-6 animate-shiny-text"
+                  className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
                   style={{
                     stroke: 'url(#gradient-logo-header)',
                     fill: 'none',
-                    strokeWidth: 2
+                    strokeWidth: 2,
+                    filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
                   }}
                 />
-                <span className="font-instrument-serif text-xl font-normal">
+                <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
                   <ShinyText text="RunStreak" speed={5} />
                 </span>
                 <svg width="0" height="0" style={{ position: 'absolute' }}>
                   <defs>
                     <linearGradient id="gradient-logo-header" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="hsl(25 100% 60%)" />
-                      <stop offset="100%" stopColor="hsl(15 100% 50%)" />
+                      <stop offset="0%" stopColor="hsl(22 93% 55%)" />
+                      <stop offset="50%" stopColor="hsl(15 100% 50%)" />
+                      <stop offset="100%" stopColor="hsl(340 82% 52%)" />
                     </linearGradient>
                   </defs>
                 </svg>
