@@ -410,9 +410,57 @@ Deno.serve(async (req) => {
       } else {
         console.log('User settings created with email:', athleteProfile.email);
       }
+      
+      // Create Supabase Auth user if doesn't exist
+      const tempPassword = `strava_${athleteProfile.id}_${Date.now()}`;
+      const { error: createError } = await supabase.auth.admin.createUser({
+        email: athleteProfile.email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          strava_id: athleteProfile.id,
+          display_name: athleteProfile.firstname + ' ' + athleteProfile.lastname,
+          avatar_url: athleteProfile.profile,
+          runner_id: savedRunner.id,
+        }
+      });
+      
+      if (createError && !createError.message.includes('already been registered')) {
+        console.error('Error creating auth user:', createError);
+      } else {
+        console.log('Supabase Auth user ready');
+      }
+      
+      // Check if phone is verified
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('phone_verified')
+        .eq('runner_id', savedRunner.id)
+        .maybeSingle();
+      
+      const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
+      const runnerId = savedRunner?.id || '';
+      
+      // If phone not verified, redirect to phone verification
+      if (!settings?.phone_verified) {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            'Location': `${appUrl}/auth?verify=phone&runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`,
+          },
+        });
+      }
+      
+      // Otherwise, redirect to app with success
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': `${appUrl}/?strava=success&runnerId=${runnerId}`,
+        },
+      });
     }
 
-    // Redirect to app with runner ID
+    // Redirect to app with runner ID (fallback)
     const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     const runnerId = savedRunner?.id || '';
     return new Response(null, {
