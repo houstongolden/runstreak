@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { FollowButton } from "@/components/FollowButton";
 import ActivityKudos from "@/components/ActivityKudos";
+import ActivityComments from "@/components/ActivityComments";
 import { formatDistance, formatDuration } from "@/lib/formatters";
 import { Calendar, Flame, MapPin, TrendingUp, Sparkles } from "lucide-react";
 import { format } from "date-fns";
@@ -293,10 +294,15 @@ export default function SocialFeed() {
                     </Button>
                   )}
 
-                  <div className="flex items-center pt-3 border-t">
+                  <div className="space-y-2 pt-3 border-t">
                     <ActivityKudos 
                       runnerId={activity.runner_id}
                       activityDate={activity.activity_date}
+                    />
+                    <ActivityComments
+                      activityRunnerId={activity.runner_id}
+                      activityDate={activity.activity_date}
+                      currentRunnerId={currentRunnerId || undefined}
                     />
                   </div>
                 </div>

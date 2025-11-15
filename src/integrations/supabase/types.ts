@@ -56,6 +56,51 @@ export type Database = {
           },
         ]
       }
+      activity_comments: {
+        Row: {
+          activity_date: string
+          activity_runner_id: string
+          comment_text: string
+          created_at: string
+          id: string
+          runner_id: string
+          updated_at: string
+        }
+        Insert: {
+          activity_date: string
+          activity_runner_id: string
+          comment_text: string
+          created_at?: string
+          id?: string
+          runner_id: string
+          updated_at?: string
+        }
+        Update: {
+          activity_date?: string
+          activity_runner_id?: string
+          comment_text?: string
+          created_at?: string
+          id?: string
+          runner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_comments_activity_runner_id_fkey"
+            columns: ["activity_runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_comments_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_kudos: {
         Row: {
           activity_date: string
