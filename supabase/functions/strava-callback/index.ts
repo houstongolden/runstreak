@@ -412,7 +412,7 @@ Deno.serve(async (req) => {
       }
       
       // Create Supabase Auth user if doesn't exist
-      const tempPassword = `strava_${athleteProfile.id}_${Date.now()}`;
+      const tempPassword = crypto.randomUUID() + crypto.randomUUID();
       const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
         email: athleteProfile.email,
         password: tempPassword,
@@ -425,10 +425,13 @@ Deno.serve(async (req) => {
         }
       });
       
+      let userId: string | null = null;
+      
       if (createError && !createError.message.includes('already been registered')) {
         console.error('Error creating auth user:', createError);
       } else if (authUser?.user) {
         console.log('Supabase Auth user created, linking to runner');
+        userId = authUser.user.id;
         
         // Link the runner to the auth user
         const { error: linkError } = await supabase
@@ -449,6 +452,7 @@ Deno.serve(async (req) => {
         const matchingUser = existingUser?.users.find(u => u.email === athleteProfile.email);
         
         if (matchingUser) {
+          userId = matchingUser.id;
           const { error: linkError } = await supabase
             .from('runners')
             .update({ user_id: matchingUser.id })
@@ -473,12 +477,36 @@ Deno.serve(async (req) => {
       const runnerId = savedRunner?.id || '';
       const isNewUser = !existingRunner;
       
-      // If phone not verified, redirect to phone verification
-      if (!settings?.phone_verified) {
+      // Generate magic link for auto-login
+      let magicLinkUrl = '';
+      if (userId) {
+        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: athleteProfile.email,
+          options: {
+            redirectTo: `${appUrl}/verify-phone?runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`
+          }
+        });
+        
+        if (!linkError && linkData) {
+          // Extract the token from the generated link
+          const url = new URL(linkData.properties.action_link);
+          const token = url.searchParams.get('token');
+          const tokenHash = url.searchParams.get('token_hash');
+          
+          if (token && tokenHash) {
+            magicLinkUrl = `${appUrl}/verify-phone?token=${token}&token_hash=${tokenHash}&type=magiclink&runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`;
+          }
+        }
+      }
+      
+      // If phone not verified (or settings don't exist yet), redirect to phone verification
+      if (!settings || !settings.phone_verified) {
+        console.log('Phone not verified, redirecting to verification');
         return new Response(null, {
           status: 302,
           headers: {
-            'Location': `${appUrl}/auth?verify=phone&runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`,
+            'Location': magicLinkUrl || `${appUrl}/verify-phone?runnerId=${runnerId}&email=${encodeURIComponent(athleteProfile.email)}`,
           },
         });
       }
