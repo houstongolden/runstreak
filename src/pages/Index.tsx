@@ -147,7 +147,7 @@ const Index = () => {
                 }}
               />
               <span className="text-xl font-instrument-serif font-normal -ml-5">
-                <ShinyText text="RunStreak" speed={5} />
+                <ShinyText text="RunStreak" speed={8} />
               </span>
               <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
@@ -181,7 +181,7 @@ const Index = () => {
                 }}
               />
               <span className="-ml-5">
-                <ShinyText text="RunStreak" speed={5} />
+                <ShinyText text="RunStreak" speed={8} />
               </span>
               <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
