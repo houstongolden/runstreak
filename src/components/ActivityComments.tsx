@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Send, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Card } from "@/components/ui/card";
+import { commentSchema } from "@/lib/validation";
 
 interface Comment {
   id: string;
@@ -92,6 +93,21 @@ export default function ActivityComments({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !currentRunnerId) return;
+
+    // Validate comment
+    const validationResult = commentSchema.safeParse({
+      comment_text: newComment.trim(),
+    });
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive",
+      });
+      return;
+    }
 
     setSubmitting(true);
     try {

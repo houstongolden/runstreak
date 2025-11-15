@@ -80,7 +80,7 @@ const Index = () => {
             .maybeSingle();
           
           if (!error && data) {
-            setOnboardingRunner(data as Runner);
+            setOnboardingRunner(data as any);
             // Calculate rank
             const { data: allRunners } = await supabase
               .from("runners")

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ActivityKudosProps {
   runnerId: string;
@@ -10,10 +11,10 @@ interface ActivityKudosProps {
 }
 
 export default function ActivityKudos({ runnerId, activityDate }: ActivityKudosProps) {
+  const { runnerId: currentRunnerId } = useAuth();
   const [kudosCount, setKudosCount] = useState(0);
   const [hasGivenKudos, setHasGivenKudos] = useState(false);
   const [loading, setLoading] = useState(false);
-  const currentRunnerId = localStorage.getItem('current_runner_id');
 
   useEffect(() => {
     fetchKudos();

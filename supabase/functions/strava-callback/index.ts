@@ -413,7 +413,7 @@ Deno.serve(async (req) => {
       
       // Create Supabase Auth user if doesn't exist
       const tempPassword = `strava_${athleteProfile.id}_${Date.now()}`;
-      const { error: createError } = await supabase.auth.admin.createUser({
+      const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
         email: athleteProfile.email,
         password: tempPassword,
         email_confirm: true,
@@ -427,8 +427,39 @@ Deno.serve(async (req) => {
       
       if (createError && !createError.message.includes('already been registered')) {
         console.error('Error creating auth user:', createError);
+      } else if (authUser?.user) {
+        console.log('Supabase Auth user created, linking to runner');
+        
+        // Link the runner to the auth user
+        const { error: linkError } = await supabase
+          .from('runners')
+          .update({ user_id: authUser.user.id })
+          .eq('id', savedRunner.id);
+          
+        if (linkError) {
+          console.error('Error linking runner to auth user:', linkError);
+        } else {
+          console.log('Runner successfully linked to auth user');
+        }
       } else {
-        console.log('Supabase Auth user ready');
+        console.log('Supabase Auth user already exists, trying to link');
+        
+        // User already exists, get their ID and link it
+        const { data: existingUser } = await supabase.auth.admin.listUsers();
+        const matchingUser = existingUser?.users.find(u => u.email === athleteProfile.email);
+        
+        if (matchingUser) {
+          const { error: linkError } = await supabase
+            .from('runners')
+            .update({ user_id: matchingUser.id })
+            .eq('id', savedRunner.id);
+            
+          if (linkError) {
+            console.error('Error linking existing user to runner:', linkError);
+          } else {
+            console.log('Existing auth user linked to runner');
+          }
+        }
       }
       
       // Check if phone is verified

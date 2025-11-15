@@ -68,18 +68,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchRunnerId = async (userId: string) => {
     try {
-      // First try to get runner by user's email
-      if (!user?.email) return;
-      
+      // Get runner by user_id (secure server-side link)
       const { data, error } = await supabase
         .from('runners')
         .select('id')
-        .eq('email', user.email)
+        .eq('user_id', userId)
         .maybeSingle();
       
       if (data) {
         setRunnerId(data.id);
-        localStorage.setItem('current_runner_id', data.id);
       }
     } catch (error) {
       console.error('Error fetching runner ID:', error);
@@ -89,7 +86,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setRunnerId(null);
-    localStorage.removeItem('current_runner_id');
   };
 
   return (

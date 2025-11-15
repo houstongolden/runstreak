@@ -10,7 +10,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.analyze-runner]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-verification-sms]
 verify_jwt = false
@@ -22,4 +22,4 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-coach-message]
-verify_jwt = false
+verify_jwt = true

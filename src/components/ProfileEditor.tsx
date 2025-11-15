@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Save, X } from "lucide-react";
 import { Runner } from "@/types";
+import { profileSchema } from "@/lib/validation";
 
 interface ProfileEditorProps {
   runner: Runner;
@@ -56,11 +57,18 @@ export default function ProfileEditor({ runner, onUpdate, onCancel, defaultEditi
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Validate username format (alphanumeric, underscore, hyphen only)
-      if (username && !/^[a-zA-Z0-9_-]+$/.test(username)) {
+      // Validate profile data
+      const validationResult = profileSchema.safeParse({
+        username,
+        bio,
+        x_profile: xProfile,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
         toast({
-          title: "Invalid Username",
-          description: "Username can only contain letters, numbers, underscores, and hyphens.",
+          title: "Validation Error",
+          description: firstError.message,
           variant: "destructive",
         });
         setIsSaving(false);

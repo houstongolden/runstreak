@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/input-otp";
 import AICoachChat from "@/components/AICoachChat";
 import PrivacySettings from "@/components/PrivacySettings";
+import { useAuth } from "@/contexts/AuthContext";
+import { settingsSchema, phoneSchema, emailSchema } from "@/lib/validation";
 
 interface UserSettings {
   id?: string;
@@ -34,6 +36,7 @@ interface UserSettings {
 
 export default function Settings() {
   const { toast } = useToast();
+  const { runnerId: currentRunnerId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
@@ -60,7 +63,6 @@ export default function Settings() {
 
   const fetchSettings = async () => {
     try {
-      const currentRunnerId = localStorage.getItem('current_runner_id');
       if (!currentRunnerId) {
         setLoading(false);
         return;
@@ -100,6 +102,26 @@ export default function Settings() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Validate settings data
+      const validationResult = settingsSchema.safeParse({
+        email: settings.email,
+        phone_number: settings.phone_number,
+        ai_coach_frequency: settings.ai_coach_frequency,
+        ai_coach_time: settings.ai_coach_time,
+        ai_coach_style: settings.ai_coach_style,
+      });
+
+      if (!validationResult.success) {
+        const firstError = validationResult.error.errors[0];
+        toast({
+          title: "Validation Error",
+          description: firstError.message,
+          variant: "destructive",
+        });
+        setSaving(false);
+        return;
+      }
+
       const { error } = await (supabase as any)
         .from("user_settings")
         .upsert(settings, { onConflict: "runner_id" });
