@@ -10,6 +10,15 @@ interface SendSMSRequest {
   phoneNumber: string;
 }
 
+// Hash function for verification codes
+async function hashCode(code: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(code);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,33 +27,53 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { phoneNumber }: SendSMSRequest = await req.json();
 
-    if (!phoneNumber) {
+    // Validate phone number format
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    if (!phoneNumber || !phoneRegex.test(phoneNumber)) {
       return new Response(
-        JSON.stringify({ error: "Phone number is required" }),
+        JSON.stringify({ error: "Valid phone number in E.164 format is required (e.g., +1234567890)" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Generate 6-digit verification code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    console.log("Generated code:", code, "for phone:", phoneNumber);
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Store verification code in database
+    // Rate limiting: Check for recent codes (max 1 per minute)
+    const { data: recentCodes } = await supabase
+      .from('phone_verification_codes')
+      .select('created_at')
+      .eq('phone_number', phoneNumber)
+      .gte('created_at', new Date(Date.now() - 60000).toISOString())
+      .limit(1);
+
+    if (recentCodes && recentCodes.length > 0) {
+      return new Response(
+        JSON.stringify({ error: 'Please wait at least 1 minute before requesting another code' }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Generate cryptographically secure 6-digit code
+    const codeArray = new Uint32Array(1);
+    crypto.getRandomValues(codeArray);
+    const code = (100000 + (codeArray[0] % 900000)).toString();
+    
+    // Hash the code before storing
+    const hashedCode = await hashCode(code);
+
+    // Store hashed verification code in database
     const { error: dbError } = await supabase
       .from("phone_verification_codes")
       .insert({
         phone_number: phoneNumber,
-        code: code,
+        code: hashedCode,
       });
 
     if (dbError) {
-      console.error("Database error:", dbError);
+      console.error("Database error storing verification code");
       throw new Error("Failed to store verification code");
     }
 
@@ -71,11 +100,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!twilioResponse.ok) {
       const errorText = await twilioResponse.text();
-      console.error("Twilio error:", errorText);
+      console.error("SMS service error");
       throw new Error("Failed to send SMS");
     }
 
-    console.log("SMS sent successfully to:", phoneNumber);
+    console.log("Verification code sent successfully");
 
     return new Response(
       JSON.stringify({ success: true, message: "Verification code sent" }),
@@ -85,9 +114,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-verification-sms:", error);
+    console.error("Error in send-verification-sms:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Failed to send verification code" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

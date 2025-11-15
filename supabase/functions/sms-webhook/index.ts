@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
@@ -17,73 +18,61 @@ serve(async (req) => {
     const body = formData.get('Body') as string;
     const messageId = formData.get('MessageSid') as string;
 
-    console.log('Incoming SMS:', { from, body, messageId });
+    console.log('Incoming SMS received');
 
     if (!from || !body) {
       throw new Error('Missing required fields');
     }
 
-    // Find user by phone number
+    // Create Supabase client with service role
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const settingsResponse = await fetch(
-      `${supabaseUrl}/rest/v1/user_settings?phone_number=eq.${from}&select=*`,
-      {
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-      }
-    );
-
-    const settings = await settingsResponse.json();
+    // Find user by phone number using Supabase client
+    const { data: settings, error: settingsError } = await supabase
+      .from('user_settings')
+      .select('*')
+      .eq('phone_number', from)
+      .maybeSingle();
     
-    if (!settings || settings.length === 0) {
-      console.log('No user found with phone number:', from);
+    if (settingsError || !settings) {
+      console.log('No user found for incoming SMS');
       return new Response('OK', { status: 200 });
     }
 
-    const userSettings = settings[0];
+    const userSettings = settings;
 
     if (!userSettings.ai_coach_enabled) {
-      console.log('AI coach not enabled for user:', from);
+      console.log('AI coach not enabled for user');
       return new Response('OK', { status: 200 });
     }
 
     // Save user message to database
-    await fetch(
-      `${supabaseUrl}/rest/v1/coach_messages`,
-      {
-        method: 'POST',
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          runner_id: userSettings.runner_id,
-          content: body,
-          role: 'user',
-          source: 'sms',
-        }),
-      }
-    );
+    const { error: messageError } = await supabase
+      .from('coach_messages')
+      .insert({
+        runner_id: userSettings.runner_id,
+        content: body,
+        role: 'user',
+        source: 'sms',
+      });
+
+    if (messageError) {
+      console.error('Error saving message');
+    }
 
     // Get runner data for context
-    const runnerResponse = await fetch(
-      `${supabaseUrl}/rest/v1/runners?id=eq.${userSettings.runner_id}&select=*`,
-      {
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-      }
-    );
+    const { data: runner, error: runnerError } = await supabase
+      .from('runners')
+      .select('*')
+      .eq('id', userSettings.runner_id)
+      .single();
 
-    const runners = await runnerResponse.json();
-    const runner = runners[0];
+    if (runnerError || !runner) {
+      console.error('Error fetching runner data');
+      return new Response('OK', { status: 200 });
+    }
 
     // Generate AI response
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -116,64 +105,59 @@ Keep responses under 160 characters for SMS. Be conversational and personal.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: body }
         ],
-        max_tokens: 100,
+        max_tokens: 150,
+        temperature: 0.7,
       }),
     });
 
+    if (!aiResponse.ok) {
+      console.error('AI API error');
+      throw new Error('Failed to get AI response');
+    }
+
     const aiData = await aiResponse.json();
-    const aiMessage = aiData.choices[0].message.content;
+    const coachResponse = aiData.choices[0]?.message?.content || "Keep up the great work!";
 
-    // Save AI response to database
-    await fetch(
-      `${supabaseUrl}/rest/v1/coach_messages`,
-      {
-        method: 'POST',
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          runner_id: userSettings.runner_id,
-          content: aiMessage,
-          role: 'assistant',
-          source: 'sms',
-        }),
-      }
-    );
+    // Save coach response
+    await supabase
+      .from('coach_messages')
+      .insert({
+        runner_id: userSettings.runner_id,
+        content: coachResponse,
+        role: 'assistant',
+        source: 'sms',
+      });
 
-    // Send SMS response via Twilio
-    const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
+    // Send SMS response
+    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`;
-    
+    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
+    const responseBody = new URLSearchParams({
+      To: from,
+      From: twilioPhoneNumber!,
+      Body: coachResponse,
+    });
+
     const twilioResponse = await fetch(twilioUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
       },
-      body: new URLSearchParams({
-        To: from,
-        From: TWILIO_PHONE_NUMBER!,
-        Body: aiMessage,
-      }),
+      body: responseBody.toString(),
     });
 
     if (!twilioResponse.ok) {
-      const errorText = await twilioResponse.text();
-      console.error('Twilio error:', errorText);
-      throw new Error('Failed to send SMS');
+      console.error('SMS send error');
+    } else {
+      console.log('SMS response sent successfully');
     }
-
-    console.log('AI response sent successfully');
 
     return new Response('OK', { status: 200 });
   } catch (error) {
-    console.error('Error in sms-webhook:', error);
-    return new Response('Internal Server Error', { status: 500 });
+    console.error('Error in sms-webhook:', error instanceof Error ? error.message : 'Unknown error');
+    return new Response('OK', { status: 200 }); // Always return 200 to Twilio
   }
 });

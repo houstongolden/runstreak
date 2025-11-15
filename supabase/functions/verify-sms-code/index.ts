@@ -11,6 +11,15 @@ interface VerifyCodeRequest {
   code: string;
 }
 
+// Hash function for verification codes
+async function hashCode(code: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(code);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,19 +35,28 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Verifying code for phone:", phoneNumber);
+    // Validate code format (6 digits)
+    if (!/^\d{6}$/.test(code)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid code format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Hash the input code to compare with stored hash
+    const hashedCode = await hashCode(code);
+
     // Find the most recent non-verified code for this phone number
     const { data: verificationCode, error: fetchError } = await supabase
       .from("phone_verification_codes")
       .select("*")
       .eq("phone_number", phoneNumber)
-      .eq("code", code)
+      .eq("code", hashedCode)
       .eq("verified", false)
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: false })
@@ -46,7 +64,7 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (fetchError || !verificationCode) {
-      console.error("Code not found or expired:", fetchError);
+      console.log("Verification attempt failed");
       return new Response(
         JSON.stringify({ error: "Invalid or expired verification code" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -60,11 +78,11 @@ const handler = async (req: Request): Promise<Response> => {
       .eq("id", verificationCode.id);
 
     if (updateError) {
-      console.error("Error updating verification code:", updateError);
+      console.error("Error updating verification status");
       throw new Error("Failed to verify code");
     }
 
-    console.log("Phone verified successfully:", phoneNumber);
+    console.log("Phone verification successful");
 
     return new Response(
       JSON.stringify({ success: true, message: "Phone number verified successfully" }),
@@ -74,9 +92,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in verify-sms-code:", error);
+    console.error("Error in verify-sms-code:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || "Failed to verify code" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

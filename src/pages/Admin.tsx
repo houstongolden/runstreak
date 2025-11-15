@@ -113,10 +113,16 @@ export default function Admin() {
 
       if (runnerError) throw runnerError;
 
-      // Delete auth user if exists
+      // Delete auth user if exists using admin edge function
       if (userId) {
-        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-        if (authError) console.error('Error deleting auth user:', authError);
+        const { error: authError } = await supabase.functions.invoke('admin-delete-user', {
+          body: { userId }
+        });
+        
+        if (authError) {
+          console.error('Error deleting auth user:', authError);
+          toast.error('Runner deleted but failed to delete auth user');
+        }
       }
 
       toast.success('User deleted successfully');

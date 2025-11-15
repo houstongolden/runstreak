@@ -17,7 +17,6 @@ export default function StravaConnect() {
     
     if (stravaStatus === 'success') {
       if (runnerId) {
-        localStorage.setItem('current_runner_id', runnerId);
         toast.success('Successfully connected to Strava!');
         setTimeout(() => navigate(`/runner/${runnerId}`), 1500);
       }
