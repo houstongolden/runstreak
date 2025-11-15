@@ -1,111 +1,159 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Shield, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AdminSetup() {
-  const [loading, setLoading] = useState(false);
-  const [completed, setCompleted] = useState(false);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [setupKey, setSetupKey] = useState("");
 
-  const setupAdmin = async () => {
-    setLoading(true);
+  const handleSetup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const { data, error } = await supabase.functions.invoke('setup-admin', {
-        body: { email: 'houston@bamf.ai' }
+      const { data, error } = await supabase.functions.invoke('create-admin', {
+        body: { email, password, setupKey }
       });
 
       if (error) throw error;
 
-      setCompleted(true);
-      toast.success('Admin account configured successfully!');
-      
-      setTimeout(() => {
-        navigate('/auth');
-      }, 2000);
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      toast.success("Admin account created successfully!");
+      setTimeout(() => navigate("/admin/login"), 1500);
     } catch (error) {
-      console.error('Setup error:', error);
-      toast.error('Failed to setup admin account');
+      console.error("Setup error:", error);
+      toast.error("Failed to create admin account");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const clearSession = async () => {
-    await supabase.auth.signOut();
-    toast.success('Session cleared');
-    window.location.reload();
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-secondary/20">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Shield className="w-8 h-8 text-primary" />
-            <CardTitle>Admin Setup</CardTitle>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="max-w-md w-full">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Shield className="w-12 h-12 text-primary" />
           </div>
+          <CardTitle className="text-3xl">Admin Setup</CardTitle>
           <CardDescription>
-            Configure your admin account and test authentication
+            Create your first admin account
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {!completed ? (
-            <>
-              <div className="space-y-2">
-                <h3 className="font-semibold">Step 1: Setup Admin Account</h3>
-                <p className="text-sm text-muted-foreground">
-                  This will create/configure the admin user with email: <strong>houston@bamf.ai</strong>
-                </p>
-                <Button
-                  onClick={setupAdmin}
-                  disabled={loading}
-                  className="w-full"
-                >
-                  {loading ? 'Setting up...' : 'Setup Admin Account'}
-                </Button>
-              </div>
+        <CardContent>
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              This page is for creating the first admin account. You'll need the setup key provided during installation.
+            </AlertDescription>
+          </Alert>
 
-              <div className="space-y-2">
-                <h3 className="font-semibold">Step 2: Clear Current Session</h3>
-                <p className="text-sm text-muted-foreground">
-                  Sign out of your current session to test the authentication flow
-                </p>
-                <Button
-                  onClick={clearSession}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Clear Session
-                </Button>
-              </div>
-
-              <div className="space-y-2 pt-4 border-t">
-                <h3 className="font-semibold">Admin Login Credentials</h3>
-                <div className="text-sm space-y-1 bg-secondary/50 p-3 rounded-lg">
-                  <p><strong>Email:</strong> houston@bamf.ai</p>
-                  <p><strong>Password:</strong> bamf4Life!</p>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center space-y-4 py-8">
-              <div className="flex justify-center">
-                <div className="rounded-full bg-green-500/20 p-3">
-                  <Check className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-semibold">Setup Complete!</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Redirecting to login page...
-                </p>
-              </div>
+          <form onSubmit={handleSetup} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="setupKey">Setup Key</Label>
+              <Input
+                id="setupKey"
+                type="password"
+                placeholder="Enter setup key"
+                value={setupKey}
+                onChange={(e) => setSetupKey(e.target.value)}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Default: runstreak-admin-2024
+              </p>
             </div>
-          )}
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Minimum 8 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={8}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Re-enter password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              size="lg"
+              className="w-full"
+            >
+              {isLoading ? 'Creating Admin...' : 'Create Admin Account'}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center space-y-2">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/admin/login')}
+              className="text-sm"
+            >
+              Already have an admin account? Sign in
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="text-sm w-full"
+            >
+              Back to Home
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

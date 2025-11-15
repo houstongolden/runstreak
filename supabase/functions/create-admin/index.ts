@@ -15,16 +15,10 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { email, password } = await req.json();
+    const { email, password, setupKey } = await req.json();
 
-    if (!email || !password) {
-      return new Response(
-        JSON.stringify({ error: 'Email and password are required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Security: Only allow if no admins exist yet
+    // Require a setup key for security (only first admin needs this)
+    // Check if any admins exist
     const { data: existingAdmins } = await supabase
       .from('user_roles')
       .select('*')
@@ -33,17 +27,33 @@ Deno.serve(async (req) => {
 
     if (existingAdmins && existingAdmins.length > 0) {
       return new Response(
-        JSON.stringify({ error: 'Admin already exists' }),
+        JSON.stringify({ error: 'Admin already exists. Contact existing admin to create new admins.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Find or create the auth user
+    // Validate setup key for first admin creation
+    const expectedSetupKey = Deno.env.get('ADMIN_SETUP_KEY') || 'runstreak-admin-2024';
+    if (setupKey !== expectedSetupKey) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid setup key' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({ error: 'Email and password are required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user already exists
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
     let userId = existingUsers?.users.find(u => u.email === email)?.id;
 
     if (!userId) {
-      // Create the admin user with provided credentials
+      // Create the admin user
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email,
         password,
@@ -81,12 +91,12 @@ Deno.serve(async (req) => {
       if (roleError) throw roleError;
     }
 
-    console.log('Admin setup complete for:', email);
+    console.log('Admin created successfully');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Admin user configured successfully',
+        message: 'Admin user created successfully',
         userId 
       }),
       { 
@@ -95,7 +105,7 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in setup-admin:', error);
+    console.error('Error in create-admin:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
