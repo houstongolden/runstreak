@@ -24,8 +24,8 @@ verify_jwt = false
 [functions.send-coach-message]
 verify_jwt = true
 
-[functions.setup-admin]
-verify_jwt = false
-
 [functions.create-admin]
 verify_jwt = false
+
+[functions.admin-delete-user]
+verify_jwt = true
