@@ -440,6 +440,7 @@ Deno.serve(async (req) => {
       
       const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
       const runnerId = savedRunner?.id || '';
+      const isNewUser = !existingRunner;
       
       // If phone not verified, redirect to phone verification
       if (!settings?.phone_verified) {
@@ -455,7 +456,7 @@ Deno.serve(async (req) => {
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': `${appUrl}/?strava=success&runnerId=${runnerId}`,
+          'Location': `${appUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`,
         },
       });
     }
@@ -463,10 +464,11 @@ Deno.serve(async (req) => {
     // Redirect to app with runner ID (fallback)
     const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     const runnerId = savedRunner?.id || '';
+    const isNewUser = !existingRunner;
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': `${appUrl}/?strava=success&runnerId=${runnerId}`,
+        'Location': `${appUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`,
       },
     });
   } catch (error) {
