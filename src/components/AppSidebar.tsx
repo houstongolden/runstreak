@@ -93,69 +93,107 @@ export function AppSidebar() {
       className="fixed left-0 top-0 z-50 h-screen"
     >
       <SidebarContent className="pt-14">
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            Navigation
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => {
-                // Set dynamic URL for My Profile and Edit Profile
-                let itemUrl = item.url;
-                if (item.title === "My Profile") {
-                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/auth";
-                } else if (item.title === "Edit Profile") {
-                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}?edit=true` : "/auth";
-                }
+        {!user ? (
+          // Not authenticated - only show Connect with Strava
+          <SidebarGroup>
+            <SidebarGroupLabel>Get Started</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/auth" 
+                      className="hover:bg-muted/50" 
+                      activeClassName="bg-muted text-primary font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Trophy className="mr-2 h-4 w-4" />
+                      <span>Connect with Strava</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/" 
+                      className="hover:bg-muted/50" 
+                      activeClassName="bg-muted text-primary font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Trophy className="mr-2 h-4 w-4" />
+                      <span>View Leaderboard</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : (
+          // Authenticated - show full navigation
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>
+                Navigation
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {menuItems.map((item) => {
+                    // Set dynamic URL for My Profile and Edit Profile
+                    let itemUrl = item.url;
+                    if (item.title === "My Profile") {
+                      itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/auth";
+                    } else if (item.title === "Edit Profile") {
+                      itemUrl = currentRunnerId ? `/runner/${currentRunnerId}?edit=true` : "/auth";
+                    }
 
-                return (
-                  <SidebarMenuItem key={item.title}>
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <NavLink 
+                            to={itemUrl} 
+                            end={item.url === "/"} 
+                            className="hover:bg-muted/50" 
+                            activeClassName="bg-muted text-primary font-medium"
+                            onClick={handleNavClick}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* AI Assistant Section */}
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
+                AI Assistant
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <NavLink 
-                        to={itemUrl} 
-                        end={item.url === "/"} 
+                        to="/coach" 
                         className="hover:bg-muted/50" 
                         activeClassName="bg-muted text-primary font-medium"
                         onClick={handleNavClick}
                       >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
+                        <Sparkles className="h-4 w-4" />
+                        <span>AI Coach</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        {/* AI Assistant Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
-            AI Assistant
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink 
-                    to="/coach" 
-                    className="hover:bg-muted/50" 
-                    activeClassName="bg-muted text-primary font-medium"
-                    onClick={handleNavClick}
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>AI Coach</span>
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Coaching Sessions Section */}
-        {currentRunnerId && (
-          <SidebarGroup>
+            {/* Coaching Sessions Section */}
+            {currentRunnerId && (
+              <SidebarGroup>
             <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
               Coaching Sessions
             </SidebarGroupLabel>
@@ -193,6 +231,8 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+        )}
+          </>
         )}
       </SidebarContent>
       
