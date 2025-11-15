@@ -170,24 +170,16 @@ export default function RunnerProfile() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
-        {/* Header with Logo, Back Button, and Sync */}
+        {/* Header with Back Button and Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
-            <div className="flex items-center gap-2">
-              <Flame className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-              <span className="hidden sm:inline text-2xl font-bold font-instrument-serif bg-gradient-to-r from-[hsl(25_100%_60%)] to-[hsl(15_100%_50%)] bg-clip-text text-transparent">
-                RunStreak
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/")}
-              className="hover:bg-accent"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Leaderboard
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="hover:bg-accent"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Leaderboard
+          </Button>
           <div className="flex items-center gap-2">
             {isOwnProfile && (
               <Button 
@@ -216,23 +208,27 @@ export default function RunnerProfile() {
               <Share2 className="h-4 w-4" />
               <span className="hidden sm:inline">Share</span>
             </Button>
-            <Button 
-              variant="default" 
-              onClick={() => navigate(`/runner/${id}/badge`)}
-              className="gap-2"
-            >
-              <Medal className="h-4 w-4" />
-              <span className="hidden sm:inline">Get Badge</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleSync}
-              disabled={isSyncing}
-              className="gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
-            </Button>
+            {isOwnProfile && (
+              <Button 
+                variant="default" 
+                onClick={() => navigate(`/runner/${id}/badge`)}
+                className="gap-2"
+              >
+                <Medal className="h-4 w-4" />
+                <span className="hidden sm:inline">Get Badge</span>
+              </Button>
+            )}
+            {isOwnProfile && (
+              <Button 
+                variant="outline" 
+                onClick={handleSync}
+                disabled={isSyncing}
+                className="gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
+              </Button>
+            )}
           </div>
         </div>
 
