@@ -24,7 +24,6 @@ import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 import { AppDownloadSection } from "@/components/AppDownloadSection";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 type LeaderboardView = "total" | "percent" | "fiveday";
 
@@ -138,7 +137,6 @@ const Index = () => {
         <header className="md:hidden sticky top-0 z-40 bg-background border-b">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="-ml-2" />
               <Flame 
                 className="h-6 w-6 animate-shiny-text"
                 style={{
