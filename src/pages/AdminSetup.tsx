@@ -73,7 +73,7 @@ export default function AdminSetup() {
           <Alert className="mb-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              This page is for creating the first admin account. You'll need the setup key provided during installation.
+              This page is for creating the first admin account. You'll need a setup key for security.
             </AlertDescription>
           </Alert>
 
@@ -89,7 +89,7 @@ export default function AdminSetup() {
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Default: runstreak-admin-2024
+                Set ADMIN_SETUP_KEY environment variable or use default
               </p>
             </div>
 
