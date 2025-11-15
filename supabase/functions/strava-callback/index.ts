@@ -466,22 +466,44 @@ Deno.serve(async (req) => {
         }
       }
       
-      // Check if phone is verified - for now skip this requirement
-      // Redirect directly to home with welcome flag
-      const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
+      // Generate a magic link for automatic sign-in
+      let redirectUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
       const runnerId = savedRunner?.id || '';
       const isNewUser = !existingRunner;
       
-      // Always redirect to home with success, let onboarding modal handle phone verification
+      if (userId && athleteProfile.email) {
+        try {
+          // Generate a sign-in link for the user
+          const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+            type: 'magiclink',
+            email: athleteProfile.email,
+            options: {
+              redirectTo: `${redirectUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`
+            }
+          });
+          
+          if (linkError) {
+            console.error('Error generating magic link:', linkError);
+          } else if (linkData?.properties?.action_link) {
+            // Redirect to the magic link which will sign them in
+            console.log('Generated magic link for auto sign-in');
+            redirectUrl = linkData.properties.action_link;
+          }
+        } catch (error) {
+          console.error('Failed to generate magic link:', error);
+        }
+      }
+      
+      // Redirect with authentication
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': `${appUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`,
+          'Location': redirectUrl,
         },
       });
     }
-
-    // Redirect to app with runner ID (fallback)
+    
+    // Fallback if no email - redirect without authentication (should rarely happen)
     const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     const runnerId = savedRunner?.id || '';
     const isNewUser = !existingRunner;
@@ -491,6 +513,7 @@ Deno.serve(async (req) => {
         'Location': `${appUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`,
       },
     });
+
   } catch (error) {
     console.error('Error in strava-callback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
