@@ -4,10 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { FollowButton } from "@/components/FollowButton";
+import ActivityKudos from "@/components/ActivityKudos";
 import { formatDistance, formatDuration } from "@/lib/formatters";
-import { Calendar, Flame, MapPin, TrendingUp } from "lucide-react";
+import { Calendar, Flame, MapPin, TrendingUp, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface FeedActivity {
   runner_id: string;
@@ -18,6 +21,7 @@ interface FeedActivity {
   distance: number;
   moving_time: number;
   run_count: number;
+  status_text?: string;
 }
 
 export default function SocialFeed() {
@@ -82,9 +86,25 @@ export default function SocialFeed() {
 
       if (!runners) return;
 
-      // Combine activities with runner info
+      // Get activity statuses
+      const activityKeys = (recentActivities || []).map(a => ({
+        runner_id: a.runner_id,
+        activity_date: a.activity_date
+      }));
+
+      const { data: statuses } = await supabase
+        .from("activity_status")
+        .select("runner_id, activity_date, status_text")
+        .in("runner_id", followingIds)
+        .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0]);
+
+      // Combine activities with runner info and statuses
       const feedItems: FeedActivity[] = (recentActivities || []).map((activity) => {
         const runner = runners.find((r) => r.id === activity.runner_id);
+        const status = statuses?.find(s => 
+          s.runner_id === activity.runner_id && 
+          s.activity_date === activity.activity_date
+        );
         return {
           runner_id: activity.runner_id,
           runner_name: runner?.display_name || "Unknown Runner",
@@ -94,6 +114,7 @@ export default function SocialFeed() {
           distance: activity.distance,
           moving_time: activity.moving_time,
           run_count: activity.run_count,
+          status_text: status?.status_text,
         };
       });
 
@@ -102,6 +123,25 @@ export default function SocialFeed() {
       console.error("Error loading feed:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateStatus = async (runnerId: string, activityDate: string) => {
+    try {
+      toast.info('Generating AI status...');
+      const { data, error } = await supabase.functions.invoke('generate-activity-status', {
+        body: { runnerId, activityDate }
+      });
+
+      if (error) throw error;
+      
+      toast.success('Status generated!');
+      if (currentRunnerId) {
+        loadFeed(currentRunnerId); // Refresh to show new status
+      }
+    } catch (error) {
+      console.error('Error generating status:', error);
+      toast.error('Failed to generate status');
     }
   };
 
@@ -234,6 +274,30 @@ export default function SocialFeed() {
                       <Flame className="h-4 w-4 text-orange-500" />
                       <span className="font-medium">{activity.current_streak} day streak</span>
                     </div>
+                  </div>
+
+                  {activity.status_text && (
+                    <div className="p-3 bg-accent/50 rounded-lg">
+                      <p className="text-sm italic">{activity.status_text}</p>
+                    </div>
+                  )}
+
+                  {!activity.status_text && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateStatus(activity.runner_id, activity.activity_date)}
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      Generate AI Status
+                    </Button>
+                  )}
+
+                  <div className="flex items-center pt-3 border-t">
+                    <ActivityKudos 
+                      runnerId={activity.runner_id}
+                      activityDate={activity.activity_date}
+                    />
                   </div>
                 </div>
               </div>
