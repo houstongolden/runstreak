@@ -60,8 +60,31 @@ export default function Settings() {
 
   const fetchSettings = async () => {
     try {
-      // In a real app, you'd get the runner_id from authenticated user
-      // For now, we'll use a placeholder
+      const currentRunnerId = localStorage.getItem('current_runner_id');
+      if (!currentRunnerId) {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('*')
+        .eq('runner_id', currentRunnerId)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        setSettings({
+          ...data,
+          runner_id: currentRunnerId,
+        });
+      } else {
+        setSettings(prev => ({ ...prev, runner_id: currentRunnerId }));
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error("Error fetching settings:", error);

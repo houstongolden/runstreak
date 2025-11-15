@@ -16,12 +16,11 @@ export default function StravaConnect() {
     const runnerId = searchParams.get('runnerId');
     
     if (stravaStatus === 'success') {
-      // Store runner ID in localStorage for sidebar navigation
       if (runnerId) {
         localStorage.setItem('current_runner_id', runnerId);
+        toast.success('Successfully connected to Strava!');
+        setTimeout(() => navigate(`/runner/${runnerId}`), 1500);
       }
-      toast.success('Successfully connected to Strava!');
-      setTimeout(() => navigate('/'), 2000);
     } else if (stravaStatus === 'error') {
       toast.error(`Failed to connect: ${message || 'Unknown error'}`);
     }
