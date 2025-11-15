@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import AICoach from "./pages/AICoach";
 import Activities from "./pages/Activities";
 import SocialFeed from "./pages/SocialFeed";
+import Discover from "./pages/Discover";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
             <Route path="/activities" element={<AppLayout><Activities /></AppLayout>} />
             <Route path="/feed" element={<AppLayout><SocialFeed /></AppLayout>} />
+            <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
             <Route path="/coach" element={<AppLayout><AICoach /></AppLayout>} />
             <Route path="/coach/:runnerId" element={<AppLayout><AICoach /></AppLayout>} />
             
