@@ -157,49 +157,40 @@ export default function SocialFeed() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-4xl space-y-4">
-      <div className="flex items-center justify-between mb-2">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Flame className="h-6 w-6 text-orange-500" />
-          Streak Updates
-        </h1>
-      </div>
+    <div className="container mx-auto p-4 sm:p-6 max-w-3xl space-y-3">
+      <h1 className="text-xl font-semibold flex items-center gap-2 mb-3">
+        <Flame className="h-5 w-5 text-orange-500" />
+        Streak Updates
+      </h1>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {activities.map((activity, index) => (
-          <Card 
-            key={`${activity.runner_id}-${activity.activity_date}-${index}`} 
-            className="hover:bg-muted/30 transition-colors cursor-pointer"
+          <div
+            key={`${activity.runner_id}-${activity.activity_date}-${index}`}
+            className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
             onClick={() => navigate(`/runner/${activity.runner_id}`)}
           >
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10 shrink-0">
-                  <AvatarImage src={activity.runner_avatar} />
-                  <AvatarFallback>
-                    {activity.runner_name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+            <Avatar className="h-8 w-8 shrink-0">
+              <AvatarImage src={activity.runner_avatar} />
+              <AvatarFallback className="text-xs">
+                {activity.runner_name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
 
-                <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-semibold truncate text-sm sm:text-base">
-                      {activity.runner_name}
-                    </span>
-                    <span className="text-muted-foreground text-xs sm:text-sm whitespace-nowrap">
-                      kept their streak alive
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5 shrink-0 bg-orange-500/10 px-2.5 py-1 rounded-full">
-                    <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-orange-500" />
-                    <span className="font-bold text-sm sm:text-base">{activity.current_streak}</span>
-                    <span className="text-xs text-muted-foreground hidden sm:inline">days</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+              <span className="font-medium truncate text-sm">
+                {activity.runner_name}
+              </span>
+              <span className="text-muted-foreground text-xs whitespace-nowrap">
+                kept streak alive
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 shrink-0 bg-orange-500/10 px-2 py-0.5 rounded-full">
+              <Flame className="h-3.5 w-3.5 text-orange-500" />
+              <span className="font-semibold text-sm">{activity.current_streak}</span>
+            </div>
+          </div>
         ))}
       </div>
     </div>
