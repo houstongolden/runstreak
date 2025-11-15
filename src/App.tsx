@@ -36,8 +36,8 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<AppLayout><Index /></AppLayout>} />
+              {/* Public routes - no sidebar */}
+              <Route path="/" element={<Index />} />
               <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
               <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
               
