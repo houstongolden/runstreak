@@ -22,17 +22,22 @@ import ShinyText from "@/components/ui/shiny-text";
 import { RunStreakPhilosophy } from "@/components/RunStreakPhilosophy";
 import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 import { AppDownloadSection } from "@/components/AppDownloadSection";
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 type LeaderboardView = "total" | "percent" | "fiveday";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, runnerId } = useAuth();
   const [runners, setRunners] = useState<Runner[]>([]);
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<LeaderboardView>("total");
   const [displayCount, setDisplayCount] = useState(10);
-  const [isConnected, setIsConnected] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingRunner, setOnboardingRunner] = useState<Runner | null>(null);
+  const [leaderboardRank, setLeaderboardRank] = useState(0);
 
   const fetchRunners = async () => {
     try {
@@ -56,29 +61,60 @@ const Index = () => {
   };
 
   useEffect(() => {
-    fetchRunners();
+    const loadData = async () => {
+      await fetchRunners();
+      
+      // Check if user is already connected to Strava and handle success callback
+      const searchParams = new URLSearchParams(window.location.search);
+      const stravaStatus = searchParams.get('strava');
+      const urlRunnerId = searchParams.get('runnerId');
+      const showWelcome = searchParams.get('welcome');
+      
+      if (stravaStatus === 'success' && urlRunnerId && showWelcome === 'true') {
+        // Fetch the runner data for onboarding
+        try {
+          const { data, error } = await supabase
+            .from("runners")
+            .select("*")
+            .eq("id", urlRunnerId)
+            .maybeSingle();
+          
+          if (!error && data) {
+            setOnboardingRunner(data as Runner);
+            // Calculate rank
+            const { data: allRunners } = await supabase
+              .from("runners")
+              .select("id, current_streak_days")
+              .order("current_streak_days", { ascending: false });
+            
+            const rank = (allRunners || []).findIndex(r => r.id === urlRunnerId) + 1;
+            setLeaderboardRank(rank);
+            setShowOnboarding(true);
+          }
+        } catch (error) {
+          console.error("Error fetching runner for onboarding:", error);
+        }
+        
+        // Clean up URL
+        window.history.replaceState({}, '', '/');
+      } else if (stravaStatus === 'success' && urlRunnerId) {
+        toast({
+          title: "Connected!",
+          description: "Successfully connected to Strava.",
+        });
+        window.history.replaceState({}, '', '/');
+      } else if (stravaStatus === 'error') {
+        const message = searchParams.get('message');
+        toast({
+          title: "Connection Failed",
+          description: message || "Failed to connect to Strava.",
+          variant: "destructive",
+        });
+        window.history.replaceState({}, '', '/');
+      }
+    };
     
-    // Check if user is already connected to Strava and handle success callback
-    const searchParams = new URLSearchParams(window.location.search);
-    const stravaStatus = searchParams.get('strava');
-    const runnerId = searchParams.get('runnerId');
-    
-    if (stravaStatus === 'success' && runnerId) {
-      toast({
-        title: "Connected!",
-        description: "Successfully connected to Strava.",
-      });
-      // Clean up URL
-      window.history.replaceState({}, '', '/');
-    } else if (stravaStatus === 'error') {
-      const message = searchParams.get('message');
-      toast({
-        title: "Connection Failed",
-        description: message || "Failed to connect to Strava.",
-        variant: "destructive",
-      });
-      window.history.replaceState({}, '', '/');
-    }
+    loadData();
   }, [navigate, toast]);
 
   const displayedRunners = runners.slice(0, displayCount);
@@ -126,11 +162,11 @@ const Index = () => {
         </header>
 
         {/* Actions */}
-        {!isConnected ? (
+        {!user && (
           <div className="mb-10 sm:mb-12">
             <div className="flex justify-center">
               <Button
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
                 size="lg"
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >
@@ -139,16 +175,12 @@ const Index = () => {
               </Button>
             </div>
           </div>
-        ) : (
+        )}
+        {user && runnerId && (
           <div className="mb-10 sm:mb-12">
             <div className="flex justify-center gap-3">
               <Button
-                onClick={() => {
-                  const runnerId = localStorage.getItem('runnerId');
-                  if (runnerId) {
-                    window.location.href = `/runner/${runnerId}`;
-                  }
-                }}
+                onClick={() => navigate(`/runner/${runnerId}`)}
                 size="lg"
                 variant="default"
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
@@ -466,6 +498,20 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Modals */}
+      <AdvertiseModal 
+        open={isAdvertiseModalOpen} 
+        onOpenChange={setIsAdvertiseModalOpen}
+      />
+
+      <OnboardingModal
+        open={showOnboarding}
+        onOpenChange={setShowOnboarding}
+        runner={onboardingRunner}
+        leaderboardRank={leaderboardRank}
+        totalRunners={runners.length}
+      />
 
       {/* Theme Toggle - Fixed Bottom Right */}
       <div className="fixed bottom-6 right-6 z-50">
