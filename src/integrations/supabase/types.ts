@@ -651,6 +651,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           accountability_notifications_enabled: boolean | null
@@ -725,11 +746,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_admin_analytics: {
+        Args: never
+        Returns: {
+          active_streaks: number
+          activities_last_30_days: number
+          avg_streak_days: number
+          total_activities: number
+          total_coach_messages: number
+          total_miles: number
+          total_users: number
+          users_last_30_days: number
+          users_last_7_days: number
+          users_today: number
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       accountability_status: "pending" | "accepted" | "declined"
       activity_sharing_mode: "public" | "followers" | "private"
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -859,6 +902,7 @@ export const Constants = {
     Enums: {
       accountability_status: ["pending", "accepted", "declined"],
       activity_sharing_mode: ["public", "followers", "private"],
+      app_role: ["admin", "user"],
     },
   },
 } as const

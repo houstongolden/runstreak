@@ -1,9 +1,10 @@
-import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity, TrendingUp, Users, LogOut } from "lucide-react";
+import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity, TrendingUp, Users, LogOut, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -40,6 +41,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { setOpenMobile } = useSidebar();
   const { runnerId: authRunnerId, signOut, user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
   const [coachingSessions, setCoachingSessions] = useState<CoachingSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
@@ -231,14 +233,31 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+            )}
           </>
         )}
       </SidebarContent>
       
+      {/* Admin Section */}
+      {user && isAdmin && (
+        <SidebarFooter className="p-4 border-t space-y-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setOpenMobile(false);
+              window.location.href = '/admin';
+            }}
+            className="w-full justify-start"
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Admin Dashboard
+          </Button>
+        </SidebarFooter>
+      )}
+      
       {/* Logout Button */}
       {user && (
-        <SidebarFooter className="p-4 border-t">
+        <SidebarFooter className={`p-4 ${!isAdmin ? 'border-t' : ''}`}>
           <Button
             variant="ghost"
             onClick={handleLogout}

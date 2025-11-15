@@ -7,7 +7,9 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AppLayout } from "./components/AppLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { AdminRoute } from "./components/AdminRoute";
 import Index from "./pages/Index";
+import Admin from "./pages/Admin";
 import StravaConnect from "./pages/StravaConnect";
 import RunnerProfile from "./pages/RunnerProfile";
 import BadgeCustomizer from "./pages/BadgeCustomizer";
@@ -18,6 +20,7 @@ import Activities from "./pages/Activities";
 import SocialFeed from "./pages/SocialFeed";
 import Discover from "./pages/Discover";
 import Auth from "./pages/Auth";
+import AdminSetup from "./pages/AdminSetup";
 import VerifyPhone from "./pages/VerifyPhone";
 import NotFound from "./pages/NotFound";
 
@@ -44,9 +47,13 @@ const App = () => (
               <Route path="/coach" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               <Route path="/coach/:runnerId" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               
+              {/* Admin routes - require admin role */}
+              <Route path="/admin" element={<AdminRoute><AppLayout><Admin /></AppLayout></AdminRoute>} />
+              
               {/* Routes without sidebar layout */}
               <Route path="/connect" element={<StravaConnect />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin-setup" element={<AdminSetup />} />
               <Route path="/verify-phone" element={<VerifyPhone />} />
               <Route path="/runner/:id/badge" element={<BadgeCustomizer />} />
               <Route path="/badge-docs" element={<BadgeDocs />} />
