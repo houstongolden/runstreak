@@ -1,8 +1,11 @@
-import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity, TrendingUp, Users } from "lucide-react";
+import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, Activity, TrendingUp, Users, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 import {
   Sidebar,
@@ -14,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -35,19 +39,19 @@ interface CoachingSession {
 export function AppSidebar() {
   const location = useLocation();
   const { setOpenMobile } = useSidebar();
+  const { runnerId: authRunnerId, signOut, user } = useAuth();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
   const [coachingSessions, setCoachingSessions] = useState<CoachingSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
 
   useEffect(() => {
-    // Get current runner from localStorage (set during Strava connection)
-    const runnerId = localStorage.getItem('current_runner_id');
-    setCurrentRunnerId(runnerId);
+    // Use authenticated runner ID
+    setCurrentRunnerId(authRunnerId);
     
-    if (runnerId) {
-      fetchCoachingSessions(runnerId);
+    if (authRunnerId) {
+      fetchCoachingSessions(authRunnerId);
     }
-  }, []);
+  }, [authRunnerId]);
 
   const handleNavClick = () => {
     setOpenMobile(false);
@@ -71,6 +75,16 @@ export function AppSidebar() {
       setLoadingSessions(false);
     }
   };
+  
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success('Logged out successfully');
+      setOpenMobile(false);
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
+  };
 
   return (
     <Sidebar
@@ -89,9 +103,9 @@ export function AppSidebar() {
                 // Set dynamic URL for My Profile and Edit Profile
                 let itemUrl = item.url;
                 if (item.title === "My Profile") {
-                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/connect";
+                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/auth";
                 } else if (item.title === "Edit Profile") {
-                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}?edit=true` : "/connect";
+                  itemUrl = currentRunnerId ? `/runner/${currentRunnerId}?edit=true` : "/auth";
                 }
 
                 return (
@@ -181,6 +195,20 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
       </SidebarContent>
+      
+      {/* Logout Button */}
+      {user && (
+        <SidebarFooter className="p-4 border-t">
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="w-full justify-start"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }

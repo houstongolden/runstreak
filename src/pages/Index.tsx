@@ -64,15 +64,12 @@ const Index = () => {
     const runnerId = searchParams.get('runnerId');
     
     if (stravaStatus === 'success' && runnerId) {
-      // Store runner ID and navigate to profile
-      localStorage.setItem('current_runner_id', runnerId);
       toast({
         title: "Connected!",
         description: "Successfully connected to Strava.",
       });
-      // Clean up URL and redirect to profile
+      // Clean up URL
       window.history.replaceState({}, '', '/');
-      setTimeout(() => navigate(`/runner/${runnerId}`), 1000);
     } else if (stravaStatus === 'error') {
       const message = searchParams.get('message');
       toast({
@@ -81,12 +78,6 @@ const Index = () => {
         variant: "destructive",
       });
       window.history.replaceState({}, '', '/');
-    }
-    
-    // Check if user is already connected
-    const currentRunnerId = localStorage.getItem('current_runner_id');
-    if (currentRunnerId) {
-      setIsConnected(true);
     }
   }, [navigate, toast]);
 
@@ -139,7 +130,7 @@ const Index = () => {
           <div className="mb-10 sm:mb-12">
             <div className="flex justify-center">
               <Button
-                onClick={() => window.location.href = '/connect'}
+                onClick={() => window.location.href = '/auth'}
                 size="lg"
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >
