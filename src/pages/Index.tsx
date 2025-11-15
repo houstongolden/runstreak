@@ -146,7 +146,7 @@ const Index = () => {
                   filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.5))'
                 }}
               />
-              <span className="text-xl font-instrument-serif font-normal">
+              <span className="text-xl font-instrument-serif font-normal -ml-5">
                 <ShinyText text="RunStreak" speed={5} />
               </span>
               <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -180,7 +180,9 @@ const Index = () => {
                   filter: 'drop-shadow(0 0 12px hsl(22 93% 55% / 0.6)) drop-shadow(0 0 20px hsl(22 93% 55% / 0.3))'
                 }}
               />
-              <ShinyText text="RunStreak" speed={5} />
+              <span className="-ml-5">
+                <ShinyText text="RunStreak" speed={5} />
+              </span>
               <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
                   <linearGradient id="gradient-logo" x1="0%" y1="0%" x2="100%" y2="100%">
