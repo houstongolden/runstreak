@@ -56,6 +56,80 @@ export type Database = {
           },
         ]
       }
+      activity_kudos: {
+        Row: {
+          activity_date: string
+          created_at: string
+          given_by_runner_id: string
+          id: string
+          runner_id: string
+        }
+        Insert: {
+          activity_date: string
+          created_at?: string
+          given_by_runner_id: string
+          id?: string
+          runner_id: string
+        }
+        Update: {
+          activity_date?: string
+          created_at?: string
+          given_by_runner_id?: string
+          id?: string
+          runner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_kudos_given_by_runner_id_fkey"
+            columns: ["given_by_runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_kudos_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_status: {
+        Row: {
+          activity_date: string
+          created_at: string
+          id: string
+          runner_id: string
+          status_text: string
+          updated_at: string
+        }
+        Insert: {
+          activity_date: string
+          created_at?: string
+          id?: string
+          runner_id: string
+          status_text: string
+          updated_at?: string
+        }
+        Update: {
+          activity_date?: string
+          created_at?: string
+          id?: string
+          runner_id?: string
+          status_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_status_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aggregate_stats: {
         Row: {
           active_streaks_count: number
