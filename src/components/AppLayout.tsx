@@ -21,7 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="flex h-14 items-center px-4 gap-4">
               <SidebarTrigger />
               
-              <Link to="/" className="flex items-center gap-2 group">
+              <Link to="/" className="flex items-center gap-1 group">
                 <Flame 
                   className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
                   style={{
