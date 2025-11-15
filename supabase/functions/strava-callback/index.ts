@@ -390,127 +390,121 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Use email from Strava or generate synthetic one
+    const userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreak.internal`;
+    const hasRealEmail = !!athleteProfile.email;
+    
+    console.log(`User email: ${userEmail} (real: ${hasRealEmail})`);
+    
     // Create or update user_settings with email
-    if (athleteProfile.email) {
-      const { error: settingsError } = await supabase
-        .from('user_settings')
-        .upsert({
-          runner_id: savedRunner.id,
-          email: athleteProfile.email,
-          ai_coach_enabled: true,
-          ai_coach_style: 'motivational',
-          ai_coach_frequency: 'daily',
-          ai_coach_time: '09:00'
-        }, {
-          onConflict: 'runner_id'
-        });
-
-      if (settingsError) {
-        console.error('Error creating user settings:', settingsError);
-      } else {
-        console.log('User settings created with email:', athleteProfile.email);
-      }
-      
-      // Create Supabase Auth user if doesn't exist
-      const tempPassword = crypto.randomUUID() + crypto.randomUUID();
-      const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
-        email: athleteProfile.email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          strava_id: athleteProfile.id,
-          display_name: athleteProfile.firstname + ' ' + athleteProfile.lastname,
-          avatar_url: athleteProfile.profile,
-          runner_id: savedRunner.id,
-        }
+    const { error: settingsError } = await supabase
+      .from('user_settings')
+      .upsert({
+        runner_id: savedRunner.id,
+        email: hasRealEmail ? athleteProfile.email : null,
+        ai_coach_enabled: true,
+        ai_coach_style: 'motivational',
+        ai_coach_frequency: 'daily',
+        ai_coach_time: '09:00'
+      }, {
+        onConflict: 'runner_id'
       });
+
+    if (settingsError) {
+      console.error('Error creating user settings:', settingsError);
+    } else {
+      console.log('User settings created');
+    }
+    
+    // Create Supabase Auth user if doesn't exist
+    const tempPassword = crypto.randomUUID() + crypto.randomUUID();
+    const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
+      email: userEmail,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: {
+        strava_id: athleteProfile.id,
+        display_name: athleteProfile.firstname + ' ' + athleteProfile.lastname,
+        avatar_url: athleteProfile.profile,
+        runner_id: savedRunner.id,
+        has_real_email: hasRealEmail,
+      }
+    });
+    
+    let userId: string | null = null;
+    
+    if (createError && !createError.message.includes('already been registered')) {
+      console.error('Error creating auth user:', createError);
+    } else if (authUser?.user) {
+      console.log('Supabase Auth user created, linking to runner');
+      userId = authUser.user.id;
       
-      let userId: string | null = null;
-      
-      if (createError && !createError.message.includes('already been registered')) {
-        console.error('Error creating auth user:', createError);
-      } else if (authUser?.user) {
-        console.log('Supabase Auth user created, linking to runner');
-        userId = authUser.user.id;
+      // Link the runner to the auth user
+      const { error: linkError } = await supabase
+        .from('runners')
+        .update({ user_id: authUser.user.id })
+        .eq('id', savedRunner.id);
         
-        // Link the runner to the auth user
+      if (linkError) {
+        console.error('Error linking runner to auth user:', linkError);
+      } else {
+        console.log('Runner successfully linked to auth user');
+      }
+    } else {
+      console.log('Supabase Auth user already exists, trying to link');
+      
+      // User already exists, get their ID and link it
+      const { data: existingUser } = await supabase.auth.admin.listUsers();
+      const matchingUser = existingUser?.users.find(u => u.email === userEmail);
+      
+      if (matchingUser) {
+        userId = matchingUser.id;
         const { error: linkError } = await supabase
           .from('runners')
-          .update({ user_id: authUser.user.id })
+          .update({ user_id: matchingUser.id })
           .eq('id', savedRunner.id);
           
         if (linkError) {
-          console.error('Error linking runner to auth user:', linkError);
+          console.error('Error linking existing user to runner:', linkError);
         } else {
-          console.log('Runner successfully linked to auth user');
-        }
-      } else {
-        console.log('Supabase Auth user already exists, trying to link');
-        
-        // User already exists, get their ID and link it
-        const { data: existingUser } = await supabase.auth.admin.listUsers();
-        const matchingUser = existingUser?.users.find(u => u.email === athleteProfile.email);
-        
-        if (matchingUser) {
-          userId = matchingUser.id;
-          const { error: linkError } = await supabase
-            .from('runners')
-            .update({ user_id: matchingUser.id })
-            .eq('id', savedRunner.id);
-            
-          if (linkError) {
-            console.error('Error linking existing user to runner:', linkError);
-          } else {
-            console.log('Existing auth user linked to runner');
-          }
+          console.log('Existing auth user linked to runner');
         }
       }
-      
-      // Generate a magic link for automatic sign-in
-      let redirectUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
-      const runnerId = savedRunner?.id || '';
-      const isNewUser = !existingRunner;
-      
-      if (userId && athleteProfile.email) {
-        try {
-          // Generate a sign-in link for the user
-          const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-            type: 'magiclink',
-            email: athleteProfile.email,
-            options: {
-              redirectTo: `${redirectUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`
-            }
-          });
-          
-          if (linkError) {
-            console.error('Error generating magic link:', linkError);
-          } else if (linkData?.properties?.action_link) {
-            // Redirect to the magic link which will sign them in
-            console.log('Generated magic link for auto sign-in');
-            redirectUrl = linkData.properties.action_link;
-          }
-        } catch (error) {
-          console.error('Failed to generate magic link:', error);
-        }
-      }
-      
-      // Redirect with authentication
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': redirectUrl,
-        },
-      });
     }
     
-    // Fallback if no email - redirect without authentication (should rarely happen)
-    const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
+    // Generate a magic link for automatic sign-in
+    let redirectUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     const runnerId = savedRunner?.id || '';
     const isNewUser = !existingRunner;
+    
+    if (userId) {
+      try {
+        // Generate a sign-in link for the user
+        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+          type: 'magiclink',
+          email: userEmail,
+          options: {
+            redirectTo: `${redirectUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`
+          }
+        });
+        
+        if (linkError) {
+          console.error('Error generating magic link:', linkError);
+        } else if (linkData?.properties?.action_link) {
+          // Redirect to the magic link which will sign them in
+          console.log('Generated magic link for auto sign-in');
+          redirectUrl = linkData.properties.action_link;
+        }
+      } catch (error) {
+        console.error('Failed to generate magic link:', error);
+      }
+    }
+    
+    // Redirect with authentication
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': `${appUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`,
+        'Location': redirectUrl,
       },
     });
 
