@@ -42,12 +42,18 @@ const Index = () => {
 
   const fetchRunners = async () => {
     try {
+      console.log("Fetching runners...");
       const { data, error } = await (supabase as any)
         .from("runners")
         .select("*")
         .order("current_streak_days", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+      
+      console.log(`Fetched ${data?.length || 0} runners:`, data);
       setRunners((data || []) as Runner[]);
     } catch (error) {
       console.error("Error fetching runners:", error);
@@ -138,7 +144,8 @@ const Index = () => {
                 style={{
                   stroke: 'url(#gradient-logo-mobile)',
                   fill: 'none',
-                  strokeWidth: 2
+                  strokeWidth: 2,
+                  filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.5))'
                 }}
               />
               <span className="text-xl font-instrument-serif font-normal">
@@ -171,7 +178,8 @@ const Index = () => {
                 style={{
                   stroke: 'url(#gradient-logo)',
                   fill: 'none',
-                  strokeWidth: 2
+                  strokeWidth: 2,
+                  filter: 'drop-shadow(0 0 12px hsl(22 93% 55% / 0.6)) drop-shadow(0 0 20px hsl(22 93% 55% / 0.3))'
                 }}
               />
               <ShinyText text="RunStreak" speed={5} />
