@@ -32,6 +32,8 @@ import { StreakHistory } from "@/components/StreakHistory";
 import { DaysOnStreakCard } from "@/components/DaysOnStreakCard";
 import { AccountabilityPartnersSection } from "@/components/AccountabilityPartnersSection";
 import { useAuth } from "@/contexts/AuthContext";
+import { RunnerActivities } from "@/components/RunnerActivities";
+import { TabsContent } from "@/components/ui/tabs";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +49,7 @@ export default function RunnerProfile() {
   const { runnerId: currentRunnerId } = useAuth();
   const isOwnProfile = currentRunnerId === id;
   const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   // Check if we should auto-open the profile editor from URL parameter
   useEffect(() => {
@@ -329,273 +332,149 @@ export default function RunnerProfile() {
           </div>
         )}
 
-        {/* Days on Streak - Primary Metric */}
-        <div className="mb-6">
-          <DaysOnStreakCard
-            daysOnStreak30={runner.days_on_streak_last_30 || 0}
-            daysOnStreak60={runner.days_on_streak_last_60 || 0}
-            daysOnStreak90={runner.days_on_streak_last_90 || 0}
-            daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
-            totalDaysSinceJoining={runner.total_days_since_joining || 0}
-            daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
-            totalDaysBeforeJoining={runner.total_days_before_joining || 0}
-            joinedAt={runner.joined_runstreak_at}
-          />
-        </div>
+        {/* Tabs for different sections */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activities">Activities</TabsTrigger>
+          </TabsList>
 
-        {/* Streak History Section */}
-        <div className="mb-6">
-          <StreakHistory runnerId={runner.id} />
-        </div>
-
-        {/* Accountability Partners Section - Only on own profile */}
-        {isOwnProfile && (
-          <div className="mb-6">
-            <AccountabilityPartnersSection runnerId={runner.id} />
-          </div>
-        )}
-
-        {/* AI Analysis Section */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">AI Performance Insights</h2>
-          <AIAnalysisCards runner={runner} />
-        </div>
-
-        {/* Best Efforts Section */}
-        <div className="mb-6">
-          <BestEfforts runnerId={runner.id} />
-        </div>
-
-        {/* Streak Stats with Toggle */}
-        <div className="mb-6">
-          <div className="flex items-center justify-end mb-4">
-            <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest" | "fiveday")}>
-              <TabsList>
-                <TabsTrigger value="current">Current Streak</TabsTrigger>
-                <TabsTrigger value="longest">Longest Streak</TabsTrigger>
-                <TabsTrigger value="fiveday">5-Day Week</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {streakView === "fiveday" ? (
-              <Card className="col-span-full">
-                <CardContent className="pt-6 text-center">
-                  <h3 className="text-lg font-semibold mb-2">5-Day Week Streak</h3>
-                  <p className="text-muted-foreground">
-                    Coming soon: Track your longest streak of running at least 5 days per week (1+ mile per day).
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Streak Days</CardTitle>
-                <Flame className="h-4 w-4 text-[hsl(25_100%_60%)]" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {(streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever) === 1 ? "day" : "days"} {streakView === "current" ? "in a row" : "best"}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {streakView === "current" ? "Streak Miles" : "Total Miles"}
-                </CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {formatNumber(streakView === "current" ? runner.current_streak_miles : runner.all_time_distance)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {streakView === "current" ? "total distance" : "all time"}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {streakView === "current" ? "Status" : "Total Runs"}
-                </CardTitle>
-                <Award className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                {streakView === "current" ? (
-                  <>
-                    <div className="text-3xl font-bold capitalize">{runner.streak_status}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      current state
-                    </p>
-                  </>
+          <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Streak Stats with Toggle */}
+            <div>
+              <div className="flex items-center justify-end mb-4">
+                <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest" | "fiveday")}>
+                  <TabsList>
+                    <TabsTrigger value="current">Current Streak</TabsTrigger>
+                    <TabsTrigger value="longest">Longest Streak</TabsTrigger>
+                    <TabsTrigger value="fiveday">5-Day Week</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {streakView === "fiveday" ? (
+                  <Card className="col-span-full">
+                    <CardContent className="pt-6 text-center">
+                      <h3 className="text-lg font-semibold mb-2">5-Day Week Streak</h3>
+                      <p className="text-muted-foreground">
+                        Coming soon: Track your longest streak of running at least 5 days per week (1+ mile per day).
+                      </p>
+                    </CardContent>
+                  </Card>
                 ) : (
                   <>
-                    <div className="text-3xl font-bold">{runner.all_time_run_count}</div>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Streak Days</CardTitle>
+                    <Flame className="h-4 w-4 text-[hsl(25_100%_60%)]" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">
+                      {streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever}
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      all time runs
+                      {(streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever) === 1 ? "day" : "days"} {streakView === "current" ? "in a row" : "best"}
                     </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {streakView === "current" ? "Streak Miles" : "Total Miles"}
+                    </CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">
+                      {formatNumber(streakView === "current" ? runner.current_streak_miles : runner.all_time_distance)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {streakView === "current" ? "total distance" : "all time"}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {streakView === "current" ? "Status" : "Total Runs"}
+                    </CardTitle>
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    {streakView === "current" ? (
+                      <>
+                        <div className="text-3xl font-bold capitalize">{runner.streak_status}</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          current state
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-3xl font-bold">{runner.all_time_run_count}</div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          all time runs
+                        </p>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg Daily Miles</CardTitle>
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">
+                      {formatNumber(runner.average_miles_per_day)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      per day
+                    </p>
+                  </CardContent>
+                </Card>
                   </>
                 )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Daily Miles</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {formatNumber(runner.average_miles_per_day)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  per day
-                </p>
-              </CardContent>
-            </Card>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Year-to-Date Stats */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Year-to-Date Stats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Runs</CardTitle>
-                <Flame className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{runner.ytd_run_count || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  this year
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {formatNumber(runner.ytd_distance || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  miles
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Time</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {formatTime(runner.ytd_moving_time || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  moving time
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Elevation Gain</CardTitle>
-                <Mountain className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {formatNumber(runner.ytd_elevation_gain || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  feet
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* All-Time Stats */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">All-Time Stats</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Runs</CardTitle>
-                <Flame className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{runner.all_time_run_count || 0}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  all time
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Distance</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {formatNumber(runner.all_time_distance || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  miles all time
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Streak Timeline */}
-        {runner.streak_start_date && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Streak Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Streak Started</span>
-                  <span className="font-medium">
-                    {new Date(runner.streak_start_date).toLocaleDateString()}
-                  </span>
-                </div>
-                {runner.last_activity_date && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Last Activity</span>
-                    <span className="font-medium">
-                      {new Date(runner.last_activity_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center justify-between border-t pt-4">
-                  <span className="text-sm text-muted-foreground">Total Duration</span>
-                  <span className="font-medium">
-                    {runner.current_streak_days} {runner.current_streak_days === 1 ? "day" : "days"}
-                  </span>
-                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+
+            {/* Days on Streak - Primary Metric */}
+            <DaysOnStreakCard
+              daysOnStreak30={runner.days_on_streak_last_30 || 0}
+              daysOnStreak60={runner.days_on_streak_last_60 || 0}
+              daysOnStreak90={runner.days_on_streak_last_90 || 0}
+              daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
+              totalDaysSinceJoining={runner.total_days_since_joining || 0}
+              daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
+              totalDaysBeforeJoining={runner.total_days_before_joining || 0}
+              joinedAt={runner.joined_runstreak_at}
+            />
+
+            {/* Streak History Section */}
+            <StreakHistory runnerId={runner.id} />
+
+            {/* Accountability Partners Section - Only on own profile */}
+            {isOwnProfile && (
+              <AccountabilityPartnersSection runnerId={runner.id} />
+            )}
+
+            {/* AI Analysis Section */}
+            <div>
+              <h2 className="text-xl font-semibold mb-4">AI Performance Insights</h2>
+              <AIAnalysisCards runner={runner} />
+            </div>
+
+            {/* Best Efforts Section */}
+            <BestEfforts runnerId={runner.id} />
+          </TabsContent>
+
+          <TabsContent value="activities" className="mt-6">
+            <RunnerActivities runnerId={id!} />
+          </TabsContent>
+        </Tabs>
+
       </div>
     </div>
   );
