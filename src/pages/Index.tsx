@@ -132,37 +132,6 @@ const Index = () => {
       <DesktopAdSidebar side="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
       <DesktopAdSidebar side="right" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
-      {/* Mobile Header with Logo and Nav (only when logged in) */}
-      {user && (
-        <header className="md:hidden sticky top-0 z-40 bg-background border-b">
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-2">
-              <Flame 
-                className="h-6 w-6 animate-shiny-text"
-                style={{
-                  stroke: 'url(#gradient-logo-mobile)',
-                  fill: 'none',
-                  strokeWidth: 2,
-                  filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.5))'
-                }}
-              />
-              <span className="text-xl font-instrument-serif font-normal" style={{ marginLeft: '-12px' }}>
-                <ShinyText text="RunStreak" speed={8} />
-              </span>
-              <svg width="0" height="0" style={{ position: 'absolute' }}>
-                <defs>
-                  <linearGradient id="gradient-logo-mobile" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="hsl(25 100% 60%)" />
-                    <stop offset="100%" stopColor="hsl(15 100% 50%)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <ThemeToggle />
-          </div>
-        </header>
-      )}
-
       {/* Top Carousel (Mobile only) */}
       <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
