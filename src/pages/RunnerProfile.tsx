@@ -30,6 +30,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
 import { StreakHistory } from "@/components/StreakHistory";
 import { DaysOnStreakCard } from "@/components/DaysOnStreakCard";
+import { CurrentStreakCard } from "@/components/CurrentStreakCard";
 import { AccountabilityPartnersSection } from "@/components/AccountabilityPartnersSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { RunnerActivities } from "@/components/RunnerActivities";
@@ -336,68 +337,13 @@ export default function RunnerProfile() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {/* Current Streak Stats */}
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Streak Days</CardTitle>
-                    <Flame className="h-4 w-4 text-[hsl(25_100%_60%)]" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">
-                      {runner.current_streak_days}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {runner.current_streak_days === 1 ? "day" : "days"} in a row
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Streak Miles</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">
-                      {formatNumber(runner.current_streak_miles)}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      total distance
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Status</CardTitle>
-                    <Award className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold capitalize">{runner.streak_status}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      current state
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Avg Daily Miles</CardTitle>
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">
-                      {formatNumber(runner.average_miles_per_day)}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      per day
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            {/* Current Streak */}
+            <CurrentStreakCard
+              streakDays={runner.current_streak_days || 0}
+              streakMiles={runner.current_streak_miles || 0}
+              streakStatus={runner.streak_status}
+              avgMilesPerDay={runner.average_miles_per_day || 0}
+            />
 
             {/* Days on Streak - Primary Metric */}
             <DaysOnStreakCard
