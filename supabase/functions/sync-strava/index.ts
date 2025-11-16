@@ -238,17 +238,33 @@ Deno.serve(async (req) => {
     const streakStatus = currentStreakDays > 0 ? 'active' : 'broken';
     const lastActivityDate = sortedActivities.length > 0 ? new Date(sortedActivities[0].start_date).toISOString().split('T')[0] : null;
 
-    // Store daily activities
-    const dailyActivitiesMap = new Map<string, { distance: number; movingTime: number; elevationGain: number; runCount: number; averageTemp: number | null; tempCount: number }>();
+    // Store daily activities with comprehensive data
+    const dailyActivitiesMap = new Map<string, any>();
 
     for (const activity of allActivities) {
       const dateStr = new Date(activity.start_date).toISOString().split('T')[0];
-      const existing = dailyActivitiesMap.get(dateStr) || { distance: 0, movingTime: 0, elevationGain: 0, runCount: 0, averageTemp: null, tempCount: 0 };
+      const existing = dailyActivitiesMap.get(dateStr) || { 
+        distance: 0, movingTime: 0, elevationGain: 0, runCount: 0,
+        averageTemp: null, tempCount: 0,
+        heartrates: [], cadences: [], speeds: [],
+        calories: 0, sufferScore: 0, achievements: 0, kudos: 0, comments: 0, photos: 0,
+        trainer: false, commute: false, devices: new Set(), workouts: new Set(), gears: new Set()
+      };
       
-      // Aggregate temperature for the day
+      // Aggregate temperature
       const newAverageTemp = activity.average_temp !== undefined && activity.average_temp !== null 
         ? (((existing.averageTemp || 0) * existing.tempCount) + activity.average_temp) / (existing.tempCount + 1)
         : existing.averageTemp;
+      
+      // Collect heart rate data
+      if (activity.average_heartrate) existing.heartrates.push(activity.average_heartrate);
+      if (activity.average_cadence) existing.cadences.push(activity.average_cadence);
+      if (activity.average_speed) existing.speeds.push(activity.average_speed);
+      
+      // Add device/workout/gear info
+      if (activity.device_name) existing.devices.add(activity.device_name);
+      if (activity.workout_type) existing.workouts.add(activity.workout_type);
+      if (activity.gear_id) existing.gears.add(activity.gear_id);
       
       dailyActivitiesMap.set(dateStr, {
         distance: existing.distance + (activity.distance / 1609.34),
@@ -257,11 +273,31 @@ Deno.serve(async (req) => {
         runCount: existing.runCount + 1,
         averageTemp: newAverageTemp,
         tempCount: activity.average_temp !== undefined && activity.average_temp !== null ? existing.tempCount + 1 : existing.tempCount,
+        heartrates: existing.heartrates,
+        cadences: existing.cadences,
+        speeds: existing.speeds,
+        calories: existing.calories + (activity.calories || 0),
+        sufferScore: Math.max(existing.sufferScore, activity.suffer_score || 0),
+        achievements: existing.achievements + (activity.achievement_count || 0),
+        kudos: existing.kudos + (activity.kudos_count || 0),
+        comments: existing.comments + (activity.comment_count || 0),
+        photos: existing.photos + (activity.photo_count || 0),
+        trainer: existing.trainer || (activity.trainer === true),
+        commute: existing.commute || (activity.commute === true),
+        devices: existing.devices,
+        workouts: existing.workouts,
+        gears: existing.gears,
+        maxHR: Math.max(existing.maxHR || 0, activity.max_heartrate || 0),
+        maxSpeed: Math.max(existing.maxSpeed || 0, activity.max_speed || 0),
       });
     }
 
-    // Upsert daily activities
+    // Upsert daily activities with all data
     for (const [dateStr, data] of dailyActivitiesMap.entries()) {
+      const avgHR = data.heartrates.length > 0 ? data.heartrates.reduce((a: number, b: number) => a + b, 0) / data.heartrates.length : null;
+      const avgCadence = data.cadences.length > 0 ? data.cadences.reduce((a: number, b: number) => a + b, 0) / data.cadences.length : null;
+      const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a: number, b: number) => a + b, 0) / data.speeds.length : null;
+      
       await supabase
         .from('daily_activities')
         .upsert({
@@ -272,6 +308,22 @@ Deno.serve(async (req) => {
           elevation_gain: data.elevationGain,
           run_count: data.runCount,
           average_temp: data.averageTemp,
+          average_heartrate: avgHR,
+          max_heartrate: data.maxHR,
+          average_cadence: avgCadence,
+          average_speed: avgSpeed,
+          max_speed: data.maxSpeed,
+          calories: data.calories,
+          suffer_score: data.sufferScore,
+          achievement_count: data.achievements,
+          kudos_count: data.kudos,
+          comment_count: data.comments,
+          photo_count: data.photos,
+          trainer: data.trainer,
+          commute: data.commute,
+          device_names: Array.from(data.devices),
+          workout_types: Array.from(data.workouts),
+          gear_ids: Array.from(data.gears),
         }, {
           onConflict: 'runner_id,activity_date'
         });

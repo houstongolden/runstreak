@@ -322,40 +322,88 @@ export type Database = {
       }
       daily_activities: {
         Row: {
+          achievement_count: number | null
           activity_date: string
+          average_cadence: number | null
+          average_heartrate: number | null
+          average_speed: number | null
           average_temp: number | null
+          calories: number | null
+          comment_count: number | null
+          commute: boolean | null
           created_at: string
+          device_names: Json | null
           distance: number
           elevation_gain: number
+          gear_ids: Json | null
           id: string
+          kudos_count: number | null
+          max_heartrate: number | null
+          max_speed: number | null
           moving_time: number
+          photo_count: number | null
           run_count: number
           runner_id: string
+          suffer_score: number | null
+          trainer: boolean | null
           updated_at: string
+          workout_types: Json | null
         }
         Insert: {
+          achievement_count?: number | null
           activity_date: string
+          average_cadence?: number | null
+          average_heartrate?: number | null
+          average_speed?: number | null
           average_temp?: number | null
+          calories?: number | null
+          comment_count?: number | null
+          commute?: boolean | null
           created_at?: string
+          device_names?: Json | null
           distance?: number
           elevation_gain?: number
+          gear_ids?: Json | null
           id?: string
+          kudos_count?: number | null
+          max_heartrate?: number | null
+          max_speed?: number | null
           moving_time?: number
+          photo_count?: number | null
           run_count?: number
           runner_id: string
+          suffer_score?: number | null
+          trainer?: boolean | null
           updated_at?: string
+          workout_types?: Json | null
         }
         Update: {
+          achievement_count?: number | null
           activity_date?: string
+          average_cadence?: number | null
+          average_heartrate?: number | null
+          average_speed?: number | null
           average_temp?: number | null
+          calories?: number | null
+          comment_count?: number | null
+          commute?: boolean | null
           created_at?: string
+          device_names?: Json | null
           distance?: number
           elevation_gain?: number
+          gear_ids?: Json | null
           id?: string
+          kudos_count?: number | null
+          max_heartrate?: number | null
+          max_speed?: number | null
           moving_time?: number
+          photo_count?: number | null
           run_count?: number
           runner_id?: string
+          suffer_score?: number | null
+          trainer?: boolean | null
           updated_at?: string
+          workout_types?: Json | null
         }
         Relationships: [
           {
