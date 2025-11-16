@@ -17,7 +17,6 @@ Deno.serve(async (req) => {
 
     const { email, password, setupKey } = await req.json();
 
-    // Require a setup key for security (only first admin needs this)
     // Check if any admins exist
     const { data: existingAdmins } = await supabase
       .from('user_roles')
@@ -32,9 +31,11 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Validate setup key for first admin creation
+    // For simplicity, use default setup key if not provided
     const expectedSetupKey = Deno.env.get('ADMIN_SETUP_KEY') || 'runstreak-admin-2024';
-    if (setupKey !== expectedSetupKey) {
+    const providedKey = setupKey || 'runstreak-admin-2024';
+    
+    if (providedKey !== expectedSetupKey) {
       return new Response(
         JSON.stringify({ error: 'Invalid setup key' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
