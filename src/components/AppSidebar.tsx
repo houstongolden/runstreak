@@ -1,4 +1,4 @@
-import { Trophy, TrendingUp, Plus, Shield, Gift, Flame } from "lucide-react";
+import { Trophy, TrendingUp, Plus, Shield, Gift, Flame, Zap, Users } from "lucide-react";
 import ShinyText from "@/components/ui/shiny-text";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -112,7 +112,7 @@ export function AppSidebar() {
         </div>
         {!user ? (
           <SidebarGroup>
-            <SidebarGroupLabel>Get Started</SidebarGroupLabel>
+            <SidebarGroupLabel>Start Your Streak</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -123,8 +123,11 @@ export function AppSidebar() {
                       activeClassName="bg-muted text-primary font-medium"
                       onClick={handleNavClick}
                     >
-                      <Trophy className="mr-2 h-4 w-4" />
-                      <span>Connect with Strava</span>
+                      <Zap className="mr-2 h-4 w-4 text-primary" />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium">Join Free - Takes 10s</span>
+                        <span className="text-xs text-muted-foreground">Connect Strava & start your streak</span>
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -136,8 +139,11 @@ export function AppSidebar() {
                       activeClassName="bg-muted text-primary font-medium"
                       onClick={handleNavClick}
                     >
-                      <Trophy className="mr-2 h-4 w-4" />
-                      <span>View Leaderboard</span>
+                      <Users className="mr-2 h-4 w-4" />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium">Browse Top Streakers</span>
+                        <span className="text-xs text-muted-foreground">See who's running daily</span>
+                      </div>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
