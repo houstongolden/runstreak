@@ -25,6 +25,8 @@ import AdminSetup from "./pages/AdminSetup";
 import AdminLogin from "./pages/AdminLogin";
 import VerifyPhone from "./pages/VerifyPhone";
 import Features from "./pages/Features";
+import Story from "./pages/Story";
+import Philosophy from "./pages/Philosophy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const App = () => (
               {/* Public routes - with sidebar for logged-in users */}
               <Route path="/" element={<AppLayout><Index /></AppLayout>} />
               <Route path="/features" element={<AppLayout><Features /></AppLayout>} />
+              <Route path="/story" element={<AppLayout><Story /></AppLayout>} />
+              <Route path="/philosophy" element={<AppLayout><Philosophy /></AppLayout>} />
               <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
               <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
               
