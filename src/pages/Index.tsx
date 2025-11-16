@@ -287,7 +287,7 @@ const Index = () => {
               <div className="text-9xl tracking-[-0.4em] -ml-4">🏃🏾‍♂️🏃🏼‍♀️🏃🏻‍♂️</div>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-instrument font-medium text-center tracking-tight max-w-4xl mb-8">
-              Prove your streak.<br />Compete with runners worldwide.<br /><span className="text-3xl sm:text-4xl lg:text-5xl">100% Free Forever.</span>
+              Prove your streak.<br />Compete with runners worldwide.
             </h2>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-3xl w-full">
