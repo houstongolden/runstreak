@@ -433,7 +433,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:px-[240px]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Navigation */}
             <div>
               <h3 className="font-semibold mb-4 text-foreground">Navigation</h3>
@@ -489,6 +489,21 @@ const Index = () => {
                 </li>
               </ul>
             </div>
+
+            {/* Partnership */}
+            <div>
+              <h3 className="font-semibold mb-4 text-foreground">Partnership</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <button
+                    onClick={() => setIsAdvertiseModalOpen(true)}
+                    className="hover:text-foreground transition-colors text-left"
+                  >
+                    Advertise with us
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div className="pt-8 border-t border-border text-center space-y-3">
@@ -504,12 +519,6 @@ const Index = () => {
               </a>
               .
             </p>
-            <button
-              onClick={() => setIsAdvertiseModalOpen(true)}
-              className="text-sm text-primary hover:underline cursor-pointer"
-            >
-              Advertise with us
-            </button>
           </div>
         </div>
       </footer>
