@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.strava-webhook]
 verify_jwt = false
 
+[functions.strava-subscribe-webhook]
+verify_jwt = true
+
 [functions.badge]
 verify_jwt = false
 

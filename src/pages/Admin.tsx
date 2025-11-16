@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { StravaWebhookManager } from "@/components/StravaWebhookManager";
 
 interface Analytics {
   total_users: number;
@@ -161,6 +162,7 @@ export default function Admin() {
         <TabsList>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
+          <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
 
         <TabsContent value="analytics" className="space-y-6">
@@ -366,6 +368,10 @@ export default function Admin() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="system" className="space-y-6">
+          <StravaWebhookManager />
         </TabsContent>
       </Tabs>
     </div>
