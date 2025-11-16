@@ -43,7 +43,7 @@ export default function RunnerProfile() {
   const [runner, setRunner] = useState<Runner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [streakView, setStreakView] = useState<"current" | "longest" | "fiveday">("current");
+  
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const { runnerId: currentRunnerId } = useAuth();
@@ -336,29 +336,9 @@ export default function RunnerProfile() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {/* Streak Stats with Toggle */}
+            {/* Current Streak Stats */}
             <div>
-              <div className="flex items-center justify-end mb-4">
-                <Tabs value={streakView} onValueChange={(v) => setStreakView(v as "current" | "longest" | "fiveday")}>
-                  <TabsList>
-                    <TabsTrigger value="current">Current Streak</TabsTrigger>
-                    <TabsTrigger value="longest">Longest Streak</TabsTrigger>
-                    <TabsTrigger value="fiveday">5-Day Week</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {streakView === "fiveday" ? (
-                  <Card className="col-span-full">
-                    <CardContent className="pt-6 text-center">
-                      <h3 className="text-lg font-semibold mb-2">5-Day Week Streak</h3>
-                      <p className="text-muted-foreground">
-                        Coming soon: Track your longest streak of running at least 5 days per week (1+ mile per day).
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Streak Days</CardTitle>
@@ -366,54 +346,39 @@ export default function RunnerProfile() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">
-                      {streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever}
+                      {runner.current_streak_days}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {(streakView === "current" ? runner.current_streak_days : runner.longest_streak_ever) === 1 ? "day" : "days"} {streakView === "current" ? "in a row" : "best"}
+                      {runner.current_streak_days === 1 ? "day" : "days"} in a row
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {streakView === "current" ? "Streak Miles" : "Total Miles"}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium">Streak Miles</CardTitle>
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">
-                      {formatNumber(streakView === "current" ? runner.current_streak_miles : runner.all_time_distance)}
+                      {formatNumber(runner.current_streak_miles)}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {streakView === "current" ? "total distance" : "all time"}
+                      total distance
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {streakView === "current" ? "Status" : "Total Runs"}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium">Status</CardTitle>
                     <Award className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    {streakView === "current" ? (
-                      <>
-                        <div className="text-3xl font-bold capitalize">{runner.streak_status}</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          current state
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold">{runner.all_time_run_count}</div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          all time runs
-                        </p>
-                      </>
-                    )}
+                    <div className="text-3xl font-bold capitalize">{runner.streak_status}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      current state
+                    </p>
                   </CardContent>
                 </Card>
 
@@ -431,8 +396,6 @@ export default function RunnerProfile() {
                     </p>
                   </CardContent>
                 </Card>
-                  </>
-                )}
               </div>
             </div>
 
