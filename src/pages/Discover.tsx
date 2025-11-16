@@ -170,8 +170,24 @@ export default function Discover() {
             placeholder="Search by name, username, or location..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-3"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                // Trigger search on Enter
+                fetchRunners();
+              }
+            }}
+            className="pl-10 pr-14 py-3"
           />
+          <button
+            onClick={() => fetchRunners()}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full flex items-center justify-center transition-colors ${
+              searchQuery.trim() 
+                ? 'bg-primary hover:bg-primary/90' 
+                : 'bg-muted/50'
+            }`}
+          >
+            <Search className={`h-4 w-4 ${searchQuery.trim() ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+          </button>
         </div>
       </div>
 
@@ -180,20 +196,20 @@ export default function Discover() {
           {searchQuery && (
             <TabsTrigger value="search" className="gap-2">
               <Search className="h-4 w-4" />
-              Search Results
+              <span className="hidden sm:inline">Search Results</span>
             </TabsTrigger>
           )}
           <TabsTrigger value="nearby" className="gap-2">
             <MapPin className="h-4 w-4" />
-            Nearby
+            <span className="hidden sm:inline">Nearby</span>
           </TabsTrigger>
           <TabsTrigger value="similar" className="gap-2">
             <TrendingUp className="h-4 w-4" />
-            Similar Pace
+            <span className="hidden sm:inline">Similar Pace</span>
           </TabsTrigger>
           <TabsTrigger value="leaders" className="gap-2">
             <Users className="h-4 w-4" />
-            Streak Leaders
+            <span className="hidden sm:inline">Streak Leaders</span>
           </TabsTrigger>
         </TabsList>
 

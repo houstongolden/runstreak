@@ -51,30 +51,42 @@ export const AdvertiseModal = ({ open, onOpenChange }: AdvertiseModalProps) => {
             <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Availability</h3>
             <div className="space-y-2 text-xs sm:text-sm">
               <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">Maximum spots:</span>
+                <span className="text-muted-foreground">Total spots:</span>
                 <span className="font-mono">20</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">Current status:</span>
-                <span className="text-orange-500 font-semibold">All spots filled</span>
+                <span className="text-muted-foreground">Available now:</span>
+                <span className="text-green-500 font-semibold">18 spots remaining</span>
               </div>
               <div className="flex justify-between gap-2">
-                <span className="text-muted-foreground">Next available:</span>
-                <span className="font-mono">1 spot for December</span>
+                <span className="text-muted-foreground">Already sold:</span>
+                <span className="font-mono">2 spots</span>
               </div>
             </div>
           </div>
 
           <div className="bg-muted/50 border border-border rounded-lg p-3 sm:p-4">
-            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Lock in your spot</h3>
+            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Early bird pricing</h3>
             <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-              Pay a <span className="font-bold text-foreground">$999 one-time advance</span> to 
-              lock your spot for December. This advance is applied toward your monthly payment.
+              Get in early and lock the best price! Pricing increases as spots fill up.
             </p>
-            <div className="text-xs sm:text-sm">
-              <span className="font-semibold">Monthly rate:</span>{" "}
-              <span className="font-mono">$1,499/month</span>{" "}
-              <span className="text-muted-foreground block sm:inline mt-1 sm:mt-0">(adjusted based on traffic)</span>
+            <div className="space-y-2 text-xs sm:text-sm">
+              <div className="flex justify-between gap-2">
+                <span className="text-muted-foreground">Spots 1-5:</span>
+                <span className="font-mono line-through opacity-50">$299/month</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-muted-foreground">Spots 6-10:</span>
+                <span className="font-mono text-green-500 font-bold">$399/month ← Current price</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-muted-foreground">Spots 11-15:</span>
+                <span className="font-mono">$599/month</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-muted-foreground">Final 5 spots:</span>
+                <span className="font-mono">$799/month</span>
+              </div>
             </div>
           </div>
 
@@ -83,7 +95,7 @@ export const AdvertiseModal = ({ open, onOpenChange }: AdvertiseModalProps) => {
             size="lg"
             onClick={() => window.open('https://pledge.to/contact', '_blank')}
           >
-            Lock spot for December
+            Lock $399/month spot now
             <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
