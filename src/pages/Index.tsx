@@ -346,11 +346,6 @@ const Index = () => {
                   </a>
                 </li>
                 <li>
-                  <a href="/story" className="hover:text-foreground transition-colors">
-                    Our Story
-                  </a>
-                </li>
-                <li>
                   <a href="/philosophy" className="hover:text-foreground transition-colors">
                     Our Philosophy
                   </a>
@@ -379,6 +374,11 @@ const Index = () => {
             <div>
               <h3 className="font-semibold mb-4 text-foreground">From the maker of RunStreak</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a href="/story" className="hover:text-foreground transition-colors">
+                    Our Story
+                  </a>
+                </li>
                 <li>
                   <a
                     href="https://bamf.com"
