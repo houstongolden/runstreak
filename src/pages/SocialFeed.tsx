@@ -4,8 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind } from "lucide-react";
+import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind, Heart, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { formatDistanceToNow } from "date-fns";
+import ActivityKudos from "@/components/ActivityKudos";
+import ActivityComments from "@/components/ActivityComments";
 
 interface FeedActivity {
   runner_id: string;
@@ -161,51 +164,78 @@ export default function SocialFeed() {
         Streak Updates
       </h1>
 
-      <div className="space-y-1.5">
+      <div className="space-y-3">
         {activities.map((activity, index) => (
-          <div
+          <Card
             key={`${activity.runner_id}-${activity.activity_date}-${index}`}
-            className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-            onClick={() => navigate(`/runner/${activity.runner_id}`)}
+            className="p-4 hover:bg-muted/50 transition-colors"
           >
-            <Avatar className="h-8 w-8 shrink-0">
-              <AvatarImage src={activity.runner_avatar} />
-              <AvatarFallback className="text-xs">
-                {activity.runner_name.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div
+              className="flex items-start gap-3 cursor-pointer mb-3"
+              onClick={() => navigate(`/runner/${activity.runner_id}`)}
+            >
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarImage src={activity.runner_avatar} />
+                <AvatarFallback className="text-xs">
+                  {activity.runner_name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
 
-            <div className="flex-1 min-w-0 flex items-center gap-2">
-              <span className="font-medium truncate text-sm">
-                {activity.runner_name}
-              </span>
-              <span className="text-muted-foreground text-xs whitespace-nowrap">
-                kept streak alive
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              {activity.average_temp !== null && activity.average_temp !== undefined && (
-                <div className="shrink-0" title={`${activity.average_temp.toFixed(0)}°C`}>
-                  {activity.average_temp < 0 ? (
-                    <CloudSnow className="h-3.5 w-3.5 text-blue-400" />
-                  ) : activity.average_temp < 10 ? (
-                    <Wind className="h-3.5 w-3.5 text-blue-300" />
-                  ) : activity.average_temp > 30 ? (
-                    <Sun className="h-3.5 w-3.5 text-orange-500" />
-                  ) : activity.average_temp > 20 ? (
-                    <Sun className="h-3.5 w-3.5 text-yellow-500" />
-                  ) : (
-                    <CloudRain className="h-3.5 w-3.5 text-gray-400" />
-                  )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-sm">
+                    {activity.runner_name}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    kept streak alive
+                  </span>
                 </div>
-              )}
-              <div className="bg-orange-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Flame className="h-3.5 w-3.5 text-orange-500" />
-                <span className="font-semibold text-sm">{activity.current_streak}</span>
+                
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>
+                    {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true })}
+                  </span>
+                  <span>•</span>
+                  <span>Day {activity.current_streak} of streak</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                {activity.average_temp !== null && activity.average_temp !== undefined && (
+                  <div className="shrink-0" title={`${activity.average_temp.toFixed(0)}°C`}>
+                    {activity.average_temp < 0 ? (
+                      <CloudSnow className="h-4 w-4 text-blue-400" />
+                    ) : activity.average_temp < 10 ? (
+                      <Wind className="h-4 w-4 text-blue-300" />
+                    ) : activity.average_temp > 30 ? (
+                      <Sun className="h-4 w-4 text-orange-500" />
+                    ) : activity.average_temp > 20 ? (
+                      <Sun className="h-4 w-4 text-yellow-500" />
+                    ) : (
+                      <CloudRain className="h-4 w-4 text-gray-400" />
+                    )}
+                  </div>
+                )}
+                <div className="bg-orange-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  <span className="font-semibold text-sm">{activity.current_streak}</span>
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Kudos and Comments */}
+            <div className="flex items-center gap-4 pt-2 border-t">
+              <ActivityKudos 
+                runnerId={activity.runner_id} 
+                activityDate={activity.activity_date}
+              />
+              <ActivityComments
+                activityRunnerId={activity.runner_id}
+                activityDate={activity.activity_date}
+                currentRunnerId={currentRunnerId || undefined}
+              />
+            </div>
+          </Card>
         ))}
       </div>
     </div>
