@@ -334,8 +334,8 @@ Deno.serve(async (req) => {
     console.log('Fetching best efforts from activity details...');
     const bestEffortsMap = new Map<number, any>();
     
-    // Limit to recent activities to avoid rate limits (last 100 runs)
-    const activitiesToFetch = sortedActivities.slice(0, 100);
+    // Fetch from all activities to capture true all-time personal bests
+    const activitiesToFetch = sortedActivities;
     
     for (const activity of activitiesToFetch) {
       try {
