@@ -284,7 +284,7 @@ const Index = () => {
         <div className="py-16 px-4">
           <div className="flex flex-col items-center justify-center gap-6">
             <div className="relative">
-              <div className="text-9xl tracking-[-0.4em] -ml-4">🏃🏾‍♂️🏃🏼‍♀️🏃🏻‍♂️</div>
+              <div className="text-6xl sm:text-9xl tracking-[-0.5em] sm:tracking-[-0.4em] -ml-3 sm:-ml-4">🏃🏾‍♂️🏃🏼‍♀️🏃🏻‍♂️</div>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-instrument font-medium text-center tracking-tight max-w-4xl mb-8">
               Prove your streak.<br />Compete with runners worldwide.
