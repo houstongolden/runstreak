@@ -18,7 +18,8 @@ import {
   RefreshCw, 
   Medal, 
   Share2,
-  Pencil
+  Pencil,
+  Zap
 } from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
@@ -268,15 +269,25 @@ export default function RunnerProfile() {
               </Button>
             )}
             {isOwnProfile && (
-              <Button 
-                variant="outline" 
-                onClick={handleSync}
-                disabled={isSyncing}
-                className="gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
-              </Button>
+              <>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSync}
+                  disabled={isSyncing}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowDebugOnboarding(true)}
+                  className="gap-2 border-dashed"
+                >
+                  <Zap className="h-4 w-4" />
+                  <span className="hidden sm:inline">Test Onboarding</span>
+                </Button>
+              </>
             )}
           </div>
         </div>
