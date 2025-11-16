@@ -203,10 +203,6 @@ Deno.serve(async (req) => {
         tempStreak = 1;
         if (!streakStartDate) streakStartDate = date;
         lastDate = date;
-        
-        tempStreak = 1;
-        if (!streakStartDate) streakStartDate = date;
-        lastDate = date;
       } else {
         const prevDate = new Date(sortedDates[i - 1]);
         const daysDiff = Math.floor((prevDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
