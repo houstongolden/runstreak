@@ -186,6 +186,44 @@ serve(async (req) => {
       const runners = await runnerResponse.json();
       const runner = runners[0];
 
+      // Get recent activities (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const activitiesResponse = await fetch(
+        `${supabaseUrl}/rest/v1/daily_activities?runner_id=eq.${runner_id}&activity_date=gte.${thirtyDaysAgo.toISOString().split('T')[0]}&order=activity_date.desc`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      const recentActivities = await activitiesResponse.json();
+
+      // Get best efforts
+      const bestEffortsResponse = await fetch(
+        `${supabaseUrl}/rest/v1/best_efforts?runner_id=eq.${runner_id}&order=distance.asc`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      const bestEfforts = await bestEffortsResponse.json();
+
+      // Get streak history
+      const streakHistoryResponse = await fetch(
+        `${supabaseUrl}/rest/v1/streak_history?runner_id=eq.${runner_id}&order=days_count.desc&limit=5`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      const streakHistory = await streakHistoryResponse.json();
+
       const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
       
       const coachingStylePrompts = {
@@ -198,25 +236,75 @@ serve(async (req) => {
       const timeOfDay = new Date().getHours();
       const greeting = timeOfDay < 12 ? 'morning' : timeOfDay < 18 ? 'afternoon' : 'evening';
 
+      // Calculate statistics from recent activities
+      const recentMiles = recentActivities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const recentRuns = recentActivities.length;
+      const avgRecentMiles = recentRuns > 0 ? recentMiles / recentRuns : 0;
+
       // Calculate average pace from YTD data
       const avgPaceMinutes = runner.ytd_moving_time && runner.ytd_distance 
-        ? Math.floor((runner.ytd_moving_time / 60) / (runner.ytd_distance / 1609.34))
+        ? Math.floor((runner.ytd_moving_time / 60) / runner.ytd_distance)
         : 10;
       const avgPaceSeconds = runner.ytd_moving_time && runner.ytd_distance
-        ? Math.round(((runner.ytd_moving_time / 60) / (runner.ytd_distance / 1609.34) % 1) * 60)
+        ? Math.round(((runner.ytd_moving_time / 60) / runner.ytd_distance % 1) * 60)
         : 0;
+
+      // Format best efforts for context
+      const bestEffortsText = bestEfforts.slice(0, 5).map((be: any) => {
+        const distanceMiles = (be.distance / 1609.34).toFixed(2);
+        const paceMin = Math.floor((be.moving_time / 60) / (be.distance / 1609.34));
+        const paceSec = Math.round(((be.moving_time / 60) / (be.distance / 1609.34) % 1) * 60);
+        return `${distanceMiles}mi in ${Math.floor(be.moving_time / 60)}:${String(be.moving_time % 60).padStart(2, '0')} (${paceMin}'${String(paceSec).padStart(2, '0')}/mi)`;
+      }).join(', ');
+
+      // Format streak history
+      const streakHistoryText = streakHistory.map((sh: any) => 
+        `${sh.days_count} days (${sh.total_miles.toFixed(1)}mi)`
+      ).join(', ');
 
       const systemPrompt = `${coachingStylePrompts[userSettings.ai_coach_style as keyof typeof coachingStylePrompts] || coachingStylePrompts.motivational}
 
-Runner Stats:
+COMPREHENSIVE RUNNER DATA:
+
+CURRENT STATUS:
 - Name: ${runner.display_name}
-- Current streak: ${runner.current_streak_days || 0} days (${((runner.current_streak_miles || 0) / 1609.34).toFixed(1)} miles)
-- Year-to-date: ${runner.ytd_run_count || 0} runs, ${((runner.ytd_distance || 0) / 1609.34).toFixed(1)} miles
-- Average pace: ${avgPaceMinutes}'${avgPaceSeconds}" per mile
+- Current streak: ${runner.current_streak_days || 0} days, ${(runner.current_streak_miles || 0).toFixed(1)} miles
+- Streak status: ${runner.streak_status || 'unknown'}
+- Longest streak ever: ${runner.longest_streak_ever || 0} days
 - Last activity: ${runner.last_activity_date || 'Unknown'}
 
-Generate a personalized coaching message for this ${greeting}. Keep it under 160 characters for SMS. Be specific about their stats and encouraging.
-IMPORTANT: Include an encouraging reminder like "It'll only take you about ${avgPaceMinutes} minutes to keep your streak alive today—you'll never regret it!"`;
+ALL-TIME STATS:
+- Total runs: ${runner.all_time_run_count || 0}
+- Total distance: ${(runner.all_time_distance || 0).toFixed(1)} miles
+- Average miles per day: ${(runner.average_miles_per_day || 0).toFixed(1)}
+
+YEAR-TO-DATE (${new Date().getFullYear()}):
+- Runs: ${runner.ytd_run_count || 0}
+- Distance: ${(runner.ytd_distance || 0).toFixed(1)} miles
+- Moving time: ${Math.floor((runner.ytd_moving_time || 0) / 3600)}h ${Math.floor(((runner.ytd_moving_time || 0) % 3600) / 60)}m
+- Elevation gain: ${(runner.ytd_elevation_gain || 0).toFixed(0)} feet
+- Average pace: ${avgPaceMinutes}'${String(avgPaceSeconds).padStart(2, '0')}" per mile
+
+LAST 30 DAYS:
+- Runs completed: ${recentRuns}
+- Total distance: ${recentMiles.toFixed(1)} miles
+- Average per run: ${avgRecentMiles.toFixed(1)} miles
+- Days with activity: ${runner.days_on_streak_last_30 || 0} of 30
+
+LAST 60/90 DAYS CONSISTENCY:
+- Last 60 days: ${runner.days_on_streak_last_60 || 0} days active
+- Last 90 days: ${runner.days_on_streak_last_90 || 0} days active
+
+BEST EFFORTS:
+${bestEffortsText || 'No best efforts recorded yet'}
+
+STREAK HISTORY (Top 5):
+${streakHistoryText || 'No previous streaks recorded'}
+
+LOCATION:
+- City: ${runner.city || 'Unknown'}, ${runner.state || 'Unknown'}
+
+Generate a personalized coaching message for this ${greeting}. Keep it under 160 characters for SMS. Be specific about their actual stats and trends. ${runner.current_streak_days && runner.current_streak_days > 0 ? `Encourage them to keep their ${runner.current_streak_days}-day streak alive!` : 'Motivate them to start a new streak!'}`;
 
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
@@ -251,6 +339,44 @@ IMPORTANT: Include an encouraging reminder like "It'll only take you about ${avg
       const runners = await runnerResponse.json();
       const runner = runners[0];
 
+      // Get recent activities (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const activitiesResponse = await fetch(
+        `${supabaseUrl}/rest/v1/daily_activities?runner_id=eq.${runner_id}&activity_date=gte.${thirtyDaysAgo.toISOString().split('T')[0]}&order=activity_date.desc`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      const recentActivities = await activitiesResponse.json();
+
+      // Get best efforts
+      const bestEffortsResponse = await fetch(
+        `${supabaseUrl}/rest/v1/best_efforts?runner_id=eq.${runner_id}&order=distance.asc`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      const bestEfforts = await bestEffortsResponse.json();
+
+      // Get streak history
+      const streakHistoryResponse = await fetch(
+        `${supabaseUrl}/rest/v1/streak_history?runner_id=eq.${runner_id}&order=days_count.desc&limit=5`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+        }
+      );
+      const streakHistory = await streakHistoryResponse.json();
+
       const coachingStylePrompts = {
         motivational: "You are an enthusiastic and motivating running coach. Be upbeat and encouraging.",
         analytical: "You are a data-driven running coach. Focus on metrics, trends, and objective analysis.",
@@ -258,14 +384,86 @@ IMPORTANT: Include an encouraging reminder like "It'll only take you about ${avg
         challenging: "You are a challenging running coach who pushes athletes to their limits. Be direct and demanding."
       };
 
+      // Calculate statistics from recent activities
+      const recentMiles = recentActivities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const recentRuns = recentActivities.length;
+      const avgRecentMiles = recentRuns > 0 ? recentMiles / recentRuns : 0;
+
+      // Calculate average pace
+      const avgPaceMinutes = runner.ytd_moving_time && runner.ytd_distance 
+        ? Math.floor((runner.ytd_moving_time / 60) / runner.ytd_distance)
+        : 10;
+      const avgPaceSeconds = runner.ytd_moving_time && runner.ytd_distance
+        ? Math.round(((runner.ytd_moving_time / 60) / runner.ytd_distance % 1) * 60)
+        : 0;
+
+      // Format best efforts
+      const bestEffortsText = bestEfforts.slice(0, 5).map((be: any) => {
+        const distanceMiles = (be.distance / 1609.34).toFixed(2);
+        const paceMin = Math.floor((be.moving_time / 60) / (be.distance / 1609.34));
+        const paceSec = Math.round(((be.moving_time / 60) / (be.distance / 1609.34) % 1) * 60);
+        return `${distanceMiles}mi in ${Math.floor(be.moving_time / 60)}:${String(be.moving_time % 60).padStart(2, '0')} (${paceMin}'${String(paceSec).padStart(2, '0')}/mi)`;
+      }).join(', ');
+
+      // Format streak history
+      const streakHistoryText = streakHistory.map((sh: any) => 
+        `${sh.days_count} days (${sh.total_miles.toFixed(1)}mi)`
+      ).join(', ');
+
+      // Format recent activity details
+      const recentActivityDetails = recentActivities.slice(0, 10).map((a: any) => {
+        const date = new Date(a.activity_date).toLocaleDateString();
+        return `${date}: ${a.distance.toFixed(1)}mi in ${Math.floor(a.moving_time / 60)}min`;
+      }).join('\n');
+
       const systemPrompt = `${coachingStylePrompts[userSettings.ai_coach_style as keyof typeof coachingStylePrompts] || coachingStylePrompts.motivational}
 
-Runner Stats:
-- Name: ${runner.display_name}
-- Current streak: ${runner.current_streak_days || 0} days (${((runner.current_streak_miles || 0) / 1609.34).toFixed(1)} miles)
-- Year-to-date: ${runner.ytd_run_count || 0} runs, ${((runner.ytd_distance || 0) / 1609.34).toFixed(1)} miles
+COMPREHENSIVE RUNNER DATA FOR ${runner.display_name}:
 
-Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 characters for SMS.' : ''}`;
+CURRENT STATUS:
+- Current streak: ${runner.current_streak_days || 0} days, ${(runner.current_streak_miles || 0).toFixed(1)} miles
+- Streak status: ${runner.streak_status || 'unknown'}
+- Longest streak ever: ${runner.longest_streak_ever || 0} days
+- Last activity: ${runner.last_activity_date || 'Unknown'}
+- Streak start date: ${runner.streak_start_date || 'N/A'}
+
+ALL-TIME STATS:
+- Total runs: ${runner.all_time_run_count || 0}
+- Total distance: ${(runner.all_time_distance || 0).toFixed(1)} miles
+- Average miles per day: ${(runner.average_miles_per_day || 0).toFixed(1)}
+
+YEAR-TO-DATE (${new Date().getFullYear()}):
+- Runs: ${runner.ytd_run_count || 0}
+- Distance: ${(runner.ytd_distance || 0).toFixed(1)} miles
+- Moving time: ${Math.floor((runner.ytd_moving_time || 0) / 3600)}h ${Math.floor(((runner.ytd_moving_time || 0) % 3600) / 60)}m
+- Elevation gain: ${(runner.ytd_elevation_gain || 0).toFixed(0)} feet
+- Average pace: ${avgPaceMinutes}'${String(avgPaceSeconds).padStart(2, '0')}" per mile
+
+LAST 30 DAYS:
+- Runs completed: ${recentRuns}
+- Total distance: ${recentMiles.toFixed(1)} miles
+- Average per run: ${avgRecentMiles.toFixed(1)} miles
+- Days with activity: ${runner.days_on_streak_last_30 || 0} of 30
+
+RECENT ACTIVITIES (Last 10):
+${recentActivityDetails || 'No recent activities'}
+
+CONSISTENCY METRICS:
+- Last 30 days: ${runner.days_on_streak_last_30 || 0} days active
+- Last 60 days: ${runner.days_on_streak_last_60 || 0} days active
+- Last 90 days: ${runner.days_on_streak_last_90 || 0} days active
+- Since joining RunStreak: ${runner.days_on_streak_since_joining || 0} days out of ${runner.total_days_since_joining || 0} total days
+
+BEST EFFORTS:
+${bestEffortsText || 'No best efforts recorded yet'}
+
+STREAK HISTORY (Top 5 Previous Streaks):
+${streakHistoryText || 'No previous streaks recorded'}
+
+LOCATION:
+- ${runner.city || 'Unknown'}, ${runner.state || 'Unknown'}
+
+Answer the runner's questions and provide coaching based on this comprehensive data. Be specific and reference actual numbers. ${source === 'sms' ? 'Keep under 160 characters for SMS.' : 'Provide detailed, helpful responses.'}`;
 
       // For app, get full response (no streaming to simplify)
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -281,7 +479,7 @@ Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 
             ...conversationMessages,
             { role: 'user', content: message }
           ],
-          max_tokens: source === 'sms' ? 100 : 500,
+          max_tokens: source === 'sms' ? 100 : 800,
           stream: false,
         }),
       });
