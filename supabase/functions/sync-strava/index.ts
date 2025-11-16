@@ -121,16 +121,22 @@ Deno.serve(async (req) => {
     }
 
     const sortedDates = Array.from(activityDates).sort().reverse();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Get today in UTC
+    const todayUTC = new Date();
+    todayUTC.setHours(0, 0, 0, 0);
 
     for (let i = 0; i < sortedDates.length; i++) {
       const dateStr = sortedDates[i];
       const date = new Date(dateStr);
       
       if (i === 0) {
-        const daysDiff = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-        if (daysDiff > 1) break;
+        // Calculate days difference between today and last run
+        const daysDiff = Math.floor((todayUTC.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Streak is active if you ran today (0) or yesterday (1)
+        // Streak breaks only if 2+ full calendar days have passed
+        // This accounts for timezone differences and gives you until end of current day
+        if (daysDiff >= 2) break;
         
         tempStreak = 1;
         if (!streakStartDate) streakStartDate = date;
@@ -265,11 +271,11 @@ Deno.serve(async (req) => {
     
     // Calculate days on streak for last 30/60/90 days
     const getDaysWithActivity = (daysPast: number) => {
-      const startDate = new Date(today);
+      const startDate = new Date(todayUTC);
       startDate.setDate(startDate.getDate() - daysPast);
       return allActivityDates.filter(dateStr => {
         const date = new Date(dateStr);
-        return date >= startDate && date <= today;
+        return date >= startDate && date <= todayUTC;
       }).length;
     };
     
@@ -286,7 +292,7 @@ Deno.serve(async (req) => {
     
     if (joinedDate) {
       joinedDate.setHours(0, 0, 0, 0);
-      totalDaysSinceJoining = Math.floor((today.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
+      totalDaysSinceJoining = Math.floor((todayUTC.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
       
       // Count days with activity since joining
       daysOnStreakSinceJoining = allActivityDates.filter(dateStr => {
