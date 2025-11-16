@@ -323,13 +323,13 @@ Deno.serve(async (req) => {
       longest_streak_ever: longestStreakEver,
       average_miles_per_day: averageMilesPerDay,
       streak_status: currentStreakDays > 0 ? 'active' : 'broken',
-      // Stats from Strava API
+      // Stats from Strava API (convert meters to miles and meters to feet)
       ytd_run_count: athleteStats?.ytd_run_totals?.count || 0,
-      ytd_distance: athleteStats?.ytd_run_totals?.distance || 0.0,
+      ytd_distance: (athleteStats?.ytd_run_totals?.distance || 0) / 1609.34,
       ytd_moving_time: athleteStats?.ytd_run_totals?.moving_time || 0,
-      ytd_elevation_gain: athleteStats?.ytd_run_totals?.elevation_gain || 0.0,
+      ytd_elevation_gain: (athleteStats?.ytd_run_totals?.elevation_gain || 0) * 3.28084,
       all_time_run_count: athleteStats?.all_run_totals?.count || 0,
-      all_time_distance: athleteStats?.all_run_totals?.distance || 0.0,
+      all_time_distance: (athleteStats?.all_run_totals?.distance || 0) / 1609.34,
       // Days on Streak metrics (new user-friendly approach)
       days_on_streak_last_30: daysOnStreak30,
       days_on_streak_last_60: daysOnStreak60,
