@@ -154,19 +154,10 @@ export default function Story() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 p-6 bg-muted/30 rounded-lg border border-border/50">
-            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-              <img 
-                src={impactMascot} 
-                alt="Impact Theory Mascot"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Built by the team behind <a href="https://bamf.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BAMF.com</a> and <a href="https://bamf.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BAMF.ai</a> — empowering creators and entrepreneurs through technology and community.
-              </p>
-            </div>
+          <div className="p-6 bg-muted/30 rounded-lg border border-border/50">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Built by the team behind <a href="https://bamf.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BAMF.com</a> and <a href="https://bamf.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BAMF.ai</a> — empowering creators and entrepreneurs through technology and community.
+            </p>
           </div>
         </div>
       </div>
