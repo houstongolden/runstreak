@@ -189,11 +189,14 @@ export default function Settings() {
 
     setSendingCode(true);
     try {
-      const { error } = await supabase.functions.invoke("send-verification-sms", {
+      const { data, error } = await supabase.functions.invoke("send-verification-sms", {
         body: { phoneNumber: formattedPhone },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("SMS verification error:", error);
+        throw new Error(error.message || "Failed to send verification code");
+      }
 
       // Update settings with formatted phone
       setSettings({ ...settings, phone_number: formattedPhone });
@@ -205,8 +208,8 @@ export default function Settings() {
     } catch (error: any) {
       console.error("Error sending verification code:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to send verification code. Please try again.",
+        title: "SMS Verification Error",
+        description: error.message || "Failed to send verification code. Please check your phone number and try again.",
         variant: "destructive",
       });
     } finally {

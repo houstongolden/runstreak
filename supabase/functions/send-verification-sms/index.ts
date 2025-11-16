@@ -100,8 +100,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!twilioResponse.ok) {
       const errorText = await twilioResponse.text();
-      console.error("SMS service error");
-      throw new Error("Failed to send SMS");
+      console.error("Twilio error response:", {
+        status: twilioResponse.status,
+        statusText: twilioResponse.statusText,
+        body: errorText
+      });
+      throw new Error(`Twilio error (${twilioResponse.status}): ${errorText}`);
     }
 
     console.log("Verification code sent successfully");
@@ -114,7 +118,11 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error("Error in send-verification-sms:", error.message);
+    console.error("Error in send-verification-sms:", {
+      message: error.message,
+      stack: error.stack,
+      error: error
+    });
     return new Response(
       JSON.stringify({ error: error.message || "Failed to send verification code" }),
       {
