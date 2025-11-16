@@ -72,16 +72,6 @@ export function Footer() {
                     Built by BAMF
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="https://bamf.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    BAMF AI Platform
-                  </a>
-                </li>
               </ul>
             </div>
 
