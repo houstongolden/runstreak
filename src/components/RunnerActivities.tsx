@@ -3,8 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatNumber } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, TrendingUp, Clock, Mountain } from "lucide-react";
 import { format } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface DailyActivity {
   id: string;
@@ -67,51 +74,43 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   }
 
   return (
-    <div className="space-y-3">
-      {activities.map((activity) => (
-        <Card key={activity.id} className="hover-lift">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">
-                      {format(new Date(activity.activity_date), 'MMM d, yyyy')}
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {activity.run_count} {activity.run_count === 1 ? 'run' : 'runs'}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 sm:gap-6">
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">
+    <Card>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Runs</TableHead>
+                <TableHead className="text-right">Distance</TableHead>
+                <TableHead className="text-right">Time</TableHead>
+                <TableHead className="text-right">Elevation</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {activities.map((activity) => (
+                <TableRow key={activity.id}>
+                  <TableCell className="font-medium">
+                    {format(new Date(activity.activity_date), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell>
+                    {activity.run_count}
+                  </TableCell>
+                  <TableCell className="text-right">
                     {formatNumber(activity.distance)} mi
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">
+                  </TableCell>
+                  <TableCell className="text-right">
                     {Math.floor(activity.moving_time / 60)}m
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <Mountain className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">
+                  </TableCell>
+                  <TableCell className="text-right">
                     {Math.round(activity.elevation_gain)}ft
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
