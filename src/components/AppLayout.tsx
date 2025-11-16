@@ -1,6 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
@@ -43,10 +42,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                   </defs>
                 </svg>
               </Link>
-
-              <div className="ml-auto">
-                <ThemeToggle />
-              </div>
             </div>
           </header>
 

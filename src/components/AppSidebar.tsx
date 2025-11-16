@@ -1,4 +1,4 @@
-import { Settings, User, Trophy, Sparkles, TrendingUp, Users, LogOut, Shield } from "lucide-react";
+import { Trophy, TrendingUp, Sparkles, Plus, Info, Shield, Gift } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -6,7 +6,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserProfileDropdown } from "@/components/UserProfileDropdown";
+import { Card } from "@/components/ui/card";
+import { MessageSquare } from "lucide-react";
+import { format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   Sidebar,
@@ -18,48 +29,56 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const mainNavItems = [
-  { title: "Leaderboard", url: "/", icon: Trophy },
-  { title: "My Profile", url: "", icon: User }, // URL will be dynamic
-];
-
-const communityNavItems = [
-  { title: "Social Feed", url: "/feed", icon: TrendingUp },
-  { title: "Discover", url: "/discover", icon: Users },
-];
-
-const toolsNavItems = [
-  { title: "AI Coach", url: "/coach", icon: Sparkles },
-  { title: "Settings", url: "/settings", icon: Settings },
-];
+interface CoachingSession {
+  id: string;
+  title: string;
+  created_at: string;
+  last_message_at: string;
+}
 
 export function AppSidebar() {
   const location = useLocation();
   const { setOpenMobile } = useSidebar();
-  const { runnerId: authRunnerId, signOut, user } = useAuth();
+  const { runnerId: authRunnerId, user } = useAuth();
   const { isAdmin } = useAdmin();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<CoachingSession[]>([]);
 
   useEffect(() => {
-    // Use authenticated runner ID
     setCurrentRunnerId(authRunnerId);
+    if (authRunnerId) {
+      fetchSessions();
+    }
   }, [authRunnerId]);
+
+  const fetchSessions = async () => {
+    if (!authRunnerId) return;
+    
+    const { data } = await supabase
+      .from('coaching_sessions')
+      .select('*')
+      .eq('runner_id', authRunnerId)
+      .order('last_message_at', { ascending: false });
+    
+    if (data) {
+      setSessions(data);
+    }
+  };
 
   const handleNavClick = () => {
     setOpenMobile(false);
   };
-  
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast.success('Logged out successfully');
-      setOpenMobile(false);
-    } catch (error) {
-      toast.error('Failed to logout');
-    }
+
+  const handleNewChat = () => {
+    window.location.href = `/coach/${authRunnerId}`;
+    setOpenMobile(false);
+  };
+
+  const handleSessionSelect = (sessionId: string) => {
+    window.location.href = `/coach/${authRunnerId}?session=${sessionId}`;
+    setOpenMobile(false);
   };
 
   return (
@@ -68,9 +87,8 @@ export function AppSidebar() {
       collapsible="offcanvas"
       className="fixed left-0 top-0 z-50 h-screen"
     >
-      <SidebarContent className="pt-14">
+      <SidebarContent className="pt-14 pb-0">
         {!user ? (
-          // Not authenticated - only show Connect with Strava
           <SidebarGroup>
             <SidebarGroupLabel>Get Started</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -105,121 +123,174 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ) : (
-          // Authenticated - show organized navigation
-          <>
-            {/* Main Navigation */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Main</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {mainNavItems.map((item) => {
-                    let itemUrl = item.url;
-                    if (item.title === "My Profile") {
-                      itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/auth";
-                    }
+          <div className="flex flex-col h-full">
+            <ScrollArea className="flex-1">
+              {/* Main Navigation */}
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to="/" 
+                          className="hover:bg-muted/50" 
+                          activeClassName="bg-muted text-primary font-medium"
+                          onClick={handleNavClick}
+                        >
+                          <Trophy className="mr-2 h-4 w-4" />
+                          <span>Leaderboard</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to={currentRunnerId ? `/runner/${currentRunnerId}` : "#"}
+                          className="hover:bg-muted/50" 
+                          activeClassName="bg-muted text-primary font-medium"
+                          onClick={handleNavClick}
+                        >
+                          <Trophy className="mr-2 h-4 w-4" />
+                          <span>My Profile</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-                    return (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild>
-                          <NavLink 
-                            to={itemUrl} 
-                            end={item.url === "/"} 
-                            className="hover:bg-muted/50" 
-                            activeClassName="bg-muted text-primary font-medium"
-                            onClick={handleNavClick}
+              {/* Social Navigation */}
+              <SidebarGroup>
+                <SidebarGroupLabel>Social</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to="/feed" 
+                          className="hover:bg-muted/50" 
+                          activeClassName="bg-muted text-primary font-medium"
+                          onClick={handleNavClick}
+                        >
+                          <TrendingUp className="mr-2 h-4 w-4" />
+                          <span>Feed</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to="/invite" 
+                          className="hover:bg-muted/50" 
+                          activeClassName="bg-muted text-primary font-medium"
+                          onClick={handleNavClick}
+                        >
+                          <Gift className="mr-2 h-4 w-4" />
+                          <span>Invite Friends</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+
+              <Separator className="my-2" />
+
+              {/* AI Coach Section */}
+              <SidebarGroup>
+                <div className="px-2 mb-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <SidebarGroupLabel className="m-0">AI Coach</SidebarGroupLabel>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            <p>Chat with your Strava and run data with your own personalized AI Coach like never before. Stop sharing screenshots with ChatGPT. We got you.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleNewChat}
+                    size="sm" 
+                    variant="default"
+                    className="w-full justify-start"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Chat
+                  </Button>
+                </div>
+
+                <SidebarGroupLabel className="px-2 mt-3">Chat History</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <ScrollArea className="h-[200px]">
+                    <div className="space-y-1 px-2">
+                      {sessions.length === 0 ? (
+                        <div className="text-center py-4 text-xs text-muted-foreground">
+                          No chats yet
+                        </div>
+                      ) : (
+                        sessions.map((session) => (
+                          <Card
+                            key={session.id}
+                            className="p-2 cursor-pointer hover:bg-accent transition-colors"
+                            onClick={() => handleSessionSelect(session.id)}
                           >
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </NavLink>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+                            <div className="flex items-start gap-2">
+                              <MessageSquare className="h-3 w-3 text-muted-foreground mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium truncate">{session.title}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {format(new Date(session.last_message_at), 'MMM d, yyyy')}
+                                </p>
+                              </div>
+                            </div>
+                          </Card>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </SidebarGroupContent>
+              </SidebarGroup>
 
-            {/* Community Navigation */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Community</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {communityNavItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <NavLink 
-                          to={item.url} 
-                          className="hover:bg-muted/50" 
-                          activeClassName="bg-muted text-primary font-medium"
-                          onClick={handleNavClick}
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+              {/* Admin Dashboard */}
+              {isAdmin && (
+                <>
+                  <Separator className="my-2" />
+                  <SidebarGroup>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild>
+                            <NavLink 
+                              to="/admin" 
+                              className="hover:bg-muted/50 text-orange-500 hover:text-orange-600" 
+                              activeClassName="bg-orange-500/10 text-orange-600 font-medium"
+                              onClick={handleNavClick}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span>Admin Dashboard</span>
+                            </NavLink>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                </>
+              )}
+            </ScrollArea>
 
-            {/* Tools Navigation */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Tools</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {toolsNavItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <NavLink 
-                          to={item.url} 
-                          className="hover:bg-muted/50" 
-                          activeClassName="bg-muted text-primary font-medium"
-                          onClick={handleNavClick}
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
+            {/* Fixed User Profile at Bottom */}
+            <div className="mt-auto border-t border-border p-3">
+              <UserProfileDropdown />
+            </div>
+          </div>
         )}
       </SidebarContent>
-      
-      {/* Admin Section */}
-      {user && isAdmin && (
-        <SidebarFooter className="p-4 border-t space-y-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOpenMobile(false);
-              window.location.href = '/admin';
-            }}
-            className="w-full justify-start"
-          >
-            <Shield className="h-4 w-4 mr-2" />
-            Admin Dashboard
-          </Button>
-        </SidebarFooter>
-      )}
-      
-      {/* Logout Button */}
-      {user && (
-        <SidebarFooter className={`p-4 ${!isAdmin ? 'border-t' : ''}`}>
-          <Button
-            variant="ghost"
-            onClick={handleLogout}
-            className="w-full justify-start"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
-        </SidebarFooter>
-      )}
     </Sidebar>
   );
 }

@@ -19,6 +19,7 @@ import AICoach from "./pages/AICoach";
 import Activities from "./pages/Activities";
 import SocialFeed from "./pages/SocialFeed";
 import Discover from "./pages/Discover";
+import Invite from "./pages/Invite";
 import Auth from "./pages/Auth";
 import AdminSetup from "./pages/AdminSetup";
 import AdminLogin from "./pages/AdminLogin";
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
               <Route path="/activities" element={<ProtectedRoute><AppLayout><Activities /></AppLayout></ProtectedRoute>} />
               <Route path="/feed" element={<ProtectedRoute><AppLayout><SocialFeed /></AppLayout></ProtectedRoute>} />
+              <Route path="/invite" element={<ProtectedRoute><AppLayout><Invite /></AppLayout></ProtectedRoute>} />
               <Route path="/coach" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               <Route path="/coach/:runnerId" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               
