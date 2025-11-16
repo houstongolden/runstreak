@@ -21,7 +21,6 @@ import ShinyText from "@/components/ui/shiny-text";
 import { RunStreakPhilosophy } from "@/components/RunStreakPhilosophy";
 import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 import { AppDownloadSection } from "@/components/AppDownloadSection";
-import FeaturesSection from "@/components/FeaturesSection";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -429,9 +428,6 @@ const Index = () => {
 
       {/* App Download Section */}
       <AppDownloadSection />
-
-      {/* Features Section */}
-      <FeaturesSection />
 
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background">
