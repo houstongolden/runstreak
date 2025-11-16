@@ -11,7 +11,6 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { AdvertiseModal } from "@/components/AdvertiseModal";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { SponsorCarousel } from "@/components/SponsorCarousel";
 import { DesktopAdSidebar } from "@/components/DesktopAdSidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -537,10 +536,6 @@ const Index = () => {
         totalRunners={runners.length}
       />
 
-      {/* Theme Toggle - Fixed Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <ThemeToggle />
-      </div>
     </div>
   );
 };
