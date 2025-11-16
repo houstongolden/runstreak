@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { Smartphone, Apple, Chrome } from "lucide-react";
+import { Smartphone, Apple } from "lucide-react";
 
 export function AppDownloadSection() {
   const [showInstructions, setShowInstructions] = useState(false);
@@ -68,87 +68,39 @@ export function AppDownloadSection() {
 
       {/* Installation Instructions Dialog */}
       <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Add RunStreak to Your Home Screen</DialogTitle>
-            <DialogDescription className="text-base">
-              Follow these simple steps to install the app on your phone
+            <DialogTitle className="text-xl sm:text-2xl">Add RunStreak to Your Home Screen</DialogTitle>
+            <DialogDescription className="text-sm sm:text-base">
+              Quick access to your streak stats anytime
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-8 py-4">
-            {/* iPhone/Safari Instructions */}
+          <div className="space-y-6 py-4">
+            <div className="flex items-center justify-center">
+              <Smartphone className="h-20 w-20 text-primary" />
+            </div>
+            
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Apple className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-semibold">iPhone (Safari)</h3>
-              </div>
-              <ol className="space-y-3 pl-4 list-decimal list-inside">
-                <li className="text-base">
-                  Open RunStreak in <strong>Safari</strong> browser
-                </li>
-                <li className="text-base">
-                  Tap the <strong>Share</strong> button (square with arrow pointing up)
-                </li>
-                <li className="text-base">
-                  Scroll down and tap <strong>"Add to Home Screen"</strong>
-                </li>
-                <li className="text-base">
-                  Tap <strong>"Add"</strong> in the top right corner
-                </li>
-              </ol>
-              <div className="bg-muted p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground italic">
-                  Note: This must be done in Safari. If you're using Chrome or another browser, 
-                  open this page in Safari first.
+              <p className="text-base sm:text-lg text-center font-medium">
+                Save this link as a bookmark on your home screen
+              </p>
+              
+              <div className="bg-muted/50 border border-border rounded-lg p-4">
+                <p className="text-sm sm:text-base text-muted-foreground text-center">
+                  Use your browser's menu to add this page to your home screen. 
+                  The app will open like a native app with quick access to all your running stats.
                 </p>
               </div>
             </div>
 
-            {/* Android/Chrome Instructions */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Chrome className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-semibold">Android (Chrome)</h3>
-              </div>
-              <ol className="space-y-3 pl-4 list-decimal list-inside">
-                <li className="text-base">
-                  Open RunStreak in <strong>Chrome</strong> browser
-                </li>
-                <li className="text-base">
-                  Tap the <strong>three dots menu</strong> (⋮) in the top right
-                </li>
-                <li className="text-base">
-                  Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>
-                </li>
-                <li className="text-base">
-                  Tap <strong>"Add"</strong> or <strong>"Install"</strong> to confirm
-                </li>
-              </ol>
-            </div>
-
-            {/* What You Get */}
-            <div className="bg-primary/5 p-6 rounded-lg space-y-3">
-              <h4 className="font-semibold text-lg">What you'll get:</h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">✓</span>
-                  <span>App icon on your home screen with the RunStreak logo</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">✓</span>
-                  <span>Quick access to your streak stats</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">✓</span>
-                  <span>Works just like a native app</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-primary">✓</span>
-                  <span>No app store download required</span>
-                </li>
-              </ul>
-            </div>
+            <Button 
+              className="w-full" 
+              onClick={() => setShowInstructions(false)}
+              size="lg"
+            >
+              Got it
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
