@@ -90,7 +90,7 @@ export function AppSidebar() {
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-orange-600">
               <Flame className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
+            <span className="font-pixelify text-lg font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
               RunStreak
             </span>
           </div>
@@ -237,7 +237,7 @@ export function AppSidebar() {
                               }`}
                               onClick={() => handleSessionSelect(session.id)}
                             >
-                              <div className="truncate leading-tight">{session.title}</div>
+                              <div className="truncate leading-tight max-w-[140px]">{session.title}</div>
                               <div className="text-[10px] text-muted-foreground mt-0.5">
                                 {format(new Date(session.last_message_at), 'MMM d')}
                               </div>
