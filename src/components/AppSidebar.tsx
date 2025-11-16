@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserProfileDropdown } from "@/components/UserProfileDropdown";
-import { Card } from "@/components/ui/card";
-import { MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import {
   Tooltip,
@@ -136,11 +134,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to="/" 
-                      className="hover:bg-accent/50 transition-colors rounded-md" 
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
                       onClick={handleNavClick}
                     >
-                      <Trophy className="mr-2 h-4 w-4" />
+                      <Trophy className="h-4 w-4" />
                       <span>Leaderboard</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -149,11 +147,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={currentRunnerId ? `/runner/${currentRunnerId}` : "#"}
-                      className="hover:bg-accent/50 transition-colors rounded-md" 
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
                       onClick={handleNavClick}
                     >
-                      <Trophy className="mr-2 h-4 w-4" />
+                      <Trophy className="h-4 w-4" />
                       <span>My Profile</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -171,11 +169,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to="/feed" 
-                      className="hover:bg-accent/50 transition-colors rounded-md" 
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
                       onClick={handleNavClick}
                     >
-                      <TrendingUp className="mr-2 h-4 w-4" />
+                      <TrendingUp className="h-4 w-4" />
                       <span>Feed</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -184,11 +182,11 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to="/invite" 
-                      className="hover:bg-accent/50 transition-colors rounded-md" 
-                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
                       onClick={handleNavClick}
                     >
-                      <Gift className="mr-2 h-4 w-4" />
+                      <Gift className="h-4 w-4" />
                       <span>Invite Friends</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -231,7 +229,7 @@ export function AppSidebar() {
                 <SidebarGroupLabel className="px-2 mt-3">Chat History</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <ScrollArea className="h-[200px]">
-                    <div className="space-y-1 px-2">
+                    <div className="space-y-0.5 px-2">
                       {sessions.length === 0 ? (
                         <div className="text-center py-4 text-xs text-muted-foreground">
                           No chats yet
@@ -240,25 +238,20 @@ export function AppSidebar() {
                         sessions.map((session) => {
                           const isActive = currentSessionId === session.id;
                           return (
-                            <Card
+                            <button
                               key={session.id}
-                              className={`p-2 cursor-pointer transition-colors rounded-md ${
-                                isActive 
-                                  ? 'bg-accent text-accent-foreground border-accent' 
-                                  : 'hover:bg-accent/50'
+                              className={`w-full text-left py-2 px-3 text-sm transition-colors ${
+                                isActive
+                                  ? 'text-foreground font-medium'
+                                  : 'text-muted-foreground hover:text-foreground'
                               }`}
                               onClick={() => handleSessionSelect(session.id)}
                             >
-                              <div className="flex items-start gap-2">
-                                <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-medium truncate">{session.title}</p>
-                                  <p className="text-[10px] opacity-70">
-                                    {format(new Date(session.last_message_at), 'MMM d, yyyy')}
-                                  </p>
-                                </div>
+                              <div className="truncate">{session.title}</div>
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                {format(new Date(session.last_message_at), 'MMM d')}
                               </div>
-                            </Card>
+                            </button>
                           );
                         })
                       )}
@@ -278,11 +271,11 @@ export function AppSidebar() {
                           <SidebarMenuButton asChild>
                             <NavLink 
                               to="/admin" 
-                              className="hover:bg-destructive/10 transition-colors rounded-md text-destructive" 
-                              activeClassName="bg-destructive/20 text-destructive font-medium"
+                              className="flex items-center gap-2 py-2 px-3 text-sm text-destructive hover:text-destructive transition-colors"
+                              activeClassName="text-destructive font-medium"
                               onClick={handleNavClick}
                             >
-                              <Shield className="mr-2 h-4 w-4" />
+                              <Shield className="h-4 w-4" />
                               <span>Admin Dashboard</span>
                             </NavLink>
                           </SidebarMenuButton>
