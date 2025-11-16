@@ -15,7 +15,7 @@ export default function AdminSetup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [setupKey, setSetupKey] = useState("");
+  const [setupKey, setSetupKey] = useState("runstreak-admin-2024");
 
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,17 +79,16 @@ export default function AdminSetup() {
 
           <form onSubmit={handleSetup} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="setupKey">Setup Key</Label>
+              <Label htmlFor="setupKey">Setup Key (Optional)</Label>
               <Input
                 id="setupKey"
                 type="password"
-                placeholder="Enter setup key"
+                placeholder="Using default key"
                 value={setupKey}
                 onChange={(e) => setSetupKey(e.target.value)}
-                required
               />
               <p className="text-xs text-muted-foreground">
-                Set ADMIN_SETUP_KEY environment variable or use default
+                Default key is pre-filled for easier setup
               </p>
             </div>
 
