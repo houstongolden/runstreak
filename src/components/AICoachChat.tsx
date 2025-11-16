@@ -242,6 +242,29 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
       {/* Input Area */}
       <div className="border-t bg-card">
         <div className="max-w-3xl mx-auto p-4">
+          {/* Conversation Starters */}
+          {messages.length === 0 && !sending && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              <button
+                onClick={() => setInput("How's my training going this week?")}
+                className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                How's my training going?
+              </button>
+              <button
+                onClick={() => setInput("What should I focus on to improve my pace?")}
+                className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                How can I improve my pace?
+              </button>
+              <button
+                onClick={() => setInput("Analyze my recent runs")}
+                className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Analyze my recent runs
+              </button>
+            </div>
+          )}
           <form onSubmit={sendMessage} className="relative">
             <Textarea
               ref={textareaRef}
