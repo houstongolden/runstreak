@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { RunStreakPhilosophy } from "@/components/RunStreakPhilosophy";
+import { Footer } from "@/components/Footer";
 
 export default function Philosophy() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export default function Philosophy() {
 
       {/* RunStreak Philosophy Section */}
       <RunStreakPhilosophy />
+
+      <Footer />
     </div>
   );
 }

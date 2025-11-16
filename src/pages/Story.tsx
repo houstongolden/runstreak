@@ -1,8 +1,8 @@
 import { Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import impactMascot from "@/assets/impact-mascot.png";
 import houstonGolden from "@/assets/houston-golden.jpeg";
+import { Footer } from "@/components/Footer";
 
 export default function Story() {
   const navigate = useNavigate();
@@ -161,6 +161,8 @@ export default function Story() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
