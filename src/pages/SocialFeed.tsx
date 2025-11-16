@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, TrendingUp } from "lucide-react";
+import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface FeedActivity {
@@ -13,6 +13,7 @@ interface FeedActivity {
   runner_avatar: string;
   current_streak: number;
   activity_date: string;
+  average_temp?: number | null;
 }
 
 export default function SocialFeed() {
@@ -39,22 +40,18 @@ export default function SocialFeed() {
         .select("following_id")
         .eq("follower_id", runnerId);
 
-      if (!follows || follows.length === 0) {
-        setActivities([]);
-        setLoading(false);
-        return;
-      }
+      // Include the current user's own ID plus any following
+      const followingIds = follows ? follows.map((f) => f.following_id) : [];
+      const allRunnerIds = [runnerId, ...followingIds];
 
-      const followingIds = follows.map((f) => f.following_id);
-
-      // Get recent activities from followed runners (last 7 days)
+      // Get recent activities from followed runners + self (last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       const { data: recentActivities, error } = await supabase
         .from("daily_activities")
-        .select("runner_id, activity_date")
-        .in("runner_id", followingIds)
+        .select("runner_id, activity_date, average_temp")
+        .in("runner_id", allRunnerIds)
         .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0])
         .order("activity_date", { ascending: false });
 
@@ -64,7 +61,7 @@ export default function SocialFeed() {
       const { data: runners } = await supabase
         .from("runners")
         .select("id, display_name, avatar_url, current_streak_days")
-        .in("id", followingIds);
+        .in("id", allRunnerIds);
 
       if (!runners) return;
 
@@ -77,6 +74,7 @@ export default function SocialFeed() {
           runner_avatar: runner?.avatar_url || "",
           current_streak: runner?.current_streak_days || 0,
           activity_date: activity.activity_date,
+          average_temp: activity.average_temp,
         };
       });
 
@@ -186,9 +184,26 @@ export default function SocialFeed() {
               </span>
             </div>
 
-            <div className="flex items-center gap-1 shrink-0 bg-orange-500/10 px-2 py-0.5 rounded-full">
-              <Flame className="h-3.5 w-3.5 text-orange-500" />
-              <span className="font-semibold text-sm">{activity.current_streak}</span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {activity.average_temp !== null && activity.average_temp !== undefined && (
+                <div className="shrink-0" title={`${activity.average_temp.toFixed(0)}°C`}>
+                  {activity.average_temp < 0 ? (
+                    <CloudSnow className="h-3.5 w-3.5 text-blue-400" />
+                  ) : activity.average_temp < 10 ? (
+                    <Wind className="h-3.5 w-3.5 text-blue-300" />
+                  ) : activity.average_temp > 30 ? (
+                    <Sun className="h-3.5 w-3.5 text-orange-500" />
+                  ) : activity.average_temp > 20 ? (
+                    <Sun className="h-3.5 w-3.5 text-yellow-500" />
+                  ) : (
+                    <CloudRain className="h-3.5 w-3.5 text-gray-400" />
+                  )}
+                </div>
+              )}
+              <div className="bg-orange-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Flame className="h-3.5 w-3.5 text-orange-500" />
+                <span className="font-semibold text-sm">{activity.current_streak}</span>
+              </div>
             </div>
           </div>
         ))}

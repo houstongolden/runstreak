@@ -48,7 +48,6 @@ export default function Discover() {
     if (!currentRunner?.city) return [];
     
     return runners.filter(r => 
-      r.id !== currentRunnerId && 
       r.city === currentRunner.city
     );
   };
@@ -60,7 +59,7 @@ export default function Discover() {
     
     const currentPace = currentRunner.average_miles_per_day;
     return runners
-      .filter(r => r.id !== currentRunnerId && r.average_miles_per_day)
+      .filter(r => r.average_miles_per_day)
       .filter(r => {
         const diff = Math.abs((r.average_miles_per_day || 0) - currentPace);
         return diff < 2; // Within 2 miles per day
@@ -74,7 +73,6 @@ export default function Discover() {
 
   const getStreakLeaders = () => {
     return runners
-      .filter(r => r.id !== currentRunnerId)
       .sort((a, b) => (b.current_streak_days || 0) - (a.current_streak_days || 0))
       .slice(0, 20);
   };
