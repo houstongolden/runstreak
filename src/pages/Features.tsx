@@ -1,7 +1,7 @@
 import { Bot, MessageSquare, Users, TrendingUp, Award, Activity } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-const FeaturesSection = () => {
+const Features = () => {
   const features = [
     {
       icon: Bot,
@@ -36,12 +36,12 @@ const FeaturesSection = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:px-[240px]">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
             Everything You Need to Run Every Day
-          </h2>
+          </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Powerful features designed to help you build and maintain your running streak, stay motivated, and become a better runner.
           </p>
@@ -54,7 +54,7 @@ const FeaturesSection = () => {
               <Card key={index} className="hover-lift">
                 <CardHeader>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary-glow/20">
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <CardTitle className="text-xl">{feature.title}</CardTitle>
@@ -70,8 +70,8 @@ const FeaturesSection = () => {
           })}
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
-export default FeaturesSection;
+export default Features;

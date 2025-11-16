@@ -24,6 +24,7 @@ import Auth from "./pages/Auth";
 import AdminSetup from "./pages/AdminSetup";
 import AdminLogin from "./pages/AdminLogin";
 import VerifyPhone from "./pages/VerifyPhone";
+import Features from "./pages/Features";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Routes>
               {/* Public routes - with sidebar for logged-in users */}
               <Route path="/" element={<AppLayout><Index /></AppLayout>} />
+              <Route path="/features" element={<AppLayout><Features /></AppLayout>} />
               <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
               <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
               

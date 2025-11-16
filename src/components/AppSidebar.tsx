@@ -141,6 +141,19 @@ export function AppSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/features" 
+                      className="hover:bg-muted/50" 
+                      activeClassName="bg-muted text-primary font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      <span>Features</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -174,6 +187,19 @@ export function AppSidebar() {
                     >
                       <Trophy className="h-4 w-4" />
                       <span>My Profile</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/features"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>Features</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
