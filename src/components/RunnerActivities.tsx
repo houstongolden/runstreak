@@ -80,29 +80,29 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Runs</TableHead>
-                <TableHead className="text-right">Distance</TableHead>
-                <TableHead className="text-right">Time</TableHead>
-                <TableHead className="text-right">Elevation</TableHead>
+                <TableHead className="text-xs py-2">Date</TableHead>
+                <TableHead className="text-xs py-2">Runs</TableHead>
+                <TableHead className="text-xs py-2 text-right">Distance</TableHead>
+                <TableHead className="text-xs py-2 text-right">Time</TableHead>
+                <TableHead className="text-xs py-2 text-right">Elevation</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {activities.map((activity) => (
                 <TableRow key={activity.id}>
-                  <TableCell className="font-medium">
-                    {format(new Date(activity.activity_date), 'MMM d, yyyy')}
+                  <TableCell className="text-sm py-2 font-medium whitespace-nowrap">
+                    {format(new Date(activity.activity_date), 'MMM d')}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-sm py-2">
                     {activity.run_count}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-sm py-2 text-right">
                     {formatNumber(activity.distance)} mi
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-sm py-2 text-right">
                     {Math.floor(activity.moving_time / 60)}m
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-sm py-2 text-right">
                     {Math.round(activity.elevation_gain)}ft
                   </TableCell>
                 </TableRow>
