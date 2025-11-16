@@ -111,45 +111,55 @@ export function AppSidebar() {
           </div>
         </div>
         {!user ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Start Your Streak</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to="/auth" 
-                      className="hover:bg-muted/50" 
-                      activeClassName="bg-muted text-primary font-medium"
-                      onClick={handleNavClick}
-                    >
-                      <Zap className="mr-2 h-4 w-4 text-primary" />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-medium">Join Free - Takes 10s</span>
-                        <span className="text-xs text-muted-foreground">Connect Strava & start your streak</span>
-                      </div>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to="/" 
-                      className="hover:bg-muted/50" 
-                      activeClassName="bg-muted text-primary font-medium"
-                      onClick={handleNavClick}
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-medium">Browse Top Streakers</span>
-                        <span className="text-xs text-muted-foreground">See who's running daily</span>
-                      </div>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <div className="px-2 py-4">
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-sm mb-3">Start Your Streak</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="space-y-3">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to="/auth" 
+                        className="hover:bg-primary/10 transition-all min-h-[72px] py-3 px-3 rounded-lg border border-transparent hover:border-primary/20" 
+                        activeClassName="bg-muted text-primary font-medium"
+                        onClick={handleNavClick}
+                      >
+                        <div className="flex items-start gap-3 w-full">
+                          <div className="p-2 rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+                            <Zap className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex flex-col gap-1 flex-1">
+                            <span className="font-semibold text-sm leading-tight">Join Free - Takes 10s</span>
+                            <span className="text-xs text-muted-foreground leading-tight">Connect Strava & start your streak</span>
+                          </div>
+                        </div>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to="/" 
+                        className="hover:bg-muted/50 transition-all min-h-[72px] py-3 px-3 rounded-lg" 
+                        activeClassName="bg-muted text-primary font-medium"
+                        onClick={handleNavClick}
+                      >
+                        <div className="flex items-start gap-3 w-full">
+                          <div className="p-2 rounded-md bg-muted/80 flex-shrink-0 mt-0.5">
+                            <Users className="h-4 w-4 text-foreground" />
+                          </div>
+                          <div className="flex flex-col gap-1 flex-1">
+                            <span className="font-semibold text-sm leading-tight">Browse Top Streakers</span>
+                            <span className="text-xs text-muted-foreground leading-tight">See who's running daily</span>
+                          </div>
+                        </div>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </div>
         ) : (
           <div className="flex flex-col h-full">
             <ScrollArea className="flex-1">
