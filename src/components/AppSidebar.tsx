@@ -1,4 +1,4 @@
-import { Settings, User, Trophy, Sparkles, Edit, MessageSquare, TrendingUp, Users, LogOut, Shield } from "lucide-react";
+import { Settings, User, Trophy, Sparkles, TrendingUp, Users, LogOut, Shield } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -21,20 +21,20 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-const menuItems = [
+const mainNavItems = [
   { title: "Leaderboard", url: "/", icon: Trophy },
   { title: "My Profile", url: "", icon: User }, // URL will be dynamic
-  { title: "Social Feed", url: "/feed", icon: TrendingUp },
-  { title: "Discover", url: "/discover", icon: Users },
-  { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Edit Profile", url: "", icon: Edit }, // URL will be dynamic
 ];
 
-interface CoachingSession {
-  id: string;
-  title: string;
-  last_message_at: string;
-}
+const communityNavItems = [
+  { title: "Social Feed", url: "/feed", icon: TrendingUp },
+  { title: "Discover", url: "/discover", icon: Users },
+];
+
+const toolsNavItems = [
+  { title: "AI Coach", url: "/coach", icon: Sparkles },
+  { title: "Settings", url: "/settings", icon: Settings },
+];
 
 export function AppSidebar() {
   const location = useLocation();
@@ -42,39 +42,14 @@ export function AppSidebar() {
   const { runnerId: authRunnerId, signOut, user } = useAuth();
   const { isAdmin } = useAdmin();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
-  const [coachingSessions, setCoachingSessions] = useState<CoachingSession[]>([]);
-  const [loadingSessions, setLoadingSessions] = useState(false);
 
   useEffect(() => {
     // Use authenticated runner ID
     setCurrentRunnerId(authRunnerId);
-    
-    if (authRunnerId) {
-      fetchCoachingSessions(authRunnerId);
-    }
   }, [authRunnerId]);
 
   const handleNavClick = () => {
     setOpenMobile(false);
-  };
-
-  const fetchCoachingSessions = async (runnerId: string) => {
-    setLoadingSessions(true);
-    try {
-      const { data, error } = await supabase
-        .from('coaching_sessions')
-        .select('*')
-        .eq('runner_id', runnerId)
-        .order('last_message_at', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      setCoachingSessions(data || []);
-    } catch (error) {
-      console.error('Error fetching coaching sessions:', error);
-    } finally {
-      setLoadingSessions(false);
-    }
   };
   
   const handleLogout = async () => {
@@ -130,21 +105,17 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ) : (
-          // Authenticated - show full navigation
+          // Authenticated - show organized navigation
           <>
+            {/* Main Navigation */}
             <SidebarGroup>
-              <SidebarGroupLabel>
-                Navigation
-              </SidebarGroupLabel>
+              <SidebarGroupLabel>Main</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.map((item) => {
-                    // Set dynamic URL for My Profile and Edit Profile
+                  {mainNavItems.map((item) => {
                     let itemUrl = item.url;
                     if (item.title === "My Profile") {
                       itemUrl = currentRunnerId ? `/runner/${currentRunnerId}` : "/auth";
-                    } else if (item.title === "Edit Profile") {
-                      itemUrl = currentRunnerId ? `/runner/${currentRunnerId}?edit=true` : "/auth";
                     }
 
                     return (
@@ -168,71 +139,53 @@ export function AppSidebar() {
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {/* AI Assistant Section */}
+            {/* Community Navigation */}
             <SidebarGroup>
-              <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
-                AI Assistant
-              </SidebarGroupLabel>
+              <SidebarGroupLabel>Community</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to="/coach" 
-                        className="hover:bg-muted/50" 
-                        activeClassName="bg-muted text-primary font-medium"
-                        onClick={handleNavClick}
-                      >
-                        <Sparkles className="h-4 w-4" />
-                        <span>AI Coach</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            {/* Coaching Sessions Section */}
-            {currentRunnerId && (
-              <SidebarGroup>
-            <SidebarGroupLabel className="text-xs text-muted-foreground uppercase">
-              Coaching Sessions
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {loadingSessions ? (
-                  <SidebarMenuItem>
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      Loading...
-                    </div>
-                  </SidebarMenuItem>
-                ) : coachingSessions.length > 0 ? (
-                  coachingSessions.map((session) => (
-                    <SidebarMenuItem key={session.id}>
+                  {communityNavItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink 
-                          to={`/coach?session=${session.id}`}
+                          to={item.url} 
                           className="hover:bg-muted/50" 
                           activeClassName="bg-muted text-primary font-medium"
                           onClick={handleNavClick}
                         >
-                          <MessageSquare className="h-4 w-4" />
-                          <span className="truncate">{session.title}</span>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  ))
-                ) : (
-                  <SidebarMenuItem>
-                    <div className="px-3 py-2 text-sm text-muted-foreground">
-                      No sessions yet
-                    </div>
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-            )}
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Tools Navigation */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Tools</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {toolsNavItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink 
+                          to={item.url} 
+                          className="hover:bg-muted/50" 
+                          activeClassName="bg-muted text-primary font-medium"
+                          onClick={handleNavClick}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
           </>
         )}
       </SidebarContent>
