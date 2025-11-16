@@ -35,6 +35,7 @@ import { AccountabilityPartnersSection } from "@/components/AccountabilityPartne
 import { useAuth } from "@/contexts/AuthContext";
 import { RunnerActivities } from "@/components/RunnerActivities";
 import { TabsContent } from "@/components/ui/tabs";
+import { OnboardingModal } from "@/components/OnboardingModal";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +52,11 @@ export default function RunnerProfile() {
   const isOwnProfile = currentRunnerId === id;
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
+  
+  // Debug: Onboarding modal state
+  const [showDebugOnboarding, setShowDebugOnboarding] = useState(false);
+  const [leaderboardRank, setLeaderboardRank] = useState(0);
+  const [totalRunners, setTotalRunners] = useState(0);
 
   // Check if we should auto-open the profile editor from URL parameter
   useEffect(() => {
@@ -58,6 +64,23 @@ export default function RunnerProfile() {
       setShowProfileEditor(true);
     }
   }, [searchParams, isOwnProfile]);
+
+  // Debug: Keyboard shortcut to trigger onboarding (Cmd/Ctrl + K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowDebugOnboarding(true);
+        toast({
+          title: "Debug Mode",
+          description: "Onboarding modal triggered for testing",
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toast]);
 
   useEffect(() => {
     const fetchRunner = async () => {
@@ -102,6 +125,31 @@ export default function RunnerProfile() {
 
     fetchRunner();
     fetchFollowCounts();
+
+    // Fetch leaderboard stats for onboarding modal
+    const fetchLeaderboardStats = async () => {
+      if (!id) return;
+      
+      try {
+        const { count } = await supabase
+          .from("runners")
+          .select("*", { count: "exact", head: true });
+        
+        setTotalRunners(count || 0);
+
+        const { data: rankData } = await supabase
+          .from("runners")
+          .select("id")
+          .order("current_streak_days", { ascending: false });
+        
+        const rank = rankData?.findIndex(r => r.id === id) ?? -1;
+        setLeaderboardRank(rank + 1);
+      } catch (error) {
+        console.error("Error fetching leaderboard stats:", error);
+      }
+    };
+
+    fetchLeaderboardStats();
   }, [id]);
 
   const handleSync = async () => {
@@ -328,6 +376,15 @@ export default function RunnerProfile() {
             />
           </div>
         )}
+
+        {/* Debug: Onboarding Modal - Trigger with Cmd/Ctrl + K */}
+        <OnboardingModal
+          open={showDebugOnboarding}
+          onOpenChange={setShowDebugOnboarding}
+          runner={runner}
+          leaderboardRank={leaderboardRank}
+          totalRunners={totalRunners}
+        />
 
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
