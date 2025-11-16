@@ -68,64 +68,63 @@ Deno.serve(async (req) => {
         if (event.aspect_type === 'create' || event.aspect_type === 'update') {
           const previousStreak = runner.current_streak_days || 0;
 
-          // Use background task to sync without blocking response
-          EdgeRuntime.waitUntil(
-            (async () => {
-              try {
-                console.log('Triggering sync-strava for runner:', runner.id);
-                
-                const { data: syncData, error: syncError } = await supabase.functions.invoke(
-                  'sync-strava',
-                  {
-                    body: { runnerId: runner.id },
-                  }
-                );
-
-                if (syncError) {
-                  console.error('Error syncing runner:', syncError);
-                  return;
+          // Fire-and-forget background sync
+          void (async () => {
+            try {
+              console.log('Triggering sync-strava for runner:', runner.id);
+              
+              const { data: syncData, error: syncError } = await supabase.functions.invoke(
+                'sync-strava',
+                {
+                  body: { runnerId: runner.id },
                 }
+              );
 
-                console.log('Sync completed successfully:', syncData);
-
-                // Check if streak milestone reached
-                const { data: updatedRunner } = await supabase
-                  .from('runners')
-                  .select('current_streak_days')
-                  .eq('id', runner.id)
-                  .single();
-
-                const newStreak = updatedRunner?.current_streak_days || 0;
-                const streakMilestones = [7, 30, 50, 100, 365, 500, 1000];
-
-                // Check if we hit a milestone
-                const hitMilestone = streakMilestones.find(
-                  (milestone) => previousStreak < milestone && newStreak >= milestone
-                );
-
-                if (hitMilestone) {
-                  console.log(`Streak milestone reached: ${hitMilestone} days`);
-
-                  // Send congratulations message via AI coach
-                  const { error: coachError } = await supabase.functions.invoke(
-                    'send-coach-message',
-                    {
-                      body: {
-                        runnerId: runner.id,
-                        userMessage: `I just reached a ${hitMilestone}-day streak milestone!`,
-                        source: 'webhook',
-                      },
-                    }
-                  );
-
-                  if (coachError) {
-                    console.error('Error sending coach message:', coachError);
-                  }
-                }
-              } catch (error) {
-                console.error('Background sync error:', error);
+              if (syncError) {
+                console.error('Error syncing runner:', syncError);
+                return;
               }
-            })();
+
+              console.log('Sync completed successfully:', syncData);
+
+              // Check if streak milestone reached
+              const { data: updatedRunner } = await supabase
+                .from('runners')
+                .select('current_streak_days')
+                .eq('id', runner.id)
+                .single();
+
+              const newStreak = updatedRunner?.current_streak_days || 0;
+              const streakMilestones = [7, 30, 50, 100, 365, 500, 1000];
+
+              // Check if we hit a milestone
+              const hitMilestone = streakMilestones.find(
+                (milestone) => previousStreak < milestone && newStreak >= milestone
+              );
+
+              if (hitMilestone) {
+                console.log(`Streak milestone reached: ${hitMilestone} days`);
+
+                // Send congratulations message via AI coach
+                const { error: coachError } = await supabase.functions.invoke(
+                  'send-coach-message',
+                  {
+                    body: {
+                      runnerId: runner.id,
+                      userMessage: `I just reached a ${hitMilestone}-day streak milestone!`,
+                      source: 'webhook',
+                    },
+                  }
+                );
+
+                if (coachError) {
+                  console.error('Error sending coach message:', coachError);
+                }
+              }
+            } catch (error) {
+              console.error('Background sync error:', error);
+            }
+          })();
         }
       }
 
