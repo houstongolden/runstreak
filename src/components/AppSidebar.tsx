@@ -1,4 +1,4 @@
-import { Trophy, TrendingUp, Sparkles, Plus, Shield, Gift, Flame } from "lucide-react";
+import { Trophy, TrendingUp, Sparkles, Plus, Shield, Gift, Flame, BookOpen, Heart } from "lucide-react";
 import ShinyText from "@/components/ui/shiny-text";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -154,6 +154,32 @@ export function AppSidebar() {
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/story" 
+                      className="hover:bg-muted/50" 
+                      activeClassName="bg-muted text-primary font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      <span>Our Story</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/philosophy" 
+                      className="hover:bg-muted/50" 
+                      activeClassName="bg-muted text-primary font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Heart className="mr-2 h-4 w-4" />
+                      <span>Our Philosophy</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -200,6 +226,32 @@ export function AppSidebar() {
                     >
                       <Sparkles className="h-4 w-4" />
                       <span>Features</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/story"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                      <span>Our Story</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/philosophy"
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Heart className="h-4 w-4" />
+                      <span>Our Philosophy</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
