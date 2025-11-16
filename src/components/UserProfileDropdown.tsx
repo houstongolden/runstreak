@@ -86,7 +86,6 @@ export function UserProfileDropdown() {
           </Avatar>
           <div className="flex-1 text-left min-w-0">
             <p className="text-sm font-medium truncate">{runnerData.display_name}</p>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </div>
