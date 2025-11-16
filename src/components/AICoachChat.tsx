@@ -180,24 +180,29 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
             <p className="text-xs text-muted-foreground">Your personal training assistant</p>
           </div>
         </div>
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-80">
-            <SheetHeader>
-              <SheetTitle>Chat History</SheetTitle>
-            </SheetHeader>
-            <CoachSessionHistory
-              runnerId={runnerId}
-              currentSessionId={currentSessionId || undefined}
-              onSessionSelect={handleSessionSelect}
-              onNewSession={handleNewSession}
-            />
-          </SheetContent>
-        </Sheet>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleNewSession}>
+            New Session
+          </Button>
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80">
+              <SheetHeader>
+                <SheetTitle>Chat History</SheetTitle>
+              </SheetHeader>
+              <CoachSessionHistory
+                runnerId={runnerId}
+                currentSessionId={currentSessionId || undefined}
+                onSessionSelect={handleSessionSelect}
+                onNewSession={handleNewSession}
+              />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       {/* Messages Area */}
