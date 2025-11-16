@@ -81,6 +81,9 @@ export function AppSidebar() {
     setOpenMobile(false);
   };
 
+  // Get current session ID from URL
+  const currentSessionId = new URLSearchParams(location.search).get('session');
+
   return (
     <Sidebar
       variant="floating"
@@ -129,32 +132,32 @@ export function AppSidebar() {
               <SidebarGroup>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <NavLink 
-                          to="/" 
-                          className="hover:bg-muted/50" 
-                          activeClassName="bg-muted text-primary font-medium"
-                          onClick={handleNavClick}
-                        >
-                          <Trophy className="mr-2 h-4 w-4" />
-                          <span>Leaderboard</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <NavLink 
-                          to={currentRunnerId ? `/runner/${currentRunnerId}` : "#"}
-                          className="hover:bg-muted/50" 
-                          activeClassName="bg-muted text-primary font-medium"
-                          onClick={handleNavClick}
-                        >
-                          <Trophy className="mr-2 h-4 w-4" />
-                          <span>My Profile</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/" 
+                      className="hover:bg-accent/50 transition-colors rounded-md" 
+                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Trophy className="mr-2 h-4 w-4" />
+                      <span>Leaderboard</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to={currentRunnerId ? `/runner/${currentRunnerId}` : "#"}
+                      className="hover:bg-accent/50 transition-colors rounded-md" 
+                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Trophy className="mr-2 h-4 w-4" />
+                      <span>My Profile</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
@@ -164,32 +167,32 @@ export function AppSidebar() {
                 <SidebarGroupLabel>Social</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <NavLink 
-                          to="/feed" 
-                          className="hover:bg-muted/50" 
-                          activeClassName="bg-muted text-primary font-medium"
-                          onClick={handleNavClick}
-                        >
-                          <TrendingUp className="mr-2 h-4 w-4" />
-                          <span>Feed</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <NavLink 
-                          to="/invite" 
-                          className="hover:bg-muted/50" 
-                          activeClassName="bg-muted text-primary font-medium"
-                          onClick={handleNavClick}
-                        >
-                          <Gift className="mr-2 h-4 w-4" />
-                          <span>Invite Friends</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/feed" 
+                      className="hover:bg-accent/50 transition-colors rounded-md" 
+                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      <span>Feed</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/invite" 
+                      className="hover:bg-accent/50 transition-colors rounded-md" 
+                      activeClassName="bg-accent text-accent-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <Gift className="mr-2 h-4 w-4" />
+                      <span>Invite Friends</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
@@ -234,23 +237,30 @@ export function AppSidebar() {
                           No chats yet
                         </div>
                       ) : (
-                        sessions.map((session) => (
-                          <Card
-                            key={session.id}
-                            className="p-2 cursor-pointer hover:bg-accent transition-colors"
-                            onClick={() => handleSessionSelect(session.id)}
-                          >
-                            <div className="flex items-start gap-2">
-                              <MessageSquare className="h-3 w-3 text-muted-foreground mt-0.5 flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium truncate">{session.title}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {format(new Date(session.last_message_at), 'MMM d, yyyy')}
-                                </p>
+                        sessions.map((session) => {
+                          const isActive = currentSessionId === session.id;
+                          return (
+                            <Card
+                              key={session.id}
+                              className={`p-2 cursor-pointer transition-colors rounded-md ${
+                                isActive 
+                                  ? 'bg-accent text-accent-foreground border-accent' 
+                                  : 'hover:bg-accent/50'
+                              }`}
+                              onClick={() => handleSessionSelect(session.id)}
+                            >
+                              <div className="flex items-start gap-2">
+                                <MessageSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-medium truncate">{session.title}</p>
+                                  <p className="text-[10px] opacity-70">
+                                    {format(new Date(session.last_message_at), 'MMM d, yyyy')}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </Card>
-                        ))
+                            </Card>
+                          );
+                        })
                       )}
                     </div>
                   </ScrollArea>
@@ -268,8 +278,8 @@ export function AppSidebar() {
                           <SidebarMenuButton asChild>
                             <NavLink 
                               to="/admin" 
-                              className="hover:bg-muted/50 text-orange-500 hover:text-orange-600" 
-                              activeClassName="bg-orange-500/10 text-orange-600 font-medium"
+                              className="hover:bg-destructive/10 transition-colors rounded-md text-destructive" 
+                              activeClassName="bg-destructive/20 text-destructive font-medium"
                               onClick={handleNavClick}
                             >
                               <Shield className="mr-2 h-4 w-4" />
