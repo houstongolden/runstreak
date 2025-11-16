@@ -491,8 +491,8 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-border">
-            <p className="text-center text-sm text-muted-foreground">
+          <div className="pt-8 border-t border-border text-center space-y-3">
+            <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} RunStreak. Built by{" "}
               <a
                 href="https://bamf.com"
@@ -502,14 +502,14 @@ const Index = () => {
               >
                 BAMF
               </a>
-              .{" "}
-              <button
-                onClick={() => setIsAdvertiseModalOpen(true)}
-                className="text-primary hover:underline cursor-pointer"
-              >
-                Advertise
-              </button>
+              .
             </p>
+            <button
+              onClick={() => setIsAdvertiseModalOpen(true)}
+              className="text-sm text-primary hover:underline cursor-pointer"
+            >
+              Advertise with us
+            </button>
           </div>
         </div>
       </footer>
