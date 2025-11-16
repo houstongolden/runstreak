@@ -2,7 +2,7 @@ import { Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import impactMascot from "@/assets/impact-mascot.png";
-import jamesCitron from "@/assets/james-citron.png";
+import houstonGolden from "@/assets/houston-golden.jpeg";
 
 export default function Story() {
   const navigate = useNavigate();
@@ -122,23 +122,23 @@ export default function Story() {
       <div className="py-16 px-4 border-t border-border/50">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-instrument font-medium text-center mb-10 tracking-tight">
-            Meet the Creator
+            Meet the Founder
           </h2>
 
           <div className="flex flex-col items-center gap-8 mb-8">
             <div className="flex flex-col sm:flex-row items-center gap-8">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
                 <img 
-                  src={jamesCitron} 
-                  alt="James Citron"
+                  src={houstonGolden} 
+                  alt="Houston Golden"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="text-center sm:text-left">
-                <h3 className="text-2xl font-semibold mb-2">James Citron</h3>
-                <p className="text-muted-foreground mb-2">Founder & CEO, BAMF</p>
+                <h3 className="text-2xl font-semibold mb-2">Houston Golden</h3>
+                <p className="text-muted-foreground mb-2">Founder, RunStreak</p>
                 <p className="text-sm text-muted-foreground">
-                  AI entrepreneur with 100+ day running streak
+                  Serial entrepreneur with 200+ day running streak
                 </p>
               </div>
             </div>
@@ -146,11 +146,11 @@ export default function Story() {
 
           <div className="text-base sm:text-lg text-foreground/90 leading-relaxed space-y-4 mb-8">
             <p>
-              "I've been running daily for over 100 days, but there was no easy way to prove it or compare my commitment with other runners. I wanted a platform that automatically verifies and celebrates consistency."
+              "I've been running daily for over 200 days, but there was no easy way to prove it or compare my commitment with other runners. I wanted a platform that automatically verifies and celebrates consistency."
             </p>
             
             <p>
-              James built RunStreak using cutting-edge AI tools to create a community where dedication is transparent and competition drives everyone to show up every single day.
+              Houston built RunStreak using cutting-edge AI tools to create a community where dedication is transparent and competition drives everyone to show up every single day.
             </p>
           </div>
 
