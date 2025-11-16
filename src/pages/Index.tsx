@@ -166,7 +166,7 @@ const Index = () => {
             The verified leaderboard for runners<br className="hidden sm:block" /> keeping their streak alive
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-inter leading-relaxed">
-            Connect your Strava. Prove you run every day. Join the leaderboard.
+            Connect your Strava. Prove you run every day. Join the leaderboard. <span className="font-semibold text-foreground">100% Free.</span>
           </p>
         </header>
 
@@ -180,7 +180,7 @@ const Index = () => {
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >
                 <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
-                Connect with Strava
+                Connect with Strava - FREE
               </Button>
             </div>
           </div>
@@ -287,7 +287,7 @@ const Index = () => {
               <div className="text-9xl tracking-[-0.4em] -ml-4">🏃🏾‍♂️🏃🏼‍♀️🏃🏻‍♂️</div>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-instrument font-medium text-center tracking-tight max-w-4xl mb-8">
-              Prove your streak.<br />Compete with runners worldwide.
+              Prove your streak.<br />Compete with runners worldwide.<br /><span className="text-3xl sm:text-4xl lg:text-5xl">100% Free Forever.</span>
             </h2>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-3xl w-full">
