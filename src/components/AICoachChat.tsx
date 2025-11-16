@@ -25,7 +25,6 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [streamingContent, setStreamingContent] = useState("");
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -62,12 +61,11 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingContent]);
+  }, [messages]);
 
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      // Get the most recent session or all messages if no session
       let query = supabase
         .from('coach_messages')
         .select('*')
@@ -75,6 +73,19 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
 
       if (currentSessionId) {
         query = query.eq('session_id', currentSessionId);
+      } else {
+        // If no session selected, get the most recent session's messages
+        const { data: sessions } = await supabase
+          .from('coaching_sessions')
+          .select('id')
+          .eq('runner_id', runnerId)
+          .order('last_message_at', { ascending: false })
+          .limit(1);
+        
+        if (sessions && sessions.length > 0) {
+          setCurrentSessionId(sessions[0].id);
+          query = query.eq('session_id', sessions[0].id);
+        }
       }
 
       const { data, error } = await query.order('created_at', { ascending: true });
@@ -96,72 +107,19 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
     const userMessage = input.trim();
     setInput("");
 
-    const tempUserMsg: Message = {
-      id: `temp-${Date.now()}`,
-      content: userMessage,
-      role: 'user',
-      source: 'app',
-      created_at: new Date().toISOString()
-    };
-    setMessages(prev => [...prev, tempUserMsg]);
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-coach-message`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-coach-message', {
+        body: {
           runner_id: runnerId,
           message: userMessage,
-          source: 'app'
-        })
+          source: 'app',
+          session_id: currentSessionId
+        }
       });
 
-      if (!response.ok) throw new Error('Failed to send message');
+      if (error) throw error;
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedContent = "";
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') continue;
-              
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  accumulatedContent += parsed.content;
-                  setStreamingContent(accumulatedContent);
-                }
-              } catch (e) {
-                console.error('Error parsing SSE:', e);
-              }
-            }
-          }
-        }
-      }
-
-      if (accumulatedContent) {
-        await supabase.from('coach_messages').insert({
-          runner_id: runnerId,
-          content: accumulatedContent,
-          role: 'assistant',
-          source: 'app'
-        });
-      }
-
-      setStreamingContent("");
+      // Messages will be added via realtime subscription
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -244,7 +202,7 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-          {messages.length === 0 && !streamingContent && (
+          {messages.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                 <Sparkles className="h-8 w-8 text-primary" />
@@ -261,13 +219,13 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
               key={msg.id}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className={`max-w-[80%]`}>
-                <div className={`inline-block px-4 py-2.5 rounded-2xl ${
+              <div className={`max-w-[85%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
+                <div className={`px-4 py-2.5 rounded-2xl ${
                   msg.role === 'user' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-muted text-foreground'
+                    ? 'bg-primary text-primary-foreground rounded-br-sm' 
+                    : 'bg-muted text-foreground rounded-bl-sm'
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 px-1">
                   {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -276,12 +234,15 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
             </div>
           ))}
 
-          {streamingContent && (
+          {sending && (
             <div className="flex justify-start">
-              <div className="max-w-[80%]">
-                <div className="inline-block px-4 py-2.5 rounded-2xl bg-muted text-foreground">
-                  <p className="text-sm whitespace-pre-wrap">{streamingContent}</p>
-                  <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1"></span>
+              <div className="max-w-[85%] items-start flex flex-col">
+                <div className="px-4 py-2.5 rounded-2xl bg-muted text-foreground rounded-bl-sm">
+                  <div className="flex items-center gap-1">
+                    <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse"></span>
+                    <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                    <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse [animation-delay:0.4s]"></span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -292,7 +253,7 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-background">
+      <div className="border-t bg-card">
         <div className="max-w-3xl mx-auto p-4">
           <form onSubmit={sendMessage} className="relative">
             <Textarea
@@ -305,23 +266,20 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
                   sendMessage(e);
                 }
               }}
-              placeholder="Ask your AI coach anything..."
-              className="min-h-[60px] max-h-[200px] resize-none pr-14 text-base"
+              placeholder="Message AI Coach..."
+              className="min-h-[52px] max-h-[200px] resize-none pr-12 py-3 text-base border-input focus-visible:ring-1"
               style={{ fontSize: '16px' }}
               disabled={sending}
             />
             <Button 
               type="submit" 
               size="icon"
-              className="absolute right-2 bottom-2 h-10 w-10 rounded-full"
+              className="absolute right-2 bottom-2 h-9 w-9 rounded-full"
               disabled={sending || !input.trim()}
             >
               <Send className="h-4 w-4" />
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground text-center mt-2">
-            Press Enter to send, Shift+Enter for new line
-          </p>
         </div>
       </div>
     </div>

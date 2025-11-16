@@ -87,17 +87,83 @@ serve(async (req) => {
 
     let messageToSend = message;
     let conversationMessages: any[] = [];
+    let currentSessionId = session_id;
+
+    // For app messages with a user message, create/get session and save the user message first
+    if (source === 'app' && message) {
+      // Create or get session
+      if (!currentSessionId) {
+        const createSessionResponse = await fetch(
+          `${supabaseUrl}/rest/v1/coaching_sessions`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              runner_id: runner_id,
+              title: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+              last_message_at: new Date().toISOString()
+            })
+          }
+        );
+        const newSession = await createSessionResponse.json();
+        currentSessionId = Array.isArray(newSession) ? newSession[0].id : newSession.id;
+      } else {
+        // Update session last_message_at
+        await fetch(
+          `${supabaseUrl}/rest/v1/coaching_sessions?id=eq.${currentSessionId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              last_message_at: new Date().toISOString()
+            })
+          }
+        );
+      }
+
+      // Save user message to database
+      await fetch(
+        `${supabaseUrl}/rest/v1/coach_messages`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({
+            runner_id: runner_id,
+            content: message,
+            role: 'user',
+            source: source,
+            session_id: currentSessionId
+          }),
+        }
+      );
+    }
 
     // Get recent conversation history for context
-    const messagesResponse = await fetch(
-      `${supabaseUrl}/rest/v1/coach_messages?runner_id=eq.${runner_id}&order=created_at.desc&limit=10`,
-      {
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-      }
-    );
+    let query = `${supabaseUrl}/rest/v1/coach_messages?runner_id=eq.${runner_id}&order=created_at.desc&limit=10`;
+    if (currentSessionId) {
+      query = `${supabaseUrl}/rest/v1/coach_messages?runner_id=eq.${runner_id}&session_id=eq.${currentSessionId}&order=created_at.desc&limit=10`;
+    }
+    
+    const messagesResponse = await fetch(query, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+    });
     const recentMessages = await messagesResponse.json();
     conversationMessages = recentMessages.reverse().map((m: any) => ({
       role: m.role,
@@ -201,7 +267,7 @@ Runner Stats:
 
 Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 characters for SMS.' : ''}`;
 
-      // Stream response for app, non-stream for SMS
+      // For app, get full response (no streaming to simplify)
       const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -215,22 +281,10 @@ Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 
             ...conversationMessages,
             { role: 'user', content: message }
           ],
-          max_tokens: source === 'sms' ? 100 : 300,
-          stream: source === 'app', // Enable streaming for app
+          max_tokens: source === 'sms' ? 100 : 500,
+          stream: false,
         }),
       });
-
-      // If streaming for app, return the stream directly
-      if (source === 'app') {
-        return new Response(aiResponse.body, {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-          },
-        });
-      }
 
       // For SMS, get the full response
       const aiData = await aiResponse.json();
@@ -246,8 +300,8 @@ Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 
     };
     
     // Add session_id if provided (for app messages)
-    if (session_id) {
-      messagePayload.session_id = session_id;
+    if (currentSessionId) {
+      messagePayload.session_id = currentSessionId;
     }
 
     await fetch(
