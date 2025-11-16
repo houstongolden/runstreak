@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Sparkles, Code, Palette, Share2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Footer } from "@/components/Footer";
 
 const BadgeDocs = () => {
   return (
@@ -230,6 +231,8 @@ const BadgeDocs = () => {
           </Link>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
