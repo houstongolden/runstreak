@@ -411,7 +411,7 @@ const Index = () => {
                     onClick={() => setIsAdvertiseModalOpen(true)}
                     className="hover:text-foreground transition-colors text-left"
                   >
-                    Sponsor RunStreak
+                    Advertise
                   </button>
                 </li>
               </ul>
