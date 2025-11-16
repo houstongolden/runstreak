@@ -6,6 +6,7 @@ import { Send, Sparkles, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CoachSessionHistory from "./CoachSessionHistory";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: string;
@@ -225,7 +226,18 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
                     ? 'bg-primary text-primary-foreground rounded-br-sm' 
                     : 'bg-muted text-foreground rounded-bl-sm'
                 }`}>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  {msg.role === 'user' ? (
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  ) : (
+                    <div className="text-sm leading-relaxed prose prose-sm prose-slate dark:prose-invert max-w-none
+                      prose-p:my-2 prose-p:leading-relaxed
+                      prose-headings:my-3 prose-headings:font-semibold
+                      prose-ul:my-2 prose-li:my-1
+                      prose-strong:font-semibold prose-strong:text-foreground
+                      prose-em:italic prose-em:text-foreground">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 px-1">
                   {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

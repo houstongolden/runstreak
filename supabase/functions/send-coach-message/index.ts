@@ -186,11 +186,9 @@ serve(async (req) => {
       const runners = await runnerResponse.json();
       const runner = runners[0];
 
-      // Get recent activities (last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Get ALL activities for comprehensive analysis
       const activitiesResponse = await fetch(
-        `${supabaseUrl}/rest/v1/daily_activities?runner_id=eq.${runner_id}&activity_date=gte.${thirtyDaysAgo.toISOString().split('T')[0]}&order=activity_date.desc`,
+        `${supabaseUrl}/rest/v1/daily_activities?runner_id=eq.${runner_id}&order=activity_date.desc`,
         {
           headers: {
             'apikey': supabaseKey,
@@ -198,7 +196,22 @@ serve(async (req) => {
           },
         }
       );
-      const recentActivities = await activitiesResponse.json();
+      const allActivities = await activitiesResponse.json();
+      
+      // Calculate date ranges
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const sixtyDaysAgo = new Date(today);
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+      const ninetyDaysAgo = new Date(today);
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      
+      // Filter activities by time periods
+      const last30Activities = allActivities.filter((a: any) => new Date(a.activity_date) >= thirtyDaysAgo);
+      const last60Activities = allActivities.filter((a: any) => new Date(a.activity_date) >= sixtyDaysAgo);
+      const last90Activities = allActivities.filter((a: any) => new Date(a.activity_date) >= ninetyDaysAgo);
+      const recentActivities = last30Activities;
 
       // Get best efforts
       const bestEffortsResponse = await fetch(
@@ -236,9 +249,12 @@ serve(async (req) => {
       const timeOfDay = new Date().getHours();
       const greeting = timeOfDay < 12 ? 'morning' : timeOfDay < 18 ? 'afternoon' : 'evening';
 
-      // Calculate statistics from recent activities
-      const recentMiles = recentActivities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
-      const recentRuns = recentActivities.length;
+      // Calculate statistics from all time periods
+      const last30Miles = last30Activities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const last60Miles = last60Activities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const last90Miles = last90Activities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const recentMiles = last30Miles;
+      const recentRuns = last30Activities.length;
       const avgRecentMiles = recentRuns > 0 ? recentMiles / recentRuns : 0;
 
       // Calculate average pace from YTD data
@@ -287,13 +303,19 @@ YEAR-TO-DATE (${new Date().getFullYear()}):
 
 LAST 30 DAYS:
 - Runs completed: ${recentRuns}
-- Total distance: ${recentMiles.toFixed(1)} miles
+- Total distance: ${last30Miles.toFixed(1)} miles
 - Average per run: ${avgRecentMiles.toFixed(1)} miles
 - Days with activity: ${runner.days_on_streak_last_30 || 0} of 30
 
-LAST 60/90 DAYS CONSISTENCY:
-- Last 60 days: ${runner.days_on_streak_last_60 || 0} days active
-- Last 90 days: ${runner.days_on_streak_last_90 || 0} days active
+LAST 60 DAYS:
+- Runs completed: ${last60Activities.length}
+- Total distance: ${last60Miles.toFixed(1)} miles
+- Days with activity: ${runner.days_on_streak_last_60 || 0} of 60
+
+LAST 90 DAYS:
+- Runs completed: ${last90Activities.length}
+- Total distance: ${last90Miles.toFixed(1)} miles
+- Days with activity: ${runner.days_on_streak_last_90 || 0} of 90
 
 BEST EFFORTS:
 ${bestEffortsText || 'No best efforts recorded yet'}
@@ -339,11 +361,9 @@ Generate a personalized coaching message for this ${greeting}. Keep it under 160
       const runners = await runnerResponse.json();
       const runner = runners[0];
 
-      // Get recent activities (last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Get ALL activities for comprehensive analysis
       const activitiesResponse = await fetch(
-        `${supabaseUrl}/rest/v1/daily_activities?runner_id=eq.${runner_id}&activity_date=gte.${thirtyDaysAgo.toISOString().split('T')[0]}&order=activity_date.desc`,
+        `${supabaseUrl}/rest/v1/daily_activities?runner_id=eq.${runner_id}&order=activity_date.desc`,
         {
           headers: {
             'apikey': supabaseKey,
@@ -351,7 +371,22 @@ Generate a personalized coaching message for this ${greeting}. Keep it under 160
           },
         }
       );
-      const recentActivities = await activitiesResponse.json();
+      const allActivities = await activitiesResponse.json();
+      
+      // Calculate date ranges
+      const today = new Date();
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const sixtyDaysAgo = new Date(today);
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+      const ninetyDaysAgo = new Date(today);
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      
+      // Filter activities by time periods
+      const last30Activities = allActivities.filter((a: any) => new Date(a.activity_date) >= thirtyDaysAgo);
+      const last60Activities = allActivities.filter((a: any) => new Date(a.activity_date) >= sixtyDaysAgo);
+      const last90Activities = allActivities.filter((a: any) => new Date(a.activity_date) >= ninetyDaysAgo);
+      const recentActivities = last30Activities;
 
       // Get best efforts
       const bestEffortsResponse = await fetch(
@@ -384,9 +419,12 @@ Generate a personalized coaching message for this ${greeting}. Keep it under 160
         challenging: "You are a challenging running coach who pushes athletes to their limits. Be direct and demanding."
       };
 
-      // Calculate statistics from recent activities
-      const recentMiles = recentActivities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
-      const recentRuns = recentActivities.length;
+      // Calculate statistics from all time periods
+      const last30Miles = last30Activities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const last60Miles = last60Activities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const last90Miles = last90Activities.reduce((sum: number, a: any) => sum + (a.distance || 0), 0);
+      const recentMiles = last30Miles;
+      const recentRuns = last30Activities.length;
       const avgRecentMiles = recentRuns > 0 ? recentMiles / recentRuns : 0;
 
       // Calculate average pace
@@ -441,17 +479,24 @@ YEAR-TO-DATE (${new Date().getFullYear()}):
 
 LAST 30 DAYS:
 - Runs completed: ${recentRuns}
-- Total distance: ${recentMiles.toFixed(1)} miles
+- Total distance: ${last30Miles.toFixed(1)} miles
 - Average per run: ${avgRecentMiles.toFixed(1)} miles
 - Days with activity: ${runner.days_on_streak_last_30 || 0} of 30
+
+LAST 60 DAYS:
+- Runs completed: ${last60Activities.length}
+- Total distance: ${last60Miles.toFixed(1)} miles
+- Days with activity: ${runner.days_on_streak_last_60 || 0} of 60
+
+LAST 90 DAYS:
+- Runs completed: ${last90Activities.length}
+- Total distance: ${last90Miles.toFixed(1)} miles
+- Days with activity: ${runner.days_on_streak_last_90 || 0} of 90
 
 RECENT ACTIVITIES (Last 10):
 ${recentActivityDetails || 'No recent activities'}
 
 CONSISTENCY METRICS:
-- Last 30 days: ${runner.days_on_streak_last_30 || 0} days active
-- Last 60 days: ${runner.days_on_streak_last_60 || 0} days active
-- Last 90 days: ${runner.days_on_streak_last_90 || 0} days active
 - Since joining RunStreak: ${runner.days_on_streak_since_joining || 0} days out of ${runner.total_days_since_joining || 0} total days
 
 BEST EFFORTS:
