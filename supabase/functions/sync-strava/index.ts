@@ -126,7 +126,8 @@ Deno.serve(async (req) => {
 
     const stats = await statsResponse.json();
 
-    // Fetch all activities for streak calculation
+    // Fetch all activities for streak calculation (need complete history for accurate streaks)
+    // But we'll only fetch detailed activity info for NEW activities when checking PRs
     let allActivities: any[] = [];
     let page = 1;
     const perPage = 200;
@@ -329,15 +330,31 @@ Deno.serve(async (req) => {
         });
     }
 
-    // Fetch best efforts from individual activity details
-    // Strava only provides best_efforts in detailed activity endpoint, not in list
-    console.log('Fetching best efforts from activity details...');
-    const bestEffortsMap = new Map<number, any>();
+    // Get existing best efforts from database
+    console.log('Checking for new personal bests in new activities...');
+    const { data: existingBestEfforts } = await supabase
+      .from('best_efforts')
+      .select('*')
+      .eq('runner_id', runnerId);
     
-    // Fetch from all activities to capture true all-time personal bests
-    const activitiesToFetch = sortedActivities;
+    const existingEffortsMap = new Map<number, any>();
+    if (existingBestEfforts) {
+      for (const effort of existingBestEfforts) {
+        existingEffortsMap.set(effort.distance, effort);
+      }
+    }
     
-    for (const activity of activitiesToFetch) {
+    // Only fetch details for NEW activities (since last sync) to check for PRs
+    const lastSyncDate = runner.last_activity_date ? new Date(runner.last_activity_date) : null;
+    const newActivities = lastSyncDate 
+      ? allActivities.filter((a: any) => new Date(a.start_date) > lastSyncDate)
+      : allActivities; // If first sync, check all activities
+    
+    console.log(`Checking ${newActivities.length} new activities for personal bests (${allActivities.length} total activities)`);
+    
+    const newBestEfforts = [];
+    
+    for (const activity of newActivities) {
       try {
         const detailResponse = await fetch(
           `https://www.strava.com/api/v3/activities/${activity.id}`,
@@ -353,39 +370,48 @@ Deno.serve(async (req) => {
         
         if (detailedActivity.best_efforts && Array.isArray(detailedActivity.best_efforts)) {
           for (const effort of detailedActivity.best_efforts) {
-            const distance = effort.distance;
-            const existing = bestEffortsMap.get(distance);
+            const distance = Math.round(effort.distance);
+            const existing = existingEffortsMap.get(distance);
             
-            // Keep the fastest effort for each distance
+            // Only update if this is a new PR (faster than existing or no existing record)
             if (!existing || effort.elapsed_time < existing.elapsed_time) {
-              bestEffortsMap.set(distance, {
+              newBestEfforts.push({
                 runner_id: runnerId,
-                distance: Math.round(distance),
+                distance: distance,
                 elapsed_time: effort.elapsed_time,
                 moving_time: effort.moving_time,
                 start_date: effort.start_date,
                 activity_id: activity.id,
               });
+              
+              // Update the map so we keep track of the best for this sync
+              existingEffortsMap.set(distance, {
+                elapsed_time: effort.elapsed_time
+              });
+              
+              console.log(`New PR at ${distance}m: ${effort.elapsed_time}s (previous: ${existing?.elapsed_time || 'none'})`);
             }
           }
         }
         
-        // Add small delay to respect rate limits (100 requests per 15 min = ~9 seconds between)
+        // Add small delay to respect rate limits
         await new Promise(resolve => setTimeout(resolve, 200));
       } catch (error) {
         console.error(`Error fetching activity ${activity.id}:`, error);
       }
     }
 
-    console.log(`Found ${bestEffortsMap.size} unique best effort distances`);
+    console.log(`Found ${newBestEfforts.length} new personal bests to update`);
 
-    // Upsert best efforts
-    for (const effort of bestEffortsMap.values()) {
-      await supabase
-        .from('best_efforts')
-        .upsert(effort, {
-          onConflict: 'runner_id,distance'
-        });
+    // Upsert only the new PRs
+    if (newBestEfforts.length > 0) {
+      for (const effort of newBestEfforts) {
+        await supabase
+          .from('best_efforts')
+          .upsert(effort, {
+            onConflict: 'runner_id,distance'
+          });
+      }
     }
 
     // Calculate days on streak metrics
