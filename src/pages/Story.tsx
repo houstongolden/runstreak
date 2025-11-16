@@ -28,6 +28,37 @@ export default function Story() {
           <h1 className="text-4xl sm:text-5xl font-instrument font-medium text-center mb-10 tracking-tight">
             Why RunStreak Exists
           </h1>
+
+          {/* Founder Story - Moved to Top */}
+          <div className="mb-12 p-6 bg-muted/30 rounded-lg border border-border/50">
+            <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
+              <div className="relative w-20 h-20 rounded-full overflow-hidden border-4 border-primary/20 flex-shrink-0">
+                <img 
+                  src={houstonGolden} 
+                  alt="Houston Golden"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center sm:text-left">
+                <h3 className="text-xl font-semibold mb-1">Houston Golden</h3>
+                <p className="text-sm text-muted-foreground">Founder, RunStreak</p>
+              </div>
+            </div>
+            
+            <div className="text-sm sm:text-base text-foreground/90 leading-relaxed space-y-3">
+              <p>
+                "I built RunStreak because I struggled with running consistency. Like many runners, I'd get on a roll, feel great for a few weeks, then break my streak and feel completely discouraged—sometimes taking weeks off before getting back to it."
+              </p>
+              
+              <p>
+                I wanted a way to track my progress that wouldn't make me feel like a failure when life happens. A tool that celebrates improvement over time, not just perfect streaks. A community that keeps me accountable through friendly competition and daily AI motivation messages via SMS.
+              </p>
+              
+              <p>
+                All my running data is public on RunStreak—you can <a href="/runner/houston" className="text-primary hover:underline font-medium">check my profile</a> and see exactly where I'm at. Some days I nail it, some days I don't. But I keep showing up, and that's what RunStreak is all about.
+              </p>
+            </div>
+          </div>
           
           {/* Story Paragraph */}
           <div className="text-base sm:text-lg text-foreground/90 leading-relaxed space-y-4 mb-12">
@@ -118,45 +149,12 @@ export default function Story() {
         </div>
       </div>
 
-      {/* Founder Story Section */}
+      {/* Built By Section */}
       <div className="py-16 px-4 border-t border-border/50">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-instrument font-medium text-center mb-10 tracking-tight">
-            Meet the Founder
-          </h2>
-
-          <div className="flex flex-col items-center gap-8 mb-8">
-            <div className="flex flex-col sm:flex-row items-center gap-8">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20">
-                <img 
-                  src={houstonGolden} 
-                  alt="Houston Golden"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-center sm:text-left">
-                <h3 className="text-2xl font-semibold mb-2">Houston Golden</h3>
-                <p className="text-muted-foreground mb-2">Founder, RunStreak</p>
-                <p className="text-sm text-muted-foreground">
-                  Serial entrepreneur with 200+ day running streak
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="text-base sm:text-lg text-foreground/90 leading-relaxed space-y-4 mb-8">
-            <p>
-              "I've been running daily for over 200 days, but there was no easy way to prove it or compare my commitment with other runners. I wanted a platform that automatically verifies and celebrates consistency."
-            </p>
-            
-            <p>
-              Houston built RunStreak using cutting-edge AI tools to create a community where dedication is transparent and competition drives everyone to show up every single day.
-            </p>
-          </div>
-
-          <div className="p-6 bg-muted/30 rounded-lg border border-border/50">
+          <div className="p-6 bg-muted/30 rounded-lg border border-border/50 text-center">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Built by the team behind <a href="https://bamf.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BAMF.com</a> and <a href="https://bamf.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BAMF.ai</a> — empowering creators and entrepreneurs through technology and community.
+              Built by the team behind <a href="https://bamf.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">BAMF.com</a> — empowering creators and entrepreneurs through technology and community.
             </p>
           </div>
         </div>
