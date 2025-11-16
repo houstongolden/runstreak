@@ -1,4 +1,4 @@
-import { Trophy, TrendingUp, Sparkles, Plus, Info, Shield, Gift } from "lucide-react";
+import { Trophy, TrendingUp, Sparkles, Plus, Shield, Gift, Flame } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -10,12 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserProfileDropdown } from "@/components/UserProfileDropdown";
 import { format } from "date-fns";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import {
   Sidebar,
@@ -90,6 +84,17 @@ export function AppSidebar() {
       className="fixed left-0 top-0 z-50 h-screen"
     >
       <SidebarContent className="pt-14 pb-0">
+        {/* Logo */}
+        <div className="px-4 py-6 border-b border-border/50">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-orange-600">
+              <Flame className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
+              RunStreak
+            </span>
+          </div>
+        </div>
         {!user ? (
           <SidebarGroup>
             <SidebarGroupLabel>Get Started</SidebarGroupLabel>
@@ -201,21 +206,7 @@ export function AppSidebar() {
               {/* AI Coach Section */}
               <SidebarGroup>
                 <div className="px-2 mb-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <SidebarGroupLabel className="m-0">AI Coach</SidebarGroupLabel>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="max-w-xs">
-                            <p>Chat with your Strava and run data with your own personalized AI Coach like never before. Stop sharing screenshots with ChatGPT. We got you.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
+                  <SidebarGroupLabel className="mb-2">AI Coach</SidebarGroupLabel>
                   <button 
                     onClick={handleNewChat}
                     className="w-full text-left py-2 px-3 text-sm bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity flex items-center gap-2"
@@ -228,7 +219,7 @@ export function AppSidebar() {
                 <SidebarGroupLabel className="px-2 mt-3">Chat History</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <ScrollArea className="h-[200px]">
-                    <div className="space-y-1">
+                    <div className="space-y-0.5 pl-2">
                       {sessions.length === 0 ? (
                         <div className="text-center py-4 text-xs text-muted-foreground">
                           No chats yet
@@ -239,15 +230,15 @@ export function AppSidebar() {
                           return (
                             <button
                               key={session.id}
-                              className={`w-full text-left py-1.5 px-2 text-sm transition-colors ${
+                              className={`w-full text-left py-1.5 px-1 text-xs transition-colors ${
                                 isActive
                                   ? 'text-foreground font-medium'
                                   : 'text-muted-foreground hover:text-foreground'
                               }`}
                               onClick={() => handleSessionSelect(session.id)}
                             >
-                              <div className="truncate text-xs">{session.title}</div>
-                              <div className="text-xs text-muted-foreground mt-0.5">
+                              <div className="truncate leading-tight">{session.title}</div>
+                              <div className="text-[10px] text-muted-foreground mt-0.5">
                                 {format(new Date(session.last_message_at), 'MMM d')}
                               </div>
                             </button>
