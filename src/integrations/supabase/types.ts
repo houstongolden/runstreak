@@ -323,6 +323,7 @@ export type Database = {
       daily_activities: {
         Row: {
           activity_date: string
+          average_temp: number | null
           created_at: string
           distance: number
           elevation_gain: number
@@ -334,6 +335,7 @@ export type Database = {
         }
         Insert: {
           activity_date: string
+          average_temp?: number | null
           created_at?: string
           distance?: number
           elevation_gain?: number
@@ -345,6 +347,7 @@ export type Database = {
         }
         Update: {
           activity_date?: string
+          average_temp?: number | null
           created_at?: string
           distance?: number
           elevation_gain?: number

@@ -243,17 +243,24 @@ Deno.serve(async (req) => {
     const lastActivityDate = sortedActivities.length > 0 ? new Date(sortedActivities[0].start_date).toISOString().split('T')[0] : null;
 
     // Store daily activities
-    const dailyActivitiesMap = new Map<string, { distance: number; movingTime: number; elevationGain: number; runCount: number }>();
+    const dailyActivitiesMap = new Map<string, { distance: number; movingTime: number; elevationGain: number; runCount: number; averageTemp: number | null; tempCount: number }>();
 
     for (const activity of allActivities) {
       const dateStr = new Date(activity.start_date).toISOString().split('T')[0];
-      const existing = dailyActivitiesMap.get(dateStr) || { distance: 0, movingTime: 0, elevationGain: 0, runCount: 0 };
+      const existing = dailyActivitiesMap.get(dateStr) || { distance: 0, movingTime: 0, elevationGain: 0, runCount: 0, averageTemp: null, tempCount: 0 };
+      
+      // Aggregate temperature for the day
+      const newAverageTemp = activity.average_temp !== undefined && activity.average_temp !== null 
+        ? (((existing.averageTemp || 0) * existing.tempCount) + activity.average_temp) / (existing.tempCount + 1)
+        : existing.averageTemp;
       
       dailyActivitiesMap.set(dateStr, {
         distance: existing.distance + (activity.distance / 1609.34),
         movingTime: existing.movingTime + activity.moving_time,
         elevationGain: existing.elevationGain + (activity.total_elevation_gain * 3.28084),
         runCount: existing.runCount + 1,
+        averageTemp: newAverageTemp,
+        tempCount: activity.average_temp !== undefined && activity.average_temp !== null ? existing.tempCount + 1 : existing.tempCount,
       });
     }
 
@@ -268,6 +275,7 @@ Deno.serve(async (req) => {
           moving_time: data.movingTime,
           elevation_gain: data.elevationGain,
           run_count: data.runCount,
+          average_temp: data.averageTemp,
         }, {
           onConflict: 'runner_id,activity_date'
         });
