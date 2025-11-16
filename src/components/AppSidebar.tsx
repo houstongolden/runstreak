@@ -1,4 +1,5 @@
 import { Trophy, TrendingUp, Sparkles, Plus, Shield, Gift, Flame } from "lucide-react";
+import ShinyText from "@/components/ui/shiny-text";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -86,13 +87,27 @@ export function AppSidebar() {
       <SidebarContent className="pt-14 pb-0">
         {/* Logo */}
         <div className="px-4 py-6 border-b border-border/50">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-orange-600">
-              <Flame className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-pixelify text-lg font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-              RunStreak
+          <div className="flex items-center gap-0.5 group">
+            <Flame 
+              className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
+              style={{
+                stroke: 'url(#gradient-logo-sidebar)',
+                fill: 'none',
+                strokeWidth: 2,
+                filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
+              }}
+            />
+            <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
+              <ShinyText text="RunStreak" speed={5} />
             </span>
+            <svg width="0" height="0" style={{ position: 'absolute' }}>
+              <defs>
+                <linearGradient id="gradient-logo-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(16 100% 50%)" />
+                  <stop offset="100%" stopColor="hsl(14 100% 48%)" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
         </div>
         {!user ? (
