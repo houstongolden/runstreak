@@ -70,6 +70,7 @@ export function AppSidebar() {
   };
 
   const handleNewChat = () => {
+    // Navigate without session parameter to create new chat
     window.location.href = `/coach/${authRunnerId}`;
     setOpenMobile(false);
   };
@@ -215,21 +216,19 @@ export function AppSidebar() {
                       </TooltipProvider>
                     </div>
                   </div>
-                  <Button 
+                  <button 
                     onClick={handleNewChat}
-                    size="sm" 
-                    variant="default"
-                    className="w-full justify-start"
+                    className="w-full text-left py-2 px-3 text-sm bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity flex items-center gap-2"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 text-primary" />
                     New Chat
-                  </Button>
+                  </button>
                 </div>
 
                 <SidebarGroupLabel className="px-2 mt-3">Chat History</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <ScrollArea className="h-[200px]">
-                    <div className="space-y-0.5 px-2">
+                    <div className="space-y-1">
                       {sessions.length === 0 ? (
                         <div className="text-center py-4 text-xs text-muted-foreground">
                           No chats yet
@@ -240,14 +239,14 @@ export function AppSidebar() {
                           return (
                             <button
                               key={session.id}
-                              className={`w-full text-left py-2 px-3 text-sm transition-colors ${
+                              className={`w-full text-left py-1.5 px-2 text-sm transition-colors ${
                                 isActive
                                   ? 'text-foreground font-medium'
                                   : 'text-muted-foreground hover:text-foreground'
                               }`}
                               onClick={() => handleSessionSelect(session.id)}
                             >
-                              <div className="truncate">{session.title}</div>
+                              <div className="truncate text-xs">{session.title}</div>
                               <div className="text-xs text-muted-foreground mt-0.5">
                                 {format(new Date(session.last_message_at), 'MMM d')}
                               </div>
