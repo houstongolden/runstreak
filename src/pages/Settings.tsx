@@ -151,6 +151,18 @@ export default function Settings() {
     });
   };
 
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove all non-digit characters
+    const cleaned = phone.replace(/\D/g, '');
+    
+    // If it doesn't start with +, add +1 for US/Canada
+    if (!phone.startsWith('+')) {
+      return `+${cleaned.startsWith('1') ? cleaned : '1' + cleaned}`;
+    }
+    
+    return `+${cleaned}`;
+  };
+
   const handleVerifyPhone = async () => {
     if (!settings.phone_number) {
       toast({
@@ -161,24 +173,40 @@ export default function Settings() {
       return;
     }
 
+    // Format phone number to E.164
+    const formattedPhone = formatPhoneNumber(settings.phone_number);
+    
+    // Validate E.164 format
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(formattedPhone)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid phone number (e.g., +12025551234 or 2025551234)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSendingCode(true);
     try {
       const { error } = await supabase.functions.invoke("send-verification-sms", {
-        body: { phoneNumber: settings.phone_number },
+        body: { phoneNumber: formattedPhone },
       });
 
       if (error) throw error;
 
+      // Update settings with formatted phone
+      setSettings({ ...settings, phone_number: formattedPhone });
       setShowCodeInput(true);
       toast({
         title: "Verification code sent",
         description: "Check your phone for the 6-digit code.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sending verification code:", error);
       toast({
         title: "Error",
-        description: "Failed to send verification code. Please try again.",
+        description: error.message || "Failed to send verification code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -273,11 +301,16 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Settings</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Manage your account and AI coach preferences
-          </p>
+        <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Settings</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Manage your account and AI coach preferences
+            </p>
+          </div>
+          <Button onClick={handleSave} disabled={saving} size="lg" className="shrink-0">
+            {saving ? "Saving..." : "Save"}
+          </Button>
         </div>
 
         <div className="space-y-6">
@@ -328,9 +361,10 @@ export default function Settings() {
                       setShowCodeInput(false);
                       setVerificationCode("");
                     }}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="e.g., +12025551234 or 2025551234"
                     disabled={settings.phone_verified}
                   />
+                
                   {settings.phone_verified ? (
                     <Badge variant="secondary" className="flex items-center gap-1 whitespace-nowrap">
                       <CheckCircle className="h-3 w-3" />
@@ -347,6 +381,11 @@ export default function Settings() {
                     </Button>
                   )}
                 </div>
+                {!settings.phone_verified && (
+                  <p className="text-xs text-muted-foreground">
+                    Enter with country code (e.g., +12025551234) or without (+1 will be added for US/Canada)
+                  </p>
+                )}
                 
                 {showCodeInput && !settings.phone_verified && (
                   <div className="space-y-3 pt-2">
@@ -548,12 +587,6 @@ export default function Settings() {
 
           {/* Privacy Settings */}
           <PrivacySettings runnerId={settings.runner_id} />
-
-          <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={saving} size="lg">
-              {saving ? "Saving..." : "Save Settings"}
-            </Button>
-          </div>
         </div>
       </div>
     </div>
