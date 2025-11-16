@@ -331,52 +331,52 @@ const Index = () => {
       <footer className="border-t border-border pt-12 pb-8 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:px-[240px]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {/* Navigation */}
+            {/* Explore */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">Navigation</h3>
+              <h3 className="font-semibold mb-4 text-foreground">Explore</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/" className="hover:text-foreground transition-colors">
-                    Leaderboard
+                    Global Leaderboard
                   </a>
                 </li>
                 <li>
                   <a href="/features" className="hover:text-foreground transition-colors">
-                    Features
+                    Platform Features
                   </a>
                 </li>
                 <li>
                   <a href="/philosophy" className="hover:text-foreground transition-colors">
-                    Our Philosophy
+                    The Run Streak Philosophy
                   </a>
                 </li>
                 <li>
                   <a href="/badge-docs" className="hover:text-foreground transition-colors">
-                    Badge Documentation
+                    Embed Your Badge
                   </a>
                 </li>
               </ul>
             </div>
 
-            {/* Browse Runners */}
+            {/* Community */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">Browse Runners</h3>
+              <h3 className="font-semibold mb-4 text-foreground">Community</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/" className="hover:text-foreground transition-colors">
-                    All Runners
+                    View All Streakers
                   </a>
                 </li>
               </ul>
             </div>
 
-            {/* From the maker */}
+            {/* About */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">From the maker of RunStreak</h3>
+              <h3 className="font-semibold mb-4 text-foreground">About RunStreak</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/story" className="hover:text-foreground transition-colors">
-                    Our Story
+                    Our Origin Story
                   </a>
                 </li>
                 <li>
@@ -386,7 +386,7 @@ const Index = () => {
                     rel="noopener noreferrer"
                     className="hover:text-foreground transition-colors"
                   >
-                    BAMF.com
+                    Built by BAMF
                   </a>
                 </li>
                 <li>
@@ -396,22 +396,22 @@ const Index = () => {
                     rel="noopener noreferrer"
                     className="hover:text-foreground transition-colors"
                   >
-                    BAMF.ai
+                    BAMF AI Platform
                   </a>
                 </li>
               </ul>
             </div>
 
-            {/* Partnership */}
+            {/* Partner With Us */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">Partnership</h3>
+              <h3 className="font-semibold mb-4 text-foreground">Partner With Us</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <button
                     onClick={() => setIsAdvertiseModalOpen(true)}
                     className="hover:text-foreground transition-colors text-left"
                   >
-                    Advertise with us
+                    Sponsor RunStreak
                   </button>
                 </li>
               </ul>
