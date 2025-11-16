@@ -180,7 +180,7 @@ const Index = () => {
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >
                 <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
-                Connect with Strava - FREE
+                Connect with Strava
               </Button>
             </div>
           </div>
@@ -502,7 +502,13 @@ const Index = () => {
               >
                 BAMF
               </a>
-              .
+              .{" "}
+              <button
+                onClick={() => setIsAdvertiseModalOpen(true)}
+                className="text-primary hover:underline cursor-pointer"
+              >
+                Advertise
+              </button>
             </p>
           </div>
         </div>
