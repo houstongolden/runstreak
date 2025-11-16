@@ -175,7 +175,7 @@ export default function ActivityComments({
       </Button>
 
       {showComments && (
-        <Card className="p-4 space-y-4">
+        <div className="space-y-4 mt-2">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading comments...</p>
           ) : (
@@ -219,18 +219,19 @@ export default function ActivityComments({
               )}
 
               {currentRunnerId ? (
-                <form onSubmit={handleSubmit} className="flex gap-2">
+                <form onSubmit={handleSubmit} className="relative">
                   <Textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Leave an encouraging message..."
-                    className="min-h-[60px] resize-none"
+                    className="min-h-[60px] resize-none pr-12 border-border/50 bg-background/50"
                     disabled={submitting}
                   />
                   <Button
                     type="submit"
-                    size="sm"
+                    size="icon"
                     disabled={!newComment.trim() || submitting}
+                    className="absolute bottom-2 right-2 h-8 w-8 rounded-full"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -242,7 +243,7 @@ export default function ActivityComments({
               )}
             </>
           )}
-        </Card>
+        </div>
       )}
     </div>
   );
