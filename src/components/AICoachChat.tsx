@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 
@@ -25,6 +25,7 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -243,25 +244,44 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
       <div className="border-t bg-card">
         <div className="max-w-3xl mx-auto p-4">
           {/* Conversation Starters */}
-          <div className="flex flex-wrap gap-2 mb-3">
-            <button
-              onClick={() => setInput("How's my training going this week?")}
-              className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              How's my training going?
-            </button>
-            <button
-              onClick={() => setInput("What should I focus on to improve my pace?")}
-              className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              How can I improve my pace?
-            </button>
-            <button
-              onClick={() => setInput("Analyze my recent runs")}
-              className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Analyze my recent runs
-            </button>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Suggestions</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setShowSuggestions(!showSuggestions)}
+              >
+                {showSuggestions ? (
+                  <ChevronUp className="h-3.5 w-3.5" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5" />
+                )}
+              </Button>
+            </div>
+            {showSuggestions && (
+              <div className="flex flex-wrap gap-2 animate-accordion-down">
+                <button
+                  onClick={() => setInput("How's my training going this week?")}
+                  className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  How's my training going?
+                </button>
+                <button
+                  onClick={() => setInput("What should I focus on to improve my pace?")}
+                  className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  How can I improve my pace?
+                </button>
+                <button
+                  onClick={() => setInput("Analyze my recent runs")}
+                  className="px-3 py-1.5 text-xs rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Analyze my recent runs
+                </button>
+              </div>
+            )}
           </div>
           <form onSubmit={sendMessage} className="relative">
             <Textarea
