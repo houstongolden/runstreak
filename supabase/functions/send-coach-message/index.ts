@@ -454,6 +454,11 @@ Generate a personalized coaching message for this ${greeting}. Keep it under 160
         return `${date}: ${a.distance.toFixed(1)}mi in ${Math.floor(a.moving_time / 60)}min`;
       }).join('\n');
 
+      // Format ALL activities for complete context
+      const allActivityDetails = allActivities.map((a: any) => {
+        return `${a.activity_date}: ${a.distance.toFixed(2)}mi, ${a.run_count} run(s), ${Math.floor(a.moving_time / 60)}min, ${a.elevation_gain.toFixed(0)}ft gain`;
+      }).join('\n');
+
       const systemPrompt = `${coachingStylePrompts[userSettings.ai_coach_style as keyof typeof coachingStylePrompts] || coachingStylePrompts.motivational}
 
 COMPREHENSIVE RUNNER DATA FOR ${runner.display_name}:
@@ -495,6 +500,18 @@ LAST 90 DAYS:
 
 RECENT ACTIVITIES (Last 10):
 ${recentActivityDetails || 'No recent activities'}
+
+COMPLETE ACTIVITY HISTORY (ALL ${allActivities.length} activities with exact dates):
+${allActivityDetails}
+
+IMPORTANT INSTRUCTIONS FOR CALCULATIONS:
+- When asked about specific time periods (e.g., "September 2024", "last 90 days"), you MUST calculate from the COMPLETE ACTIVITY HISTORY above
+- Filter activities by the exact dates shown (format: YYYY-MM-DD)
+- Sum the distance values for the matching dates
+- Count the number of unique dates that match the criteria
+- Example: For "September 2024", filter for dates starting with "2024-09" and sum those distances
+- Example: For "last 90 days from today (${new Date().toISOString().split('T')[0]})", count backwards 90 days and filter/sum those activities
+- ALWAYS show your calculation method when answering numerical questions
 
 CONSISTENCY METRICS:
 - Since joining RunStreak: ${runner.days_on_streak_since_joining || 0} days out of ${runner.total_days_since_joining || 0} total days
