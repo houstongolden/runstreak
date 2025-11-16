@@ -20,9 +20,13 @@ interface OnboardingModalProps {
 
 const steps = [
   { id: 1, title: "The Hard Truth About Consistency" },
-  { id: 2, title: "How RunStreak Changes Everything" },
-  { id: 3, title: "Your Personalized Journey Starts Now" },
-  { id: 4, title: "Join the Movement" },
+  { id: 2, title: "The Impact of Accountability" },
+  { id: 3, title: "RunStreak Community" },
+  { id: 4, title: "How It Works" },
+  { id: 5, title: "Your Projected Growth" },
+  { id: 6, title: "Your Starting Position" },
+  { id: 7, title: "Building Your Identity" },
+  { id: 8, title: "Join the Movement" },
 ];
 
 export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, totalRunners }: OnboardingModalProps) {
@@ -41,7 +45,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
   }, [open]);
 
   useEffect(() => {
-    if (open && currentStep === 4) {
+    if (open && currentStep === 8) {
       const duration = 2000;
       const end = Date.now() + duration;
       const frame = () => {
@@ -114,43 +118,77 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
         )}
 
         {currentStep === 2 && (
-          <div className="space-y-8 animate-in fade-in-50 duration-700">
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-4">
               <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="h-10 w-10 text-primary" />
               </div>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                RunStreak users experience a <span className="font-bold text-primary">{stats ? `+${stats.avg_days_on_streak_improvement.toFixed(0)}%` : '+67%'}</span> improvement in running consistency.
+              <p className="text-xl sm:text-2xl font-bold text-primary">
+                {stats ? `+${stats.avg_days_on_streak_improvement.toFixed(0)}%` : '+67%'} Improvement
+              </p>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
+                RunStreak users experience dramatic improvements in running consistency through public accountability.
               </p>
             </div>
-            <Card className="bg-card border-primary/20 p-6">
-              <h3 className="text-center font-semibold mb-4 text-foreground">Running Consistency: With vs Without Accountability</h3>
-              <ResponsiveContainer width="100%" height={250}>
+            <Card className="bg-card border-primary/20 p-4 sm:p-6">
+              <h3 className="text-center font-semibold mb-3 text-sm sm:text-base text-foreground">With vs Without Accountability</h3>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={consistencyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} />
-                  <Bar dataKey="withoutApp" name="Without RunStreak" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} />
+                  <Bar dataKey="withoutApp" name="Without" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="withApp" name="With RunStreak" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Card>
-            <div className="grid sm:grid-cols-3 gap-4">
+          </div>
+        )}
+
+        {currentStep === 3 && (
+          <div className="space-y-4 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                Real numbers from our community
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: TrendingUp, value: stats ? `${stats.avg_days_on_streak_percentage.toFixed(0)}%` : '85%', label: 'Average consistency rate', color: 'primary' },
-                { icon: Users, value: stats ? stats.total_users.toLocaleString() : '1,234', label: 'Active runners', color: 'accent' },
-                { icon: Flame, value: stats ? stats.active_streaks_count.toLocaleString() : '892', label: 'Active streaks today', color: 'primary' }
+                { icon: TrendingUp, value: stats ? `${stats.avg_days_on_streak_percentage.toFixed(0)}%` : '85%', label: 'Consistency', color: 'primary' },
+                { icon: Users, value: stats ? stats.total_users.toLocaleString() : '1,234', label: 'Runners', color: 'accent' },
+                { icon: Flame, value: stats ? stats.active_streaks_count.toLocaleString() : '892', label: 'Streaks', color: 'primary' }
               ].map((stat, i) => (
-                <Card key={i} className={`p-6 text-center bg-gradient-to-br from-${stat.color}/10 to-${stat.color}/5 border-${stat.color}/20`}>
-                  <stat.icon className={`h-8 w-8 text-${stat.color} mx-auto mb-2`} />
-                  <p className={`text-3xl font-bold text-${stat.color}`}>{stat.value}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                  <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
+                  <p className="text-xl sm:text-2xl font-bold text-primary">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
                 </Card>
               ))}
             </div>
+            <Card className="bg-muted/30 border-primary/20 p-6 text-center">
+              <p className="text-base sm:text-lg text-foreground leading-relaxed">
+                Join a community of runners who show up every single day.
+              </p>
+            </Card>
+          </div>
+        )}
+
+        {currentStep === 4 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                Three powerful forces keeping you consistent
+              </p>
+            </div>
             <Card className="bg-muted/30 border-primary/20 p-6">
-              <div className="space-y-3">
+              <div className="space-y-5">
                 {[
                   { title: 'Public Accountability', desc: 'Your streak is visible. The community keeps you honest.' },
                   { title: 'Gamified Progress', desc: 'Climb the leaderboard. Earn recognition. Feel the momentum.' },
@@ -158,7 +196,10 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                    <div><p className="font-semibold text-foreground">{item.title}</p><p className="text-sm text-muted-foreground">{item.desc}</p></div>
+                    <div>
+                      <p className="font-semibold text-foreground text-base">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -166,86 +207,106 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 3 && (
-          <div className="space-y-8 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-4">
-              <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                <Target className="h-10 w-10 text-primary" />
+        {currentStep === 5 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-3">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Target className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">Hey {runner?.display_name?.split(' ')[0] || 'Runner'}, this is YOUR journey.</p>
-                <p className="text-lg text-muted-foreground mt-2">Based on your current streak of <span className="font-bold text-primary">{runner?.current_streak_days || 0} days</span>, here's where you could be:</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">Hey {runner?.display_name?.split(' ')[0] || 'Runner'}!</p>
+                <p className="text-base text-muted-foreground mt-2">Current streak: <span className="font-bold text-primary">{runner?.current_streak_days || 0} days</span></p>
               </div>
             </div>
-            <Card className="bg-card border-primary/20 p-6">
-              <h3 className="text-center font-semibold mb-4 text-foreground">Your Projected Streak Growth</h3>
-              <ResponsiveContainer width="100%" height={250}>
+            <Card className="bg-card border-primary/20 p-4 sm:p-6">
+              <h3 className="text-center font-semibold mb-3 text-sm sm:text-base text-foreground">Your 90-Day Projection</h3>
+              <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={yourPotentialData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }} formatter={(value) => [`${value} days`, 'Streak']} />
-                  <Line type="monotone" dataKey="streak" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: 'hsl(var(--primary))', r: 6 }} />
+                  <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value} days`, 'Streak']} />
+                  <Line type="monotone" dataKey="streak" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: 'hsl(var(--primary))', r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
-              <p className="text-center text-sm text-muted-foreground mt-4">Projected 90-day streak growth with consistent engagement</p>
+              <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3">With consistent daily engagement</p>
             </Card>
+          </div>
+        )}
+
+        {currentStep === 6 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Award className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                Where you are and where you're headed
+              </p>
+            </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                 <Award className="h-8 w-8 text-primary mb-3" />
-                <p className="font-semibold text-foreground mb-2">Your Starting Position</p>
-                <p className="text-3xl font-bold text-primary mb-1">#{leaderboardRank}</p>
+                <p className="font-semibold text-foreground mb-2">Starting Position</p>
+                <p className="text-3xl sm:text-4xl font-bold text-primary mb-1">#{leaderboardRank}</p>
                 <p className="text-sm text-muted-foreground">out of {totalRunners} runners</p>
               </Card>
               <Card className="p-6 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
                 <Zap className="h-8 w-8 text-accent mb-3" />
                 <p className="font-semibold text-foreground mb-2">Your Potential</p>
-                <p className="text-3xl font-bold text-accent mb-1">Top 10%</p>
+                <p className="text-3xl sm:text-4xl font-bold text-accent mb-1">Top 10%</p>
                 <p className="text-sm text-muted-foreground">in 90 days with RunStreak</p>
               </Card>
             </div>
-            <Card className="bg-muted/30 border-primary/20 p-6 text-center">
-              <p className="text-lg text-foreground leading-relaxed"><span className="font-bold text-primary">You're not just tracking runs.</span><br/>You're building an identity as someone who shows up, every single day.</p>
+          </div>
+        )}
+
+        {currentStep === 7 && (
+          <div className="space-y-6 py-8 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Heart className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <Card className="bg-gradient-to-br from-primary/10 to-accent/5 border-primary/20 p-8 text-center">
+              <p className="text-xl sm:text-2xl font-bold text-primary mb-4">
+                You're not just tracking runs.
+              </p>
+              <p className="text-base sm:text-lg text-foreground leading-relaxed">
+                You're building an identity as someone who shows up, every single day.
+              </p>
             </Card>
           </div>
         )}
 
-        {currentStep === 4 && (
-          <div className="space-y-8 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-4 py-4">
-              <div className="mx-auto w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Users className="h-12 w-12 text-white" />
+        {currentStep === 8 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-3">
+              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Users className="h-10 w-10 text-white" />
               </div>
-              <h3 className="text-3xl font-bold text-foreground">You're Not Alone</h3>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">Join <span className="font-bold text-primary">{stats ? stats.total_users.toLocaleString() : '1,234'}</span> runners who refuse to break their streak.</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-foreground">🔥 You're Ready!</h3>
+              <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto">
+                Join <span className="font-bold text-primary">{stats ? stats.total_users.toLocaleString() : '1,234'}</span> runners building streaks
+              </p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { value: stats?.total_users.toLocaleString() || '1,234', label: 'Total Runners', icon: Users },
-                { value: stats?.active_streaks_count.toLocaleString() || '892', label: 'Active Streaks', icon: Flame },
-                { value: `${stats?.avg_days_on_streak_percentage.toFixed(0) || '85'}%`, label: 'Consistency', icon: TrendingUp },
-                { value: `+${stats?.avg_days_on_streak_improvement.toFixed(0) || '67'}%`, label: 'Improvement', icon: BarChart3 }
-              ].map((stat, i) => (
-                <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
-                  <stat.icon className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-                </Card>
-              ))}
-            </div>
-            <Card className="bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/30 p-8 text-center">
-              <p className="text-2xl font-bold text-foreground mb-3">🔥 Ready to transform your running?</p>
-              <p className="text-lg text-muted-foreground mb-6">RunStreak is <span className="font-bold text-primary">free forever</span> for leaderboard access.</p>
-              <div className="space-y-3 text-left max-w-md mx-auto">
+            <Card className="bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/30 p-6 text-center">
+              <p className="text-lg sm:text-xl font-bold text-foreground mb-2">RunStreak is Free Forever</p>
+              <p className="text-sm sm:text-base text-muted-foreground mb-5">Full leaderboard access included</p>
+              <div className="space-y-3 text-left max-w-sm mx-auto">
                 {['Public accountability that works', 'Real-time leaderboard rankings', 'AI-powered coaching insights', 'Community of dedicated runners'].map((text, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                    <p className="text-foreground">{text}</p>
+                    <p className="text-sm sm:text-base text-foreground">{text}</p>
                   </div>
                 ))}
               </div>
             </Card>
-            <div className="text-center"><p className="text-sm text-muted-foreground italic">"The best time to plant a tree was 20 years ago.<br/>The second best time is now."</p></div>
+            <div className="text-center">
+              <p className="text-xs sm:text-sm text-muted-foreground italic">
+                "The best time to start was yesterday.<br/>The second best time is now."
+              </p>
+            </div>
           </div>
         )}
 
