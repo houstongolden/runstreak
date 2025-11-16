@@ -37,6 +37,7 @@ const Index = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingRunner, setOnboardingRunner] = useState<Runner | null>(null);
   const [leaderboardRank, setLeaderboardRank] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchRunners = async () => {
     try {
@@ -307,6 +308,13 @@ const Index = () => {
                 <input
                   type="text"
                   placeholder="Search runners..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      navigate(`/discover?search=${encodeURIComponent(searchQuery.trim())}`);
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder:text-muted-foreground"
                 />
               </div>
