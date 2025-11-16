@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, TrendingUp, Users, Loader2 } from "lucide-react";
+import { MapPin, TrendingUp, Users, Loader2, Flame, Award, Zap } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
 import { FollowButton } from "@/components/FollowButton";
 import { AccountabilityPartnerButton } from "@/components/AccountabilityPartnerButton";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import ShinyText from "@/components/ui/shiny-text";
 
 type Runner = Tables<"runners">;
 
