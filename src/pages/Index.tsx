@@ -443,6 +443,11 @@ const Index = () => {
                   </a>
                 </li>
                 <li>
+                  <a href="/features" className="hover:text-foreground transition-colors">
+                    Features
+                  </a>
+                </li>
+                <li>
                   <a href="/badge-docs" className="hover:text-foreground transition-colors">
                     Badge Documentation
                   </a>
