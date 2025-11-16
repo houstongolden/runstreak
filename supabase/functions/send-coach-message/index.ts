@@ -10,6 +10,7 @@ interface SendMessageRequest {
   runner_id: string;
   message?: string; // Optional: if not provided, will generate AI message
   source?: 'sms' | 'app'; // Where the message is coming from
+  session_id?: string; // Optional: session ID for app messages
 }
 
 serve(async (req) => {
@@ -18,7 +19,7 @@ serve(async (req) => {
   }
 
   try {
-    const { runner_id, message, source = 'sms' }: SendMessageRequest = await req.json();
+    const { runner_id, message, source = 'sms', session_id }: SendMessageRequest = await req.json();
 
     if (!runner_id) {
       throw new Error('runner_id is required');
@@ -237,6 +238,18 @@ Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 
     }
 
     // Save AI response to database
+    const messagePayload: any = {
+      runner_id: runner_id,
+      content: messageToSend,
+      role: 'assistant',
+      source: source,
+    };
+    
+    // Add session_id if provided (for app messages)
+    if (session_id) {
+      messagePayload.session_id = session_id;
+    }
+
     await fetch(
       `${supabaseUrl}/rest/v1/coach_messages`,
       {
@@ -247,12 +260,7 @@ Keep responses conversational and helpful. ${source === 'sms' ? 'Keep under 160 
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal',
         },
-        body: JSON.stringify({
-          runner_id: runner_id,
-          content: messageToSend,
-          role: 'assistant',
-          source: source,
-        }),
+        body: JSON.stringify(messagePayload),
       }
     );
 
