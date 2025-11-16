@@ -1,5 +1,52 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.1';
 
+// Helper function to get timezone from coordinates
+async function getTimezoneFromCoords(lat: number, lon: number): Promise<string> {
+  try {
+    // Use free TimeZoneDB API or similar service
+    // For now, we'll use a simple coordinate-based estimation
+    // In production, you'd want to use a proper timezone API
+    const response = await fetch(
+      `https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.timeZone || 'America/New_York'; // fallback
+    }
+  } catch (error) {
+    console.error('Error fetching timezone:', error);
+  }
+  
+  // Fallback to UTC-based estimation from longitude
+  // This is rough but better than nothing
+  const utcOffset = Math.round(lon / 15);
+  const timezones: { [key: number]: string } = {
+    '-8': 'America/Los_Angeles',
+    '-7': 'America/Denver',
+    '-6': 'America/Chicago',
+    '-5': 'America/New_York',
+    '0': 'Europe/London',
+    '1': 'Europe/Paris',
+    '8': 'Asia/Shanghai',
+    '9': 'Asia/Tokyo',
+  };
+  return timezones[utcOffset] || 'America/New_York';
+}
+
+// Helper to get current date in a specific timezone
+function getDateInTimezone(date: Date, timezone: string): Date {
+  try {
+    const dateStr = date.toLocaleString('en-US', { timeZone: timezone });
+    const localDate = new Date(dateStr);
+    localDate.setHours(0, 0, 0, 0);
+    return localDate;
+  } catch (error) {
+    console.error('Error converting to timezone:', error);
+    return date;
+  }
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -105,6 +152,18 @@ Deno.serve(async (req) => {
     const sortedActivities = allActivities
       .sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
+    // Determine runner's timezone from coordinates
+    let timezone = runner.timezone;
+    if (!timezone && runner.latitude && runner.longitude) {
+      console.log('Determining timezone from coordinates...');
+      timezone = await getTimezoneFromCoords(runner.latitude, runner.longitude);
+      console.log(`Determined timezone: ${timezone}`);
+    }
+    if (!timezone) {
+      timezone = 'America/New_York'; // Default fallback
+      console.log('Using fallback timezone');
+    }
+
     let currentStreakDays = 0;
     let currentStreakMiles = 0;
     let longestStreak = 0;
@@ -114,29 +173,36 @@ Deno.serve(async (req) => {
     const activityDates = new Set<string>();
 
     for (const activity of sortedActivities) {
+      // Convert activity date to runner's timezone
       const activityDate = new Date(activity.start_date);
-      activityDate.setHours(0, 0, 0, 0);
-      const dateStr = activityDate.toISOString().split('T')[0];
+      const activityDateInTZ = getDateInTimezone(activityDate, timezone);
+      const dateStr = activityDateInTZ.toISOString().split('T')[0];
       activityDates.add(dateStr);
     }
 
     const sortedDates = Array.from(activityDates).sort().reverse();
-    // Get today in UTC
-    const todayUTC = new Date();
-    todayUTC.setHours(0, 0, 0, 0);
+    // Get today in runner's timezone
+    const todayInTZ = getDateInTimezone(new Date(), timezone);
 
     for (let i = 0; i < sortedDates.length; i++) {
       const dateStr = sortedDates[i];
-      const date = new Date(dateStr);
+      const date = new Date(dateStr + 'T00:00:00');
       
       if (i === 0) {
-        // Calculate days difference between today and last run
-        const daysDiff = Math.floor((todayUTC.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        // Calculate days difference between today and last run in runner's timezone
+        const daysDiff = Math.floor((todayInTZ.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
         
         // Streak is active if you ran today (0) or yesterday (1)
-        // Streak breaks only if 2+ full calendar days have passed
-        // This accounts for timezone differences and gives you until end of current day
-        if (daysDiff >= 2) break;
+        // Streak breaks only if 2+ full calendar days have passed IN YOUR TIMEZONE
+        if (daysDiff >= 2) {
+          console.log(`Streak broken: Last run was ${daysDiff} days ago in timezone ${timezone}`);
+          break;
+        }
+        
+        console.log(`Streak active: Last run was ${daysDiff} days ago in timezone ${timezone}`);
+        tempStreak = 1;
+        if (!streakStartDate) streakStartDate = date;
+        lastDate = date;
         
         tempStreak = 1;
         if (!streakStartDate) streakStartDate = date;
@@ -271,11 +337,11 @@ Deno.serve(async (req) => {
     
     // Calculate days on streak for last 30/60/90 days
     const getDaysWithActivity = (daysPast: number) => {
-      const startDate = new Date(todayUTC);
+      const startDate = new Date(todayInTZ);
       startDate.setDate(startDate.getDate() - daysPast);
       return allActivityDates.filter(dateStr => {
-        const date = new Date(dateStr);
-        return date >= startDate && date <= todayUTC;
+        const date = new Date(dateStr + 'T00:00:00');
+        return date >= startDate && date <= todayInTZ;
       }).length;
     };
     
@@ -292,7 +358,7 @@ Deno.serve(async (req) => {
     
     if (joinedDate) {
       joinedDate.setHours(0, 0, 0, 0);
-      totalDaysSinceJoining = Math.floor((todayUTC.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
+      totalDaysSinceJoining = Math.floor((todayInTZ.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
       
       // Count days with activity since joining
       daysOnStreakSinceJoining = allActivityDates.filter(dateStr => {
@@ -435,6 +501,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('runners')
       .update({
+        timezone: timezone, // Save the timezone for future use
         current_streak_days: currentStreakDays,
         current_streak_miles: currentStreakMiles,
         longest_streak_ever: longestStreak,

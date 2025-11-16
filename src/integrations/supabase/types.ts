@@ -436,6 +436,7 @@ export type Database = {
           strava_username: string
           streak_start_date: string | null
           streak_status: string | null
+          timezone: string | null
           token_expires_at: string | null
           total_days_before_joining: number | null
           total_days_since_joining: number | null
@@ -494,6 +495,7 @@ export type Database = {
           strava_username: string
           streak_start_date?: string | null
           streak_status?: string | null
+          timezone?: string | null
           token_expires_at?: string | null
           total_days_before_joining?: number | null
           total_days_since_joining?: number | null
@@ -552,6 +554,7 @@ export type Database = {
           strava_username?: string
           streak_start_date?: string | null
           streak_status?: string | null
+          timezone?: string | null
           token_expires_at?: string | null
           total_days_before_joining?: number | null
           total_days_since_joining?: number | null
