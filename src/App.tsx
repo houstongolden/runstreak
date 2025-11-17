@@ -42,7 +42,7 @@ const App = () => (
           <AuthProvider>
             <Routes>
               {/* Public routes - with sidebar for logged-in users */}
-              <Route path="/" element={<AppLayout><Index /></AppLayout>} />
+              <Route path="/" element={<Index />} />
               <Route path="/features" element={<AppLayout><Features /></AppLayout>} />
               <Route path="/story" element={<AppLayout><Story /></AppLayout>} />
               <Route path="/philosophy" element={<AppLayout><Philosophy /></AppLayout>} />
