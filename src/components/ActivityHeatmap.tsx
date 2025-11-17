@@ -75,7 +75,12 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     let currentDate = new Date(firstDayOfYear);
 
     while (currentDate <= endDate) {
-      const dateStr = currentDate.toISOString().split("T")[0];
+      // Format date as YYYY-MM-DD using local date components to avoid timezone issues
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+      
       const activityData = activityMap.get(dateStr);
       const isInYear = currentDate.getFullYear() === selectedYear;
       
