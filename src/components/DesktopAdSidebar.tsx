@@ -105,7 +105,7 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
           onClick={onAdvertiseClick}
           className="flex-shrink-0 h-[110px] flex items-center justify-center px-4 py-3 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer"
         >
-          <Megaphone className="h-8 w-8 text-muted-foreground" />
+          <Megaphone className="h-5 w-5 text-muted-foreground" />
         </Card>
       ))}
 

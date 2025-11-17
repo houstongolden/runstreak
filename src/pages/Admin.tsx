@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +16,8 @@ import {
   Trash2,
   Shield,
   UserX,
-  Megaphone
+  Megaphone,
+  LogOut
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/formatters";
@@ -75,12 +77,19 @@ interface AdSpot {
 }
 
 export default function Admin() {
+  const navigate = useNavigate();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [runners, setRunners] = useState<Runner[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [adSpots, setAdSpots] = useState<AdSpot[]>([]);
   const [adsLoading, setAdsLoading] = useState(true);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Logged out successfully');
+    navigate('/');
+  };
 
   useEffect(() => {
     fetchAnalytics();
@@ -200,10 +209,21 @@ export default function Admin() {
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground">Manage your RunStreak application</p>
         </div>
-        <Badge variant="outline" className="gap-2">
-          <Shield className="w-4 h-4" />
-          Admin Access
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+          <Badge variant="outline" className="gap-2">
+            <Shield className="w-4 h-4" />
+            Admin Access
+          </Badge>
+        </div>
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-6">

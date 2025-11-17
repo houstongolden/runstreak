@@ -23,6 +23,7 @@ import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 import { AppDownloadSection } from "@/components/AppDownloadSection";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { AppLayout } from "@/components/AppLayout";
 
 type LeaderboardView = "total" | "percent" | "fiveday";
 
@@ -127,13 +128,14 @@ const Index = () => {
   const hasMore = displayCount < runners.length;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Desktop Ad Sidebars */}
-      <DesktopAdSidebar side="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
-      <DesktopAdSidebar side="right" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+    <AppLayout>
+      <div className="min-h-screen bg-background">
+        {/* Desktop Ad Sidebars */}
+        <DesktopAdSidebar side="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+        <DesktopAdSidebar side="right" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
-      {/* Top Carousel (Mobile only) */}
-      <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+        {/* Top Carousel (Mobile only) */}
+        <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 lg:px-[280px] py-6 sm:py-12">
         {/* Header */}
@@ -476,7 +478,8 @@ const Index = () => {
       {/* Bottom Carousel (Mobile only) - Below Footer */}
       <SponsorCarousel direction="right" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
