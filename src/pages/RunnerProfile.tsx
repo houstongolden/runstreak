@@ -38,6 +38,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { RunnerActivities } from "@/components/RunnerActivities";
 import { TabsContent } from "@/components/ui/tabs";
 import { OnboardingModal } from "@/components/OnboardingModal";
+import { StreakCountdown } from "@/components/StreakCountdown";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -437,6 +438,9 @@ export default function RunnerProfile() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Streak Countdown - Only on own profile */}
+            {isOwnProfile && <StreakCountdown lastActivityDate={runner.last_activity_date} variant="profile" />}
+            
             {/* Current Streak */}
             <CurrentStreakCard
               streakDays={runner.current_streak_days || 0}
