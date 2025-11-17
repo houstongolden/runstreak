@@ -128,11 +128,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
-    <div className="w-full max-w-full min-w-0">
+    <div className="w-full">
       <h3 className="text-sm font-semibold mb-3">Activity Heatmap</h3>
-      <div className="bg-card rounded-lg p-4 sm:p-5 border max-w-full">
-        <div className="overflow-x-auto scrollbar-hide max-w-full" ref={scrollContainerRef}>
-          <div className="inline-block min-w-full">
+      <div className="bg-card rounded-lg p-4 sm:p-5 border">
+        <div className="overflow-x-auto scrollbar-hide" ref={scrollContainerRef}>
+          <div className="inline-block">
             {/* Month labels */}
             <div className="flex gap-[2px] mb-2 ml-6 sm:ml-8">
               {heatmapData.map((week, weekIndex) => {
