@@ -12,8 +12,9 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
-      <div className="w-full min-h-screen">
+      <div className="relative w-full min-h-screen">
+        <AppSidebar />
+        
         {/* Header */}
         <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center px-4 gap-4">
