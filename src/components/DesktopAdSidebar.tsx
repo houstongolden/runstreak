@@ -69,7 +69,6 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
   // Calculate how many sponsors to show
   const maxSponsors = side === "left" ? totalSlots : totalSlots - 1; // Right side reserves 1 spot for "Advertise"
   const sponsors = sideSpots.slice(0, maxSponsors);
-  const emptySlots = Math.max(0, maxSponsors - sponsors.length);
 
   return (
     <div className={`hidden lg:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[600px] pb-4`}>
@@ -96,28 +95,6 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
           <p className="text-xs text-muted-foreground leading-tight line-clamp-2">
             {sponsor.description}
           </p>
-        </Card>
-      ))}
-
-      {/* Empty ad spots with megaphone icon */}
-      {Array.from({ length: Math.min(emptySlots, totalSlots - sponsors.length) }).map((_, index) => (
-        <Card
-          key={`empty-${index}`}
-          onClick={onAdvertiseClick}
-          className="flex-shrink-0 h-[110px] flex items-center justify-center px-4 py-3 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer"
-        >
-          <Megaphone className="h-5 w-5 text-muted-foreground" />
-        </Card>
-      ))}
-
-      {/* Empty ad spots with megaphone icon */}
-      {Array.from({ length: emptySlots }).map((_, index) => (
-        <Card
-          key={`empty-${index}`}
-          onClick={onAdvertiseClick}
-          className="flex-shrink-0 h-[110px] flex items-center justify-center px-4 py-3 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer"
-        >
-          <Megaphone className="h-5 w-5 text-muted-foreground" />
         </Card>
       ))}
 
