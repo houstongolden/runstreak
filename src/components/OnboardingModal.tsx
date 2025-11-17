@@ -20,11 +20,11 @@ interface OnboardingModalProps {
 
 const steps = [
   { id: 1, title: "The Hard Truth About Consistency" },
-  { id: 2, title: "The Impact of Accountability" },
-  { id: 3, title: "RunStreak Community" },
-  { id: 4, title: "How It Works" },
-  { id: 5, title: "Your Projected Growth" },
-  { id: 6, title: "Your Starting Position" },
+  { id: 2, title: "Your Projected Growth" },
+  { id: 3, title: "Your Starting Position" },
+  { id: 4, title: "The Impact of Accountability" },
+  { id: 5, title: "RunStreak Community" },
+  { id: 6, title: "How It Works" },
   { id: 7, title: "Building Your Identity" },
   { id: 8, title: "Join the Movement" },
 ];
@@ -119,15 +119,69 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
 
         {currentStep === 2 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-3">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Target className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">Hey {runner?.display_name?.split(' ')[0] || 'Runner'}!</p>
+                <p className="text-base text-muted-foreground mt-2">Current streak: <span className="font-bold text-primary">{runner?.current_streak_days || 0} days</span></p>
+              </div>
+            </div>
+            <Card className="bg-card border-primary/20 p-4 sm:p-6">
+              <h3 className="text-center font-semibold mb-3 text-sm sm:text-base text-foreground">Your 90-Day Projection</h3>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={yourPotentialData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value} days`, 'Streak']} />
+                  <Line type="monotone" dataKey="streak" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: 'hsl(var(--primary))', r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
+              <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3">With consistent daily engagement</p>
+            </Card>
+          </div>
+        )}
+
+        {currentStep === 3 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <Award className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                Where you are and where you're headed
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                <Award className="h-8 w-8 text-primary mb-3" />
+                <p className="font-semibold text-foreground mb-2">Starting Position</p>
+                <p className="text-3xl sm:text-4xl font-bold text-primary mb-1">#{leaderboardRank}</p>
+                <p className="text-sm text-muted-foreground">out of {totalRunners} runners</p>
+              </Card>
+              <Card className="p-6 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+                <Zap className="h-8 w-8 text-accent mb-3" />
+                <p className="font-semibold text-foreground mb-2">Your Potential</p>
+                <p className="text-3xl sm:text-4xl font-bold text-accent mb-1">Top 10%</p>
+                <p className="text-sm text-muted-foreground">in 90 days with RunStreak</p>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 4 && stats && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-4">
               <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="h-10 w-10 text-primary" />
               </div>
               <p className="text-xl sm:text-2xl font-bold text-primary">
-                {stats ? `+${stats.avg_days_on_streak_improvement.toFixed(0)}%` : '+67%'} Improvement
+                +{stats.avg_days_on_streak_improvement.toFixed(0)}% Improvement
               </p>
               <p className="text-base sm:text-lg text-muted-foreground max-w-lg mx-auto leading-relaxed">
-                RunStreak users experience dramatic improvements in running consistency through public accountability.
+                Real data from RunStreak users showing dramatic improvements in consistency
               </p>
             </div>
             <Card className="bg-card border-primary/20 p-4 sm:p-6">
@@ -146,7 +200,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 5 && stats && (
           <div className="space-y-4 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-2">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -158,9 +212,9 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: TrendingUp, value: stats ? `${stats.avg_days_on_streak_percentage.toFixed(0)}%` : '85%', label: 'Consistency', color: 'primary' },
-                { icon: Users, value: stats ? stats.total_users.toLocaleString() : '1,234', label: 'Runners', color: 'accent' },
-                { icon: Flame, value: stats ? stats.active_streaks_count.toLocaleString() : '892', label: 'Streaks', color: 'primary' }
+                { icon: TrendingUp, value: `${stats.avg_days_on_streak_percentage.toFixed(0)}%`, label: 'Consistency', color: 'primary' },
+                { icon: Users, value: stats.total_users.toLocaleString(), label: 'Runners', color: 'accent' },
+                { icon: Flame, value: stats.active_streaks_count.toLocaleString(), label: 'Streaks', color: 'primary' }
               ].map((stat, i) => (
                 <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                   <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
@@ -177,7 +231,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 6 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-2">
               <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -207,60 +261,6 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 5 && (
-          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-3">
-              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Target className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <p className="text-xl sm:text-2xl font-bold text-foreground">Hey {runner?.display_name?.split(' ')[0] || 'Runner'}!</p>
-                <p className="text-base text-muted-foreground mt-2">Current streak: <span className="font-bold text-primary">{runner?.current_streak_days || 0} days</span></p>
-              </div>
-            </div>
-            <Card className="bg-card border-primary/20 p-4 sm:p-6">
-              <h3 className="text-center font-semibold mb-3 text-sm sm:text-base text-foreground">Your 90-Day Projection</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={yourPotentialData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value} days`, 'Streak']} />
-                  <Line type="monotone" dataKey="streak" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: 'hsl(var(--primary))', r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
-              <p className="text-center text-xs sm:text-sm text-muted-foreground mt-3">With consistent daily engagement</p>
-            </Card>
-          </div>
-        )}
-
-        {currentStep === 6 && (
-          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-2">
-              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Award className="h-8 w-8 text-primary" />
-              </div>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                Where you are and where you're headed
-              </p>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                <Award className="h-8 w-8 text-primary mb-3" />
-                <p className="font-semibold text-foreground mb-2">Starting Position</p>
-                <p className="text-3xl sm:text-4xl font-bold text-primary mb-1">#{leaderboardRank}</p>
-                <p className="text-sm text-muted-foreground">out of {totalRunners} runners</p>
-              </Card>
-              <Card className="p-6 bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
-                <Zap className="h-8 w-8 text-accent mb-3" />
-                <p className="font-semibold text-foreground mb-2">Your Potential</p>
-                <p className="text-3xl sm:text-4xl font-bold text-accent mb-1">Top 10%</p>
-                <p className="text-sm text-muted-foreground">in 90 days with RunStreak</p>
-              </Card>
-            </div>
-          </div>
-        )}
-
         {currentStep === 7 && (
           <div className="space-y-6 py-8 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-2">
@@ -279,7 +279,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 8 && (
+        {currentStep === 8 && stats && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
               <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
@@ -287,7 +287,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-foreground">🔥 You're Ready!</h3>
               <p className="text-base sm:text-lg text-muted-foreground max-w-md mx-auto">
-                Join <span className="font-bold text-primary">{stats ? stats.total_users.toLocaleString() : '1,234'}</span> runners building streaks
+                Join <span className="font-bold text-primary">{stats.total_users.toLocaleString()}</span> runners building streaks
               </p>
             </div>
             <Card className="bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10 border-primary/30 p-6 text-center">
