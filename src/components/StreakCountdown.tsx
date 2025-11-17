@@ -39,10 +39,20 @@ export function StreakCountdown({ lastActivityDate, variant = "profile" }: Strea
     return () => clearInterval(timer);
   }, []);
 
-  // Check if user has run today
-  const hasRunToday = lastActivityDate === new Date().toISOString().split('T')[0];
+  // Check if user has run today in their local timezone
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().split('T')[0];
   
-  // Don't show if they've already run today
+  // Also check yesterday since we allow running "yesterday" to keep streak
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  
+  const hasRunToday = lastActivityDate === todayStr;
+  const hasRunYesterday = lastActivityDate === yesterdayStr;
+  
+  // Don't show if they've run today
   if (hasRunToday) {
     return null;
   }

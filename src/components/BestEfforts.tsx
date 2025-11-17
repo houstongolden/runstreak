@@ -112,40 +112,58 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {efforts.map((effort) => (
-            <div
-              key={effort.distance}
-              className="p-4 rounded-lg bg-gradient-to-br from-muted/50 to-muted/30 border border-border/50 hover:border-primary/50 transition-all duration-200 group"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-                    {DISTANCE_LABELS[effort.distance] || `${effort.distance}m`}
-                  </div>
-                  {effort.start_date && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(effort.start_date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })}
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border/50">
+                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Distance</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Time</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Pace</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {efforts.map((effort, index) => (
+                <tr 
+                  key={effort.distance}
+                  className={`border-b border-border/30 hover:bg-muted/30 transition-colors ${
+                    index === 0 ? 'border-t border-border/50' : ''
+                  }`}
+                >
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="font-semibold text-foreground">
+                        {DISTANCE_LABELS[effort.distance] || `${(effort.distance / 1000).toFixed(1)}km`}
+                      </span>
                     </div>
-                  )}
-                </div>
-                <Trophy className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors" />
-              </div>
-              <div className="space-y-2 mt-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Time</span>
-                  <span className="font-bold text-base text-foreground">{formatTime(effort.elapsed_time)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground uppercase tracking-wide">Pace</span>
-                  <span className="font-semibold text-sm text-primary">{formatPace(effort.distance, effort.elapsed_time)}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="font-mono text-base text-foreground">
+                      {formatTime(effort.elapsed_time)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="text-sm text-primary font-medium">
+                      {formatPace(effort.distance, effort.moving_time)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(effort.start_date).toLocaleDateString('en-US', { 
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
         </div>
       </CardContent>
     </Card>
