@@ -40,14 +40,20 @@ export function StreakCountdown({ lastActivityDate, variant = "profile" }: Strea
   }, []);
 
   // Check if user has run today in their local timezone
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString().split('T')[0];
+  // Create date strings using local date components to match database format
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
   
-  // Also check yesterday since we allow running "yesterday" to keep streak
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  // Calculate yesterday in local timezone
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayYear = yesterdayDate.getFullYear();
+  const yesterdayMonth = String(yesterdayDate.getMonth() + 1).padStart(2, '0');
+  const yesterdayDay = String(yesterdayDate.getDate()).padStart(2, '0');
+  const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
   
   const hasRunToday = lastActivityDate === todayStr;
   const hasRunYesterday = lastActivityDate === yesterdayStr;
