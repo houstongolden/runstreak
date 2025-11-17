@@ -85,8 +85,9 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       const isInYear = currentDate.getFullYear() === selectedYear;
       
       if (isInYear) {
+        // Store the date string directly to avoid timezone issues
         currentWeek.push({
-          date: new Date(currentDate),
+          date: new Date(year, currentDate.getMonth(), currentDate.getDate()),
           distance: activityData?.distance || 0,
           runCount: activityData?.runCount || 0,
         });

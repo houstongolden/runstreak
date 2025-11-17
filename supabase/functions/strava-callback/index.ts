@@ -432,10 +432,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Check for existing user_settings to preserve email
+    // Check for existing user_settings to preserve user_email and email
     const { data: existingSettings } = await supabase
       .from('user_settings')
-      .select('email')
+      .select('email, user_email')
       .eq('runner_id', savedRunner.id)
       .maybeSingle();
     
@@ -447,12 +447,13 @@ Deno.serve(async (req) => {
     
     console.log(`User email for settings: ${settingsEmailToStore} (from Strava: ${hasRealEmail})`);
     
-    // Create or update user_settings with email
+    // Create or update user_settings with email, preserving user_email if it exists
     const { error: settingsError } = await supabase
       .from('user_settings')
       .upsert({
         runner_id: savedRunner.id,
         email: settingsEmailToStore,
+        user_email: existingSettings?.user_email || null, // Preserve user-provided email
         ai_coach_enabled: true,
         ai_coach_style: 'motivational',
         ai_coach_frequency: 'daily',
