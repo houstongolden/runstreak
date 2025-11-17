@@ -187,11 +187,13 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < sortedDates.length; i++) {
       const dateStr = sortedDates[i];
-      const date = new Date(dateStr + 'T00:00:00');
+      // Parse date in the runner's timezone to ensure correct comparison
+      const date = new Date(dateStr + 'T12:00:00Z'); // Use noon UTC to avoid day boundary issues
+      const dateInTZ = getDateInTimezone(date, timezone);
       
       if (i === 0) {
         // Calculate days difference between today and last run in runner's timezone
-        const daysDiff = Math.floor((todayInTZ.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.floor((todayInTZ.getTime() - dateInTZ.getTime()) / (1000 * 60 * 60 * 24));
         
         // Streak is active if you ran today (0) or yesterday (1)
         // Streak breaks only if 2+ full calendar days have passed IN YOUR TIMEZONE
@@ -202,15 +204,17 @@ Deno.serve(async (req) => {
         
         console.log(`Streak active: Last run was ${daysDiff} days ago in timezone ${timezone}`);
         tempStreak = 1;
-        if (!streakStartDate) streakStartDate = date;
-        lastDate = date;
+        if (!streakStartDate) streakStartDate = dateInTZ;
+        lastDate = dateInTZ;
       } else {
-        const prevDate = new Date(sortedDates[i - 1]);
-        const daysDiff = Math.floor((prevDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+        const prevDateStr = sortedDates[i - 1];
+        const prevDate = new Date(prevDateStr + 'T12:00:00Z');
+        const prevDateInTZ = getDateInTimezone(prevDate, timezone);
+        const daysDiff = Math.floor((prevDateInTZ.getTime() - dateInTZ.getTime()) / (1000 * 60 * 60 * 24));
         
         if (daysDiff === 1) {
           tempStreak++;
-          streakStartDate = date; // Always update to the earliest date as we go backwards
+          streakStartDate = dateInTZ; // Always update to the earliest date as we go backwards
         } else {
           break;
         }
