@@ -54,6 +54,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     const weeks: Array<Array<{ date: Date; distance: number; runCount: number } | null>> = [];
     
     // Create a map of activities by date for quick lookup
+    // Dates in database are already in runner's local timezone
     const activityMap = new Map();
     activities.forEach(activity => {
       activityMap.set(activity.activity_date, {
@@ -75,7 +76,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     let currentDate = new Date(firstDayOfYear);
 
     while (currentDate <= endDate) {
-      // Format date as YYYY-MM-DD using local date components to avoid timezone issues
+      // Format date as YYYY-MM-DD without timezone conversion (already local)
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, '0');
       const day = String(currentDate.getDate()).padStart(2, '0');
@@ -85,7 +86,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       const isInYear = currentDate.getFullYear() === selectedYear;
       
       if (isInYear) {
-        // Store the date string directly to avoid timezone issues
+        // Create date object in local time to match database dates
         currentWeek.push({
           date: new Date(year, currentDate.getMonth(), currentDate.getDate()),
           distance: activityData?.distance || 0,

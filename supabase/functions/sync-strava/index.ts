@@ -1,25 +1,23 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.1';
+import { formatInTimeZone, toZonedTime } from 'https://esm.sh/date-fns-tz@3.2.0';
+import { format } from 'https://esm.sh/date-fns@4.1.0';
 
 // Helper function to get timezone from coordinates
 async function getTimezoneFromCoords(lat: number, lon: number): Promise<string> {
   try {
-    // Use free TimeZoneDB API or similar service
-    // For now, we'll use a simple coordinate-based estimation
-    // In production, you'd want to use a proper timezone API
     const response = await fetch(
       `https://timeapi.io/api/timezone/coordinate?latitude=${lat}&longitude=${lon}`
     );
     
     if (response.ok) {
       const data = await response.json();
-      return data.timeZone || 'America/New_York'; // fallback
+      return data.timeZone || 'America/New_York';
     }
   } catch (error) {
     console.error('Error fetching timezone:', error);
   }
   
   // Fallback to UTC-based estimation from longitude
-  // This is rough but better than nothing
   const utcOffset = Math.round(lon / 15);
   const timezones: { [key: number]: string } = {
     '-8': 'America/Los_Angeles',
@@ -34,17 +32,22 @@ async function getTimezoneFromCoords(lat: number, lon: number): Promise<string> 
   return timezones[utcOffset] || 'America/New_York';
 }
 
-// Helper to get current date in a specific timezone
-function getDateInTimezone(date: Date, timezone: string): Date {
+// Convert UTC date string to local date string in runner's timezone
+function convertToLocalDateStr(utcDateStr: string, timezone: string): string {
   try {
-    const dateStr = date.toLocaleString('en-US', { timeZone: timezone });
-    const localDate = new Date(dateStr);
-    localDate.setHours(0, 0, 0, 0);
-    return localDate;
+    const utcDate = new Date(utcDateStr);
+    // Convert to the runner's timezone and format as YYYY-MM-DD
+    return formatInTimeZone(utcDate, timezone, 'yyyy-MM-dd');
   } catch (error) {
-    console.error('Error converting to timezone:', error);
-    return date;
+    console.error('Error converting date to timezone:', error);
+    // Fallback to basic conversion
+    return utcDateStr.split('T')[0];
   }
+}
+
+// Get today's date in runner's timezone as YYYY-MM-DD
+function getTodayInTimezone(timezone: string): string {
+  return formatInTimeZone(new Date(), timezone, 'yyyy-MM-dd');
 }
 
 const corsHeaders = {
@@ -214,30 +217,25 @@ Deno.serve(async (req) => {
     let streakStartDate: Date | null = null;
     const activityDates = new Set<string>();
 
+    // Convert all activities to runner's local timezone dates
     for (const activity of sortedActivities) {
-      // Convert activity date to runner's timezone
-      const activityDate = new Date(activity.start_date);
-      const activityDateInTZ = getDateInTimezone(activityDate, timezone);
-      const dateStr = activityDateInTZ.toISOString().split('T')[0];
+      const dateStr = convertToLocalDateStr(activity.start_date, timezone);
       activityDates.add(dateStr);
     }
 
     const sortedDates = Array.from(activityDates).sort().reverse();
-    // Get today in runner's timezone
-    const todayInTZ = getDateInTimezone(new Date(), timezone);
+    const todayStr = getTodayInTimezone(timezone);
 
     for (let i = 0; i < sortedDates.length; i++) {
       const dateStr = sortedDates[i];
-      // Parse date in the runner's timezone to ensure correct comparison
-      const date = new Date(dateStr + 'T12:00:00Z'); // Use noon UTC to avoid day boundary issues
-      const dateInTZ = getDateInTimezone(date, timezone);
       
       if (i === 0) {
-        // Calculate days difference between today and last run in runner's timezone
-        const daysDiff = Math.floor((todayInTZ.getTime() - dateInTZ.getTime()) / (1000 * 60 * 60 * 24));
+        // Calculate days difference between today and last run
+        const lastRunDate = new Date(dateStr);
+        const todayDate = new Date(todayStr);
+        const daysDiff = Math.floor((todayDate.getTime() - lastRunDate.getTime()) / (1000 * 60 * 60 * 24));
         
         // Streak is active if you ran today (0) or yesterday (1)
-        // Streak breaks only if 2+ full calendar days have passed IN YOUR TIMEZONE
         if (daysDiff >= 2) {
           console.log(`Streak broken: Last run was ${daysDiff} days ago in timezone ${timezone}`);
           break;
@@ -245,17 +243,17 @@ Deno.serve(async (req) => {
         
         console.log(`Streak active: Last run was ${daysDiff} days ago in timezone ${timezone}`);
         tempStreak = 1;
-        if (!streakStartDate) streakStartDate = dateInTZ;
-        lastDate = dateInTZ;
+        if (!streakStartDate) streakStartDate = new Date(dateStr);
+        lastDate = new Date(dateStr);
       } else {
         const prevDateStr = sortedDates[i - 1];
-        const prevDate = new Date(prevDateStr + 'T12:00:00Z');
-        const prevDateInTZ = getDateInTimezone(prevDate, timezone);
-        const daysDiff = Math.floor((prevDateInTZ.getTime() - dateInTZ.getTime()) / (1000 * 60 * 60 * 24));
+        const prevDate = new Date(prevDateStr);
+        const currDate = new Date(dateStr);
+        const daysDiff = Math.floor((prevDate.getTime() - currDate.getTime()) / (1000 * 60 * 60 * 24));
         
         if (daysDiff === 1) {
           tempStreak++;
-          streakStartDate = dateInTZ; // Always update to the earliest date as we go backwards
+          streakStartDate = new Date(dateStr);
         } else {
           break;
         }
@@ -283,11 +281,11 @@ Deno.serve(async (req) => {
     const streakStatus = currentStreakDays > 0 ? 'active' : 'broken';
     const lastActivityDate = sortedActivities.length > 0 ? new Date(sortedActivities[0].start_date).toISOString().split('T')[0] : null;
 
-    // Store daily activities with comprehensive data
+    // Store daily activities with comprehensive data using runner's timezone
     const dailyActivitiesMap = new Map<string, any>();
 
     for (const activity of allActivities) {
-      const dateStr = new Date(activity.start_date).toISOString().split('T')[0];
+      const dateStr = convertToLocalDateStr(activity.start_date, timezone);
       const existing = dailyActivitiesMap.get(dateStr) || { 
         distance: 0, movingTime: 0, elevationGain: 0, runCount: 0,
         averageTemp: null, tempCount: 0,
@@ -461,12 +459,13 @@ Deno.serve(async (req) => {
     const allActivityDates = Array.from(activityDates);
     
     // Calculate days on streak for last 30/60/90 days
+    const todayDate = new Date(todayStr);
     const getDaysWithActivity = (daysPast: number) => {
-      const startDate = new Date(todayInTZ);
+      const startDate = new Date(todayStr);
       startDate.setDate(startDate.getDate() - daysPast);
       return allActivityDates.filter(dateStr => {
         const date = new Date(dateStr + 'T00:00:00');
-        return date >= startDate && date <= todayInTZ;
+        return date >= startDate && date <= todayDate;
       }).length;
     };
     
@@ -483,7 +482,7 @@ Deno.serve(async (req) => {
     
     if (joinedDate) {
       joinedDate.setHours(0, 0, 0, 0);
-      totalDaysSinceJoining = Math.floor((todayInTZ.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
+      totalDaysSinceJoining = Math.floor((todayDate.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
       
       // Count days with activity since joining
       daysOnStreakSinceJoining = allActivityDates.filter(dateStr => {

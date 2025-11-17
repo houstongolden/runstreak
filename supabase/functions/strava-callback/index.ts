@@ -1,4 +1,21 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { formatInTimeZone } from 'https://esm.sh/date-fns-tz@3.2.0';
+
+// Convert UTC date string to local date string in runner's timezone
+function convertToLocalDateStr(utcDateStr: string, timezone: string): string {
+  try {
+    const utcDate = new Date(utcDateStr);
+    return formatInTimeZone(utcDate, timezone, 'yyyy-MM-dd');
+  } catch (error) {
+    console.error('Error converting date to timezone:', error);
+    return utcDateStr.split('T')[0];
+  }
+}
+
+// Get today's date in runner's timezone as YYYY-MM-DD
+function getTodayInTimezone(timezone: string): string {
+  return formatInTimeZone(new Date(), timezone, 'yyyy-MM-dd');
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -155,7 +172,11 @@ Deno.serve(async (req) => {
     const activities = allActivities;
     console.log(`Total activities fetched: ${activities.length}`);
 
-    // Calculate streak
+    // Get runner's timezone from Strava profile, fallback to America/Los_Angeles
+    const timezone = athleteProfile.timezone || 'America/Los_Angeles';
+    console.log('Using timezone:', timezone);
+
+    // Calculate streak using runner's local timezone
     const runActivities = activities
       .filter((a: any) => a.type === 'Run')
       .sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
@@ -167,14 +188,12 @@ Deno.serve(async (req) => {
     let lastActivityDate = null;
     let tempStreak = 0;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = getTodayInTimezone(timezone);
     
+    // Build activity map using runner's local date
     const activityDates = new Map();
     runActivities.forEach((activity: any) => {
-      const date = new Date(activity.start_date);
-      date.setHours(0, 0, 0, 0);
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = convertToLocalDateStr(activity.start_date, timezone);
       const miles = (activity.distance * 0.000621371);
       
       if (!activityDates.has(dateStr)) {
@@ -186,9 +205,12 @@ Deno.serve(async (req) => {
 
     const sortedDates = Array.from(activityDates.keys()).sort().reverse();
     
+    // Calculate current streak
     for (let i = 0; i < sortedDates.length; i++) {
-      const currentDate = new Date(sortedDates[i]);
-      const expectedDate = new Date(today);
+      const currentDateStr = sortedDates[i];
+      const currentDate = new Date(currentDateStr);
+      const todayDate = new Date(todayStr);
+      const expectedDate = new Date(todayDate);
       expectedDate.setDate(expectedDate.getDate() - i);
       expectedDate.setHours(0, 0, 0, 0);
       
@@ -217,12 +239,13 @@ Deno.serve(async (req) => {
     const averageMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
 
     // Calculate Days on Streak metrics (activity regardless of breaks)
+    const todayDate = new Date(todayStr);
     const calculateDaysOnStreak = (daysBack: number) => {
-      const cutoffDate = new Date(today);
+      const cutoffDate = new Date(todayStr);
       cutoffDate.setDate(cutoffDate.getDate() - daysBack);
       return sortedDates.filter(dateStr => {
         const date = new Date(dateStr);
-        return date >= cutoffDate && date <= today;
+        return date >= cutoffDate && date <= todayDate;
       }).length;
     };
 
@@ -244,10 +267,10 @@ Deno.serve(async (req) => {
     joinedDate.setHours(0, 0, 0, 0);
     
     // Calculate days on streak since joining RunStreak
-    const daysSinceJoining = Math.floor((today.getTime() - joinedDate.getTime()) / 86400000) + 1;
+    const daysSinceJoining = Math.floor((todayDate.getTime() - joinedDate.getTime()) / 86400000) + 1;
     const daysOnStreakSinceJoining = sortedDates.filter(dateStr => {
       const date = new Date(dateStr);
-      return date >= joinedDate && date <= today;
+      return date >= joinedDate && date <= todayDate;
     }).length;
 
     // Calculate baseline before joining (average of 90-day periods before join date)
