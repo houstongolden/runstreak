@@ -416,67 +416,35 @@ Deno.serve(async (req) => {
       console.log('User settings created');
     }
     
-    // Create Supabase Auth user if doesn't exist
-    const tempPassword = crypto.randomUUID() + crypto.randomUUID();
-    const { data: authUser, error: createError } = await supabase.auth.admin.createUser({
-      email: userEmail,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: {
-        strava_id: athleteProfile.id,
-        display_name: athleteProfile.firstname + ' ' + athleteProfile.lastname,
-        avatar_url: athleteProfile.profile,
-        runner_id: savedRunner.id,
-        has_real_email: hasRealEmail,
-      }
-    });
+    // Create Supabase Auth user ONLY if this is a returning user who already has a user_id
+    // For new users, we'll redirect them to verify-account page first
+    let userId: string | null = savedRunner.user_id;
+    let shouldRedirectToVerify = false;
     
-    let userId: string | null = null;
-    
-    if (createError && !createError.message.includes('already been registered')) {
-      console.error('Error creating auth user:', createError);
-    } else if (authUser?.user) {
-      console.log('Supabase Auth user created, linking to runner');
-      userId = authUser.user.id;
-      
-      // Link the runner to the auth user
-      const { error: linkError } = await supabase
-        .from('runners')
-        .update({ user_id: authUser.user.id })
-        .eq('id', savedRunner.id);
-        
-      if (linkError) {
-        console.error('Error linking runner to auth user:', linkError);
-      } else {
-        console.log('Runner successfully linked to auth user');
-      }
+    if (!userId) {
+      console.log('New user without user_id - will redirect to verification');
+      shouldRedirectToVerify = true;
     } else {
-      console.log('Supabase Auth user already exists, trying to link');
-      
-      // User already exists, get their ID and link it
-      const { data: existingUser } = await supabase.auth.admin.listUsers();
-      const matchingUser = existingUser?.users.find(u => u.email === userEmail);
-      
-      if (matchingUser) {
-        userId = matchingUser.id;
-        const { error: linkError } = await supabase
-          .from('runners')
-          .update({ user_id: matchingUser.id })
-          .eq('id', savedRunner.id);
-          
-        if (linkError) {
-          console.error('Error linking existing user to runner:', linkError);
-        } else {
-          console.log('Existing auth user linked to runner');
-        }
-      }
+      console.log('Existing user with user_id, proceeding with magic link');
     }
     
-    // Generate a magic link for automatic sign-in
+    // Generate redirect URL
     let redirectUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     const runnerId = savedRunner?.id || '';
     const isNewUser = !existingRunner;
     
+    // If user needs to verify, redirect to verify-account page
+    if (shouldRedirectToVerify) {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': `${redirectUrl}/verify-account?runnerId=${runnerId}`,
+          ...corsHeaders,
+        },
+      });
+    }
+    
+    // For existing users with auth account, generate magic link for auto sign-in
     if (userId) {
       try {
         // Generate a sign-in link for the user
