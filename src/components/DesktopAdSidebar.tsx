@@ -22,23 +22,23 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
     : allSponsors.slice(3, 6);
 
   return (
-    <div className={`hidden lg:flex fixed ${side === "left" ? "left-4" : "right-4"} top-24 flex-col gap-4 w-[200px] max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide pb-4`}>
+    <div className={`hidden lg:flex fixed ${side === "left" ? "left-4" : "right-4"} top-24 flex-col gap-3 w-[160px] max-h-[70vh] overflow-y-auto scrollbar-hide pb-4`}>
       {/* Sponsor cards */}
       {sponsors.map((sponsor, index) => (
         <Card
           key={`${sponsor.name}-${index}`}
-          className="flex-shrink-0 h-[200px] flex flex-col items-center justify-center gap-3 px-3 bg-card border-border hover:bg-muted/50 transition-colors"
+          className="flex-shrink-0 h-[140px] flex flex-col items-center justify-center gap-2 px-2 bg-card border-border hover:bg-muted/50 transition-colors"
         >
           <img
             src={getCompanyLogoUrl(sponsor.name)}
             alt={`${sponsor.name} logo`}
-            className="h-12 w-12 object-contain"
+            className="h-10 w-10 object-contain"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
             }}
           />
-          <span className="font-semibold text-sm text-foreground text-center">
+          <span className="font-semibold text-xs text-foreground text-center">
             {sponsor.name}
           </span>
         </Card>
@@ -47,9 +47,9 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
       {/* Advertise spot at bottom */}
       <Card
         onClick={onAdvertiseClick}
-        className="flex-shrink-0 h-[200px] flex flex-col items-center justify-center gap-2 px-3 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer mt-auto"
+        className="flex-shrink-0 h-[140px] flex flex-col items-center justify-center gap-2 px-2 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer"
       >
-        <span className="font-semibold text-sm text-foreground text-center">Advertise</span>
+        <span className="font-semibold text-xs text-foreground text-center">Advertise</span>
         <span className="text-xs text-muted-foreground text-center">Your spot here</span>
       </Card>
     </div>
