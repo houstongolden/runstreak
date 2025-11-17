@@ -327,44 +327,44 @@ export default function RunnerProfile() {
 
         {/* Profile Header */}
         <Card className="mb-6 sm:mb-8">
-          <CardContent className="p-6 sm:p-8">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1 w-full">
-                <Avatar className="h-28 w-28 sm:h-32 sm:w-32 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0">
+                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
                     {runner.display_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 text-center sm:text-left w-full">
-                  <h1 className="text-2xl sm:text-3xl font-bold mb-3">{runner.display_name}</h1>
+                <div className="flex-1 text-center sm:text-left w-full min-w-0">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 break-words">{runner.display_name}</h1>
                   
                   {runner.bio && (
-                    <p className="text-muted-foreground mb-4 text-sm sm:text-base">{runner.bio}</p>
+                    <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base break-words">{runner.bio}</p>
                   )}
                   
                   {(runner.city || runner.state || runner.country) && (
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className="text-sm text-muted-foreground mb-3 sm:mb-4 break-words">
                       📍 {[runner.city, runner.state, runner.country].filter(Boolean).join(', ')}
                     </p>
                   )}
 
                   {/* Follower/Following Counts */}
-                  <div className="flex gap-6 mb-4 justify-center sm:justify-start">
+                  <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-foreground">{followerCount}</div>
+                      <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
                       <div className="text-xs text-muted-foreground">Followers</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-foreground">{followingCount}</div>
+                      <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
                       <div className="text-xs text-muted-foreground">Following</div>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
-                    <div className="flex gap-2 mb-4 flex-wrap justify-center sm:justify-start">
+                    <div className="flex gap-2 mb-3 sm:mb-4 flex-wrap justify-center sm:justify-start">
                       <FollowButton
                         targetRunnerId={runner.id}
                         currentRunnerId={currentRunnerId}
@@ -399,7 +399,7 @@ export default function RunnerProfile() {
                 </div>
               </div>
               
-              <div className="w-full lg:w-auto lg:min-w-[380px] xl:min-w-[420px]">
+              <div className="w-full lg:w-auto lg:max-w-[420px] overflow-hidden">
                 <ActivityHeatmap runnerId={runner.id} />
               </div>
             </div>
