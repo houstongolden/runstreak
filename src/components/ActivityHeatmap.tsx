@@ -182,25 +182,26 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       <div className="bg-card rounded-lg p-4 sm:p-5 border overflow-hidden">
         <div className="overflow-x-auto scrollbar-hide" ref={scrollContainerRef}>
           <div className="inline-block max-w-full">
-            {/* Month labels - absolutely positioned to align with week columns */}
-            <div className="relative mb-2 ml-6 sm:ml-8" style={{ height: '16px' }}>
-              {monthLabelPositions.map((position, idx) => (
-                <div
-                  key={idx}
-                  className="absolute text-[10px] sm:text-xs text-muted-foreground"
-                  style={{
-                    left: `${position.weekIndex * (12 + 2)}px`, // 12px width + 2px gap (w-3 + gap-[2px])
-                  }}
-                >
-                  {position.month}
-                </div>
-              ))}
+            {/* Month labels - using grid structure to match week columns exactly */}
+            <div className="flex gap-[2px] mb-2">
+              {/* Spacer for day labels column */}
+              <div className="w-6 sm:w-8 shrink-0" />
+              
+              {/* Month label grid - one cell per week */}
+              {heatmapData.map((week, weekIndex) => {
+                const monthLabel = monthLabelPositions.find(pos => pos.weekIndex === weekIndex);
+                return (
+                  <div key={weekIndex} className="w-3 sm:w-3.5 shrink-0 text-[10px] sm:text-xs text-muted-foreground">
+                    {monthLabel ? monthLabel.month : ""}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Heatmap grid */}
             <div className="flex gap-[2px]">
               {/* Day labels */}
-              <div className="flex flex-col gap-[2px] text-[10px] sm:text-xs text-muted-foreground pr-2 sm:pr-3">
+              <div className="flex flex-col gap-[2px] text-[10px] sm:text-xs text-muted-foreground pr-2 sm:pr-3 w-6 sm:w-8 shrink-0">
                 <div className="h-3 sm:h-3.5">Mon</div>
                 <div className="h-3 sm:h-3.5"></div>
                 <div className="h-3 sm:h-3.5">Wed</div>
@@ -213,7 +214,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
               {/* Activity squares */}
               <TooltipProvider>
                 {heatmapData.map((week, weekIndex) => (
-                  <div key={weekIndex} className="flex flex-col gap-[2px]">
+                  <div key={weekIndex} className="flex flex-col gap-[2px] shrink-0">
                     {week.map((day, dayIndex) => {
                       if (!day) {
                         return <div key={dayIndex} className="w-3 sm:w-3.5 h-3 sm:h-3.5" />;

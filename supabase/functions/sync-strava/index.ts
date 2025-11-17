@@ -343,33 +343,10 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Check if we need a full resync of best efforts
-    const needsFullResync = !existingBestEfforts || existingBestEfforts.length < 5;
-    
-    // Determine which activities to check for PRs
-    let activitiesToCheck;
-    if (needsFullResync) {
-      // First sync or very few best efforts - check all activities
-      console.log('Performing full best efforts sync - checking all activities');
-      activitiesToCheck = allActivities;
-    } else {
-      // Check last 50 activities to ensure we capture any missed PRs + all new activities
-      const lastSyncDate = runner.last_activity_date ? new Date(runner.last_activity_date) : null;
-      const recentActivities = allActivities.slice(0, 50);
-      const newActivities = lastSyncDate 
-        ? allActivities.filter((a: any) => new Date(a.start_date) > lastSyncDate)
-        : [];
-      
-      // Combine recent + new, removing duplicates
-      const activityIds = new Set();
-      activitiesToCheck = [...recentActivities, ...newActivities].filter(a => {
-        if (activityIds.has(a.id)) return false;
-        activityIds.add(a.id);
-        return true;
-      });
-      
-      console.log(`Checking ${newActivities.length} new activities + ${recentActivities.length} recent activities for PRs`);
-    }
+    // ALWAYS do a full historical check to ensure PRs are accurate
+    // This is critical because true PRs may be from years ago, not recent activities
+    console.log('Performing comprehensive best efforts check across ALL historical activities');
+    const activitiesToCheck = allActivities;
     
     console.log(`Checking ${activitiesToCheck.length} activities for personal bests (${allActivities.length} total activities)`);
     
