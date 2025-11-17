@@ -182,15 +182,19 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       <div className="bg-card rounded-lg p-4 sm:p-5 border overflow-hidden">
         <div className="overflow-x-auto scrollbar-hide" ref={scrollContainerRef}>
           <div className="inline-block max-w-full">
-            {/* Month labels - positioned using grid structure */}
+            {/* Month labels - absolutely positioned to align with week columns */}
             <div className="relative mb-2 ml-6 sm:ml-8" style={{ height: '16px' }}>
-              <div className="flex gap-[2px]">
-                {heatmapData.map((_, weekIndex) => (
-                  <div key={weekIndex} className="w-3 sm:w-3.5 text-[10px] sm:text-xs text-muted-foreground">
-                    {monthLabelPositions.find(pos => pos.weekIndex === weekIndex)?.month || ""}
-                  </div>
-                ))}
-              </div>
+              {monthLabelPositions.map((position, idx) => (
+                <div
+                  key={idx}
+                  className="absolute text-[10px] sm:text-xs text-muted-foreground"
+                  style={{
+                    left: `${position.weekIndex * (12 + 2)}px`, // 12px width + 2px gap (w-3 + gap-[2px])
+                  }}
+                >
+                  {position.month}
+                </div>
+              ))}
             </div>
 
             {/* Heatmap grid */}
