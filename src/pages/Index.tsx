@@ -159,7 +159,7 @@ const Index = () => {
         {/* Top Carousel (Mobile only) */}
         {adsEnabled && <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-6 sm:py-12">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24 py-6 sm:py-12">
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
@@ -225,7 +225,7 @@ const Index = () => {
         )}
 
         {/* Leaderboard Section */}
-        <div className="mb-6 px-2 sm:px-4">
+        <div className="mb-6 px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
             <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
               <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
@@ -387,7 +387,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Explore */}
             <div>
