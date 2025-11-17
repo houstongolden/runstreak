@@ -251,8 +251,8 @@ export default function RunnerProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 overflow-x-hidden">
         {/* Header with Back Button and Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <Button
@@ -326,10 +326,10 @@ export default function RunnerProfile() {
         </div>
 
         {/* Profile Header */}
-        <Card className="mb-6 sm:mb-8">
+        <Card className="mb-6 sm:mb-8 overflow-hidden">
           <CardContent className="p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0">
+            <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0 overflow-hidden">
                 <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
@@ -399,7 +399,7 @@ export default function RunnerProfile() {
                 </div>
               </div>
               
-              <div className="w-full lg:w-auto lg:max-w-[420px] overflow-hidden">
+              <div className="w-full lg:w-auto lg:max-w-[420px] max-w-full overflow-hidden flex-shrink-0">
                 <ActivityHeatmap runnerId={runner.id} />
               </div>
             </div>
