@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Flame, TrendingUp, Users, ChevronRight, Award, BarChart3, Heart, Zap, Target, CheckCircle2, ArrowRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Runner } from "@/types";
@@ -20,10 +22,11 @@ interface OnboardingModalProps {
 }
 
 const steps = [
-  { id: 1, title: "Join the Leaderboard" },
+  { id: 1, title: "Welcome" },
   { id: 2, title: "Track Your Consistency" },
   { id: 3, title: "Stay Accountable" },
-  { id: 4, title: "Start Your Streak" },
+  { id: 4, title: "Join the Community" },
+  { id: 5, title: "Start Your Streak" },
 ];
 
 export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, totalRunners }: OnboardingModalProps) {
@@ -42,7 +45,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
   }, [open]);
 
   useEffect(() => {
-    if (open && currentStep === 4) {
+    if (open && currentStep === 1) {
       const duration = 2000;
       const end = Date.now() + duration;
       const frame = () => {
@@ -76,31 +79,34 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
         {currentStep === 1 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Join the Leaderboard</p>
-              <p className="text-base text-muted-foreground font-instrument">Your current streak from Strava</p>
+              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">You've joined the leaderboard!</p>
+              <p className="text-base text-muted-foreground font-instrument">Welcome to the RunStreak community</p>
             </div>
-            <Card className="bg-card border-primary/20 p-4">
-              <div className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
-                <div className="text-2xl font-bold text-primary">#{leaderboardRank}</div>
-                <div className="flex items-center gap-3 flex-1">
-                  <Avatar className="w-12 h-12">
-                    <AvatarImage src={runner?.avatar_url || ''} alt={runner?.display_name || 'Runner'} />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-bold">
-                      {runner?.display_name?.charAt(0) || 'R'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">{runner?.display_name || 'Your Name'}</p>
-                    <p className="text-sm text-muted-foreground">@{runner?.strava_username || 'username'}</p>
+            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <Avatar className="h-12 w-12 border-2 border-primary/30">
+                  <AvatarImage src={runner?.avatar_url || ''} alt={runner?.display_name} />
+                  <AvatarFallback className="bg-primary/20 text-primary font-instrument">
+                    {runner?.display_name?.charAt(0) || 'R'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-foreground font-instrument">{runner?.display_name}</p>
+                    <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 font-instrument">
+                      #{leaderboardRank}
+                    </Badge>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-primary font-instrument">{runner?.current_streak_days || 0}</p>
-                  <p className="text-xs text-muted-foreground font-instrument">day streak</p>
+                  <p className="text-sm text-muted-foreground font-instrument">
+                    {runner?.current_streak_days || 0} day streak
+                  </p>
                 </div>
               </div>
+              <Separator className="bg-primary/20 mb-4" />
+              <div className="text-center text-muted-foreground text-sm font-instrument">
+                Top {Math.round((leaderboardRank / totalRunners) * 100)}% of {totalRunners.toLocaleString()} runners
+              </div>
             </Card>
-            <p className="text-center text-sm text-muted-foreground font-instrument">Your streak is visible to everyone. The community keeps you honest.</p>
           </div>
         )}
 
@@ -169,7 +175,34 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 4 && stats && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-3">
+              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Join the Community</p>
+              <p className="text-base text-muted-foreground font-instrument">Real stats from runners like you</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: Users, value: stats.total_users.toLocaleString(), label: 'Runners' },
+                { icon: Flame, value: stats.active_streaks_count.toLocaleString(), label: 'Active Streaks' },
+                { icon: TrendingUp, value: `${stats.avg_days_on_streak_percentage.toFixed(0)}%`, label: 'Consistency' }
+              ].map((stat, i) => (
+                <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                  <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
+                  <p className="text-xl sm:text-2xl font-bold text-primary font-instrument">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1 font-instrument">{stat.label}</p>
+                </Card>
+              ))}
+            </div>
+            <Card className="bg-muted/30 border-primary/20 p-6 text-center">
+              <p className="text-base sm:text-lg text-foreground leading-relaxed font-instrument">
+                A community of runners who show up every single day
+              </p>
+            </Card>
+          </div>
+        )}
+
+        {currentStep === 5 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
               <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Ready to Start Your Streak</p>
