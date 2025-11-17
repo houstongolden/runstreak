@@ -138,6 +138,27 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     availableYears.push(currentYear);
   }
 
+  // Calculate month label positions based on actual week indices
+  const getMonthLabelPositions = () => {
+    const positions: { month: string; weekIndex: number }[] = [];
+    let lastMonth = -1;
+
+    heatmapData.forEach((week, weekIndex) => {
+      const firstDay = week.find(day => day !== null);
+      if (firstDay) {
+        const monthIndex = firstDay.date.getMonth();
+        if (monthIndex !== lastMonth) {
+          positions.push({ month: months[monthIndex], weekIndex });
+          lastMonth = monthIndex;
+        }
+      }
+    });
+
+    return positions;
+  };
+
+  const monthLabelPositions = getMonthLabelPositions();
+
   return (
     <div className="w-full min-w-0 max-w-[350px]">
       <div className="flex items-center justify-between mb-3">
@@ -161,21 +182,15 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       <div className="bg-card rounded-lg p-4 sm:p-5 border overflow-hidden">
         <div className="overflow-x-auto scrollbar-hide" ref={scrollContainerRef}>
           <div className="inline-block max-w-full">
-            {/* Month labels */}
-            <div className="flex gap-[2px] mb-2 ml-6 sm:ml-8">
-              {heatmapData.map((week, weekIndex) => {
-                const firstDay = week.find(day => day !== null);
-                if (!firstDay) return <div key={weekIndex} className="w-3 sm:w-3.5" />;
-                
-                const date = firstDay.date;
-                const isFirstWeekOfMonth = date.getDate() <= 7;
-                
-                return (
+            {/* Month labels - positioned using grid structure */}
+            <div className="relative mb-2 ml-6 sm:ml-8" style={{ height: '16px' }}>
+              <div className="flex gap-[2px]">
+                {heatmapData.map((_, weekIndex) => (
                   <div key={weekIndex} className="w-3 sm:w-3.5 text-[10px] sm:text-xs text-muted-foreground">
-                    {isFirstWeekOfMonth ? months[date.getMonth()] : ""}
+                    {monthLabelPositions.find(pos => pos.weekIndex === weekIndex)?.month || ""}
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
             {/* Heatmap grid */}
