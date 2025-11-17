@@ -210,8 +210,7 @@ Deno.serve(async (req) => {
         
         if (daysDiff === 1) {
           tempStreak++;
-          if (!streakStartDate) streakStartDate = date;
-          lastDate = date;
+          streakStartDate = date; // Always update to the earliest date as we go backwards
         } else {
           break;
         }
