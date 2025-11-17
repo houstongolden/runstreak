@@ -59,18 +59,16 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
 
   // Left side gets 5 spots, right side gets 4 (to fit advertise section)
   const totalSlots = side === "left" ? 5 : 4;
-  const activeSpots = adSpots.length;
-  const emptySlots = Math.max(0, totalSlots - activeSpots);
-
-  // Left sidebar shows first half, right shows second half, offset by currentIndex
-  const startIndex = side === "left" 
-    ? currentIndex 
-    : Math.ceil(adSpots.length / 2) + currentIndex;
   
-  const sponsors = Array.from({ length: totalSlots }, (_, i) => {
-    const index = (startIndex + i) % adSpots.length;
-    return adSpots[index];
-  }).filter(Boolean);
+  // Split active sponsors between left and right sidebars
+  const midpoint = Math.ceil(adSpots.length / 2);
+  const sideSpots = side === "left" 
+    ? adSpots.slice(0, midpoint)
+    : adSpots.slice(midpoint);
+  
+  // Calculate how many sponsors to show and how many empty slots
+  const sponsors = sideSpots.slice(0, totalSlots);
+  const emptySlots = Math.max(0, totalSlots - sponsors.length);
 
   return (
     <div className={`hidden lg:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[600px] pb-4`}>
