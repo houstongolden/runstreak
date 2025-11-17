@@ -16,6 +16,7 @@ import BadgeCustomizer from "./pages/BadgeCustomizer";
 import BadgeDocs from "./pages/BadgeDocs";
 import Settings from "./pages/Settings";
 import AICoach from "./pages/AICoach";
+import Inbox from "./pages/Inbox";
 import Activities from "./pages/Activities";
 import SocialFeed from "./pages/SocialFeed";
 import Discover from "./pages/Discover";
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/activities" element={<ProtectedRoute><AppLayout><Activities /></AppLayout></ProtectedRoute>} />
               <Route path="/feed" element={<ProtectedRoute><AppLayout><SocialFeed /></AppLayout></ProtectedRoute>} />
               <Route path="/invite" element={<ProtectedRoute><AppLayout><Invite /></AppLayout></ProtectedRoute>} />
+              <Route path="/inbox" element={<ProtectedRoute><AppLayout><Inbox /></AppLayout></ProtectedRoute>} />
               <Route path="/coach" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               <Route path="/coach/:runnerId" element={<ProtectedRoute><AppLayout><AICoach /></AppLayout></ProtectedRoute>} />
               
