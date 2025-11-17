@@ -100,9 +100,9 @@ export function AppSidebar() {
     <Sidebar
       collapsible="offcanvas"
     >
-      <SidebarContent className="pt-14 pb-0">
+      <SidebarContent className="pt-0 pb-0">
         {/* Logo */}
-        <div className="px-4 pt-2 pb-4 border-b border-border/50">
+        <div className="px-4 pt-4 pb-4 border-b border-border/50 sticky top-0 bg-sidebar z-10">
           <div className="flex items-center gap-0.5 group">
             <Flame 
               className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
