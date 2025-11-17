@@ -78,7 +78,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
               <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Join the Leaderboard</p>
-              <p className="text-base text-muted-foreground">Here's how your profile will look</p>
+              <p className="text-base text-muted-foreground font-instrument">Your current streak from Strava</p>
             </div>
             <Card className="bg-card border-primary/20 p-4">
               <div className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
@@ -96,8 +96,8 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-primary">{runner?.current_streak_days || 0}</p>
-                  <p className="text-xs text-muted-foreground">day streak</p>
+                  <p className="text-2xl font-bold text-primary font-instrument">{runner?.current_streak_days || 0}</p>
+                  <p className="text-xs text-muted-foreground font-instrument">day streak</p>
                 </div>
               </div>
             </Card>
