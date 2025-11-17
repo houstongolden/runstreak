@@ -853,6 +853,7 @@ export type Database = {
           runner_id: string
           show_strava_follow_prompt: boolean | null
           updated_at: string
+          user_email: string | null
         }
         Insert: {
           accountability_notifications_enabled?: boolean | null
@@ -875,6 +876,7 @@ export type Database = {
           runner_id: string
           show_strava_follow_prompt?: boolean | null
           updated_at?: string
+          user_email?: string | null
         }
         Update: {
           accountability_notifications_enabled?: boolean | null
@@ -897,6 +899,7 @@ export type Database = {
           runner_id?: string
           show_strava_follow_prompt?: boolean | null
           updated_at?: string
+          user_email?: string | null
         }
         Relationships: []
       }

@@ -23,7 +23,8 @@ import { settingsSchema, phoneSchema, emailSchema } from "@/lib/validation";
 interface UserSettings {
   id?: string;
   runner_id: string;
-  email: string;
+  email: string; // Strava email or placeholder
+  user_email: string; // User-provided email for authentication
   phone_number: string;
   phone_verified: boolean;
   email_verified: boolean;
@@ -50,6 +51,7 @@ export default function Settings() {
   const [settings, setSettings] = useState<UserSettings>({
     runner_id: currentRunnerId || "", // Use actual runner ID from auth context
     email: "",
+    user_email: "",
     phone_number: "",
     phone_verified: false,
     email_verified: false,
@@ -118,7 +120,7 @@ export default function Settings() {
     try {
       // Validate settings data
       const validationResult = settingsSchema.safeParse({
-        email: settings.email,
+        email: settings.user_email || settings.email, // Use user_email if provided, fallback to Strava email
         phone_number: settings.phone_number,
         ai_coach_frequency: settings.ai_coach_frequency,
         ai_coach_time: settings.ai_coach_time,
@@ -159,6 +161,15 @@ export default function Settings() {
   };
 
   const handleVerifyEmail = async () => {
+    if (!settings.user_email) {
+      toast({
+        title: "Error",
+        description: "Please enter an email address first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: "Verification email sent",
       description: "Check your inbox to verify your email address.",
@@ -399,13 +410,27 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="strava-email">Strava Email (Read-only)</Label>
+                <Input
+                  id="strava-email"
+                  type="email"
+                  value={settings.email || "Not connected"}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">
+                  This email is from your Strava account and cannot be edited here
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="user-email">Your Email Address</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="email"
+                    id="user-email"
                     type="email"
-                    value={settings.email}
-                    onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                    value={settings.user_email || ""}
+                    onChange={(e) => setSettings({ ...settings, user_email: e.target.value })}
                     placeholder="your@email.com"
                   />
                   {settings.email_verified ? (
@@ -414,11 +439,14 @@ export default function Settings() {
                       Verified
                     </Badge>
                   ) : (
-                    <Button onClick={handleVerifyEmail} variant="outline" size="sm">
+                    <Button onClick={handleVerifyEmail} variant="outline" size="sm" disabled={!settings.user_email}>
                       Verify
                     </Button>
                   )}
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Used for email/password login and notifications
+                </p>
               </div>
 
               <div className="space-y-2">
