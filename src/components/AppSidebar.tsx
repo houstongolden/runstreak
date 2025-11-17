@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserProfileDropdown } from "@/components/UserProfileDropdown";
+import { StreakCountdown } from "@/components/StreakCountdown";
 import { format } from "date-fns";
+import { Runner } from "@/types";
 
 import {
   Sidebar,
@@ -38,13 +40,29 @@ export function AppSidebar() {
   const { isAdmin } = useAdmin();
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
   const [sessions, setSessions] = useState<CoachingSession[]>([]);
+  const [currentRunner, setCurrentRunner] = useState<any>(null);
 
   useEffect(() => {
     setCurrentRunnerId(authRunnerId);
     if (authRunnerId) {
       fetchSessions();
+      fetchCurrentRunner();
     }
   }, [authRunnerId]);
+
+  const fetchCurrentRunner = async () => {
+    if (!authRunnerId) return;
+    
+    const { data } = await supabase
+      .from('runners')
+      .select('*')
+      .eq('id', authRunnerId)
+      .maybeSingle();
+    
+    if (data) {
+      setCurrentRunner(data);
+    }
+  };
 
   const fetchSessions = async () => {
     if (!authRunnerId) return;
@@ -86,7 +104,7 @@ export function AppSidebar() {
     >
       <SidebarContent className="pt-14 pb-0">
         {/* Logo */}
-        <div className="px-4 py-6 border-b border-border/50">
+        <div className="px-4 pt-2 pb-4 border-b border-border/50">
           <div className="flex items-center gap-0.5 group">
             <Flame 
               className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
@@ -162,6 +180,9 @@ export function AppSidebar() {
           </div>
         ) : (
           <div className="flex flex-col h-full">
+            {/* Streak Countdown - Sticky at top */}
+            {currentRunner && <StreakCountdown lastActivityDate={currentRunner.last_activity_date} variant="sidebar" />}
+            
             <ScrollArea className="flex-1">
               {/* Main Navigation */}
               <SidebarGroup>
