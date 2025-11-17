@@ -226,7 +226,7 @@ const Index = () => {
 
         {/* Leaderboard Section */}
         <div className="mb-6 px-4 sm:px-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-5">
             <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
               <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
                 <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
@@ -267,8 +267,8 @@ const Index = () => {
             <>
               <LeaderboardTable runners={displayedRunners} view={view} />
               
-              {hasMore && (
-                <div className="mt-8 flex flex-col items-center gap-4">
+               {hasMore && (
+                 <div className="mt-5 flex flex-col items-center gap-4">
                   <Button
                     size="lg"
                     onClick={() => setDisplayCount(prev => Math.min(prev + 10, runners.length))}
@@ -283,7 +283,7 @@ const Index = () => {
         </div>
 
         {/* Verification Message */}
-        <div className="py-8 px-4">
+        <div className="py-4 px-4">
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <svg
               className="h-5 w-5"
