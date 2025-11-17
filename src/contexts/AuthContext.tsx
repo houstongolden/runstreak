@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('[AuthContext] Auth state changed:', event, 'User:', session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -49,6 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[AuthContext] Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -68,6 +70,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchRunnerId = async (userId: string) => {
     try {
+      console.log('[AuthContext] Fetching runner for user_id:', userId);
+      
       // Get runner by user_id (secure server-side link)
       const { data, error } = await supabase
         .from('runners')
@@ -75,11 +79,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('user_id', userId)
         .maybeSingle();
       
+      if (error) {
+        console.error('[AuthContext] Error fetching runner:', error);
+        return;
+      }
+      
       if (data) {
+        console.log('[AuthContext] Found runner:', data.id);
         setRunnerId(data.id);
+      } else {
+        console.warn('[AuthContext] No runner found for user_id:', userId);
       }
     } catch (error) {
-      console.error('Error fetching runner ID:', error);
+      console.error('[AuthContext] Exception fetching runner ID:', error);
     }
   };
 
