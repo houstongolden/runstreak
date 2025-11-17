@@ -14,7 +14,8 @@ import {
   Search,
   Trash2,
   Shield,
-  UserX
+  UserX,
+  Megaphone
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/formatters";
@@ -63,15 +64,28 @@ interface Runner {
   user_id: string;
 }
 
+interface AdSpot {
+  id: string;
+  company_name: string;
+  domain: string;
+  description: string;
+  logo_url: string | null;
+  is_active: boolean;
+  display_order: number;
+}
+
 export default function Admin() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [runners, setRunners] = useState<Runner[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [adSpots, setAdSpots] = useState<AdSpot[]>([]);
+  const [adsLoading, setAdsLoading] = useState(true);
 
   useEffect(() => {
     fetchAnalytics();
     fetchRunners();
+    fetchAdSpots();
   }, []);
 
   const fetchAnalytics = async () => {
@@ -101,6 +115,40 @@ export default function Admin() {
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAdSpots = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ad_spots')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setAdSpots(data || []);
+    } catch (error) {
+      console.error('Error fetching ad spots:', error);
+      toast.error('Failed to load ad spots');
+    } finally {
+      setAdsLoading(false);
+    }
+  };
+
+  const handleToggleAdSpot = async (spotId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('ad_spots')
+        .update({ is_active: !currentStatus })
+        .eq('id', spotId);
+
+      if (error) throw error;
+      
+      toast.success(`Ad spot ${!currentStatus ? 'activated' : 'deactivated'}`);
+      fetchAdSpots();
+    } catch (error) {
+      console.error('Error toggling ad spot:', error);
+      toast.error('Failed to update ad spot');
     }
   };
 
@@ -162,6 +210,7 @@ export default function Admin() {
         <TabsList>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
+          <TabsTrigger value="ads">Ad Spots</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
 
@@ -366,6 +415,57 @@ export default function Admin() {
                   )}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ads" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ad Spot Management</CardTitle>
+              <CardDescription>
+                Manage sponsor ads displayed on the leaderboard. Toggle sponsors on/off to control which ads are shown.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {adsLoading ? (
+                <div className="text-center py-8">Loading ad spots...</div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {adSpots.map((spot) => (
+                    <Card key={spot.id} className={spot.is_active ? "border-primary" : "opacity-60"}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-3 flex-1">
+                            <img
+                              src={`https://logo.clearbit.com/${spot.domain}`}
+                              alt={`${spot.company_name} logo`}
+                              className="h-10 w-10 object-contain flex-shrink-0"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-base">{spot.company_name}</h3>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {spot.description}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant={spot.is_active ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleToggleAdSpot(spot.id, spot.is_active)}
+                          >
+                            {spot.is_active ? "Active" : "Inactive"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

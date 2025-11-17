@@ -175,6 +175,42 @@ export type Database = {
           },
         ]
       }
+      ad_spots: {
+        Row: {
+          company_name: string
+          created_at: string
+          description: string
+          display_order: number
+          domain: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          description: string
+          display_order: number
+          domain: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          domain?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       aggregate_stats: {
         Row: {
           active_streaks_count: number
