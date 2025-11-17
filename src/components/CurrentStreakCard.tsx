@@ -16,7 +16,7 @@ export function CurrentStreakCard({
   avgMilesPerDay,
 }: CurrentStreakCardProps) {
   return (
-    <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
+    <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20 overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-primary">
           <Flame className="h-5 w-5" />
@@ -26,15 +26,15 @@ export function CurrentStreakCard({
           Your active running streak and performance metrics
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Streak Days - Most Prominent */}
-          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10">
+          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10 min-w-0">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Flame className="h-4 w-4 text-primary" />
-              Streak Days
+              <Flame className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="truncate">Streak Days</span>
             </div>
-            <div className="text-4xl font-bold text-primary">
+            <div className="text-4xl font-bold text-primary break-words">
               {streakDays}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -43,12 +43,12 @@ export function CurrentStreakCard({
           </div>
 
           {/* Streak Miles */}
-          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10">
+          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10 min-w-0">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <TrendingUp className="h-4 w-4" />
-              Streak Miles
+              <TrendingUp className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Streak Miles</span>
             </div>
-            <div className="text-4xl font-bold">
+            <div className="text-4xl font-bold break-words">
               {formatNumber(streakMiles)}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -57,12 +57,12 @@ export function CurrentStreakCard({
           </div>
 
           {/* Status */}
-          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10">
+          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10 min-w-0">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Award className="h-4 w-4" />
-              Status
+              <Award className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Status</span>
             </div>
-            <div className="text-4xl font-bold capitalize">
+            <div className="text-4xl font-bold capitalize break-words">
               {streakStatus || "active"}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -71,12 +71,12 @@ export function CurrentStreakCard({
           </div>
 
           {/* Avg Daily Miles */}
-          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10">
+          <div className="space-y-2 p-4 rounded-lg bg-background/50 border border-primary/10 min-w-0">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              Avg Daily
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Avg Daily</span>
             </div>
-            <div className="text-4xl font-bold">
+            <div className="text-4xl font-bold break-words">
               {formatNumber(avgMilesPerDay)}
             </div>
             <p className="text-xs text-muted-foreground">

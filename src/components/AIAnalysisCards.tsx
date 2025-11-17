@@ -54,7 +54,7 @@ export default function AIAnalysisCards({ runner }: AIAnalysisCardsProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={i} className="animate-pulse min-h-[140px]">
             <CardHeader className="pb-3">
               <div className="h-4 bg-muted rounded w-1/2"></div>
             </CardHeader>
@@ -75,13 +75,13 @@ export default function AIAnalysisCards({ runner }: AIAnalysisCardsProps) {
       {insights.slice(0, 3).map((insight, index) => {
         const Icon = icons[index % icons.length];
         return (
-          <Card key={index} className="border-primary/20">
+          <Card key={index} className="border-primary/20 min-h-[140px]">
             <CardHeader className="flex flex-row items-center gap-2 pb-3">
               <Icon className="h-5 w-5 text-primary" />
-              <CardTitle className="text-base">{insight.title}</CardTitle>
+              <CardTitle className="text-base break-words">{insight.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{insight.description}</p>
+              <p className="text-sm text-muted-foreground break-words">{insight.description}</p>
             </CardContent>
           </Card>
         );
