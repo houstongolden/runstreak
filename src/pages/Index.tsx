@@ -225,7 +225,7 @@ const Index = () => {
         )}
 
         {/* Leaderboard Section */}
-        <div className="mb-6">
+        <div className="mb-6 px-2 sm:px-4">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 sm:mb-8">
             <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
               <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
