@@ -98,7 +98,6 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      variant="floating"
       collapsible="offcanvas"
       className="fixed left-0 top-0 z-50 h-screen"
     >
