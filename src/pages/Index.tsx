@@ -166,7 +166,7 @@ const Index = () => {
             The verified leaderboard for runners<br className="hidden sm:block" /> keeping their streak alive
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-inter leading-relaxed">
-            Connect your Strava. Prove you run every day. Join the leaderboard. <span className="font-semibold text-foreground">100% Free.</span>
+            Connect your Strava. Run at least 1 mile per day. Keep your streak alive. <span className="font-semibold text-foreground">100% Free.</span>
           </p>
         </header>
 
