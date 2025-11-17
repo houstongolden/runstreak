@@ -65,27 +65,33 @@ export function UserProfileDropdown() {
     navigate('/settings');
   };
 
-  if (!user || !runnerData) return null;
+  if (!user) return null;
 
-  const initials = runnerData.display_name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = runnerData?.display_name
+    ? runnerData.display_name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : '?';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="w-full focus:outline-none">
         <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
           <Avatar className="h-10 w-10 border-2 border-border">
-            <AvatarImage src={runnerData.avatar_url || undefined} alt={runnerData.display_name} />
+            {runnerData?.avatar_url && (
+              <AvatarImage src={runnerData.avatar_url} alt={runnerData.display_name} />
+            )}
             <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-left min-w-0">
-            <p className="text-sm font-medium truncate">{runnerData.display_name}</p>
+            <p className="text-sm font-medium truncate">
+              {runnerData?.display_name || 'Loading...'}
+            </p>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </div>
@@ -93,14 +99,18 @@ export function UserProfileDropdown() {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleEditProfile}>
-          <User className="mr-2 h-4 w-4" />
-          Edit Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSettings}>
-          <Settings className="mr-2 h-4 w-4" />
-          Settings
-        </DropdownMenuItem>
+        {runnerData && (
+          <>
+            <DropdownMenuItem onClick={handleEditProfile}>
+              <User className="mr-2 h-4 w-4" />
+              Edit Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSettings}>
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
