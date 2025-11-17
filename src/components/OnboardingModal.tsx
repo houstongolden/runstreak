@@ -23,8 +23,7 @@ const steps = [
   { id: 1, title: "Join the Leaderboard" },
   { id: 2, title: "Track Your Consistency" },
   { id: 3, title: "Stay Accountable" },
-  { id: 4, title: "Join the Community" },
-  { id: 5, title: "Start Your Streak" },
+  { id: 4, title: "Start Your Streak" },
 ];
 
 export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, totalRunners }: OnboardingModalProps) {
@@ -43,7 +42,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
   }, [open]);
 
   useEffect(() => {
-    if (open && currentStep === 5) {
+    if (open && currentStep === 4) {
       const duration = 2000;
       const end = Date.now() + duration;
       const frame = () => {
@@ -67,7 +66,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto border-primary/20">
+      <DialogContent className="sm:max-w-3xl h-[100vh] overflow-y-auto border-primary/20 [&>button]:hidden flex flex-col">
         <DialogHeader>
           <div className="text-center space-y-3">
             <Progress value={(currentStep / steps.length) * 100} className="h-1.5" />
@@ -170,34 +169,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 4 && stats && (
-          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Join the Community</p>
-              <p className="text-base text-muted-foreground font-instrument">Real stats from runners like you</p>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: Users, value: stats.total_users.toLocaleString(), label: 'Runners' },
-                { icon: Flame, value: stats.active_streaks_count.toLocaleString(), label: 'Active Streaks' },
-                { icon: TrendingUp, value: `${stats.avg_days_on_streak_percentage.toFixed(0)}%`, label: 'Consistency' }
-              ].map((stat, i) => (
-                <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                  <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
-                  <p className="text-xl sm:text-2xl font-bold text-primary font-instrument">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1 font-instrument">{stat.label}</p>
-                </Card>
-              ))}
-            </div>
-            <Card className="bg-muted/30 border-primary/20 p-6 text-center">
-              <p className="text-base sm:text-lg text-foreground leading-relaxed font-instrument">
-                A community of runners who show up every single day
-              </p>
-            </Card>
-          </div>
-        )}
-
-        {currentStep === 5 && (
+        {currentStep === 4 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
               <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Ready to Start Your Streak</p>
