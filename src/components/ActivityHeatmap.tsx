@@ -163,19 +163,16 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
           <div className="inline-block max-w-full">
             {/* Month labels */}
             <div className="flex gap-[2px] mb-2 ml-6 sm:ml-8">
-              {months.map((month, monthIndex) => {
-                // Calculate approximate week position for each month
-                const monthStartWeek = Math.floor(monthIndex * 4.33);
+              {heatmapData.map((week, weekIndex) => {
+                const firstDay = week.find(day => day !== null);
+                if (!firstDay) return <div key={weekIndex} className="w-3 sm:w-3.5" />;
+                
+                const date = firstDay.date;
+                const isFirstWeekOfMonth = date.getDate() <= 7;
+                
                 return (
-                  <div 
-                    key={monthIndex} 
-                    className="text-[10px] sm:text-xs text-muted-foreground"
-                    style={{ 
-                      width: `${(heatmapData.length / 12) * 14}px`,
-                      minWidth: '14px'
-                    }}
-                  >
-                    {month}
+                  <div key={weekIndex} className="w-3 sm:w-3.5 text-[10px] sm:text-xs text-muted-foreground">
+                    {isFirstWeekOfMonth ? months[date.getMonth()] : ""}
                   </div>
                 );
               })}
