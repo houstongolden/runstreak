@@ -51,7 +51,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   }, [isLoading]);
 
   const generateHeatmapData = () => {
-    const weeks: Array<Array<{ date: Date; distance: number; runCount: number } | null>> = [];
+    const weeks: Array<Array<{ dateStr: string; distance: number; runCount: number } | null>> = [];
     
     // Create a map of activities by date for quick lookup
     // Dates in database are already in runner's local timezone
@@ -72,11 +72,11 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     const firstDayOfYear = new Date(startDate);
     firstDayOfYear.setDate(firstDayOfYear.getDate() - firstDayOfYear.getDay());
 
-    let currentWeek: Array<{ date: Date; distance: number; runCount: number } | null> = [];
+    let currentWeek: Array<{ dateStr: string; distance: number; runCount: number } | null> = [];
     let currentDate = new Date(firstDayOfYear);
 
     while (currentDate <= endDate) {
-      // Format date as YYYY-MM-DD without timezone conversion (already local)
+      // Format date as YYYY-MM-DD in local timezone
       const year = currentDate.getFullYear();
       const month = String(currentDate.getMonth() + 1).padStart(2, '0');
       const day = String(currentDate.getDate()).padStart(2, '0');
@@ -86,9 +86,9 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       const isInYear = currentDate.getFullYear() === selectedYear;
       
       if (isInYear) {
-        // Create date object in local time to match database dates
+        // Store the date string directly to avoid timezone issues
         currentWeek.push({
-          date: new Date(year, currentDate.getMonth(), currentDate.getDate()),
+          dateStr: dateStr,
           distance: activityData?.distance || 0,
           runCount: activityData?.runCount || 0,
         });
@@ -153,7 +153,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     heatmapData.forEach((week, weekIndex) => {
       const firstDay = week.find(day => day !== null);
       if (firstDay) {
-        const monthIndex = firstDay.date.getMonth();
+        const monthIndex = new Date(firstDay.dateStr + 'T00:00:00').getMonth();
         if (monthIndex !== lastMonth) {
           positions.push({ month: months[monthIndex], weekIndex });
           lastMonth = monthIndex;
@@ -239,7 +239,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                           <TooltipContent>
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {day.date.toLocaleDateString("en-US", {
+                                {new Date(day.dateStr + 'T00:00:00').toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",
