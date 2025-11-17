@@ -66,19 +66,23 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
   // Rotate sponsors every 20 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 5) % allSponsors.length);
+      setCurrentIndex((prev) => (prev + 1) % (allSponsors.length / 2));
     }, 20000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Get 5 sponsors starting from current index
+  // Left sidebar shows first half, right shows second half, offset by currentIndex
+  const startIndex = side === "left" 
+    ? currentIndex 
+    : (allSponsors.length / 2) + currentIndex;
+  
   const sponsors = Array.from({ length: 5 }, (_, i) => 
-    allSponsors[(currentIndex + i) % allSponsors.length]
+    allSponsors[(startIndex + i) % allSponsors.length]
   );
 
   return (
-    <div className={`hidden lg:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide pb-4`}>
+    <div className={`hidden lg:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[600px] pb-4`}>
       {/* Sponsor cards */}
       {sponsors.map((sponsor, index) => (
         <Card
