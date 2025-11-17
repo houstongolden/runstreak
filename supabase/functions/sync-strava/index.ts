@@ -125,6 +125,47 @@ Deno.serve(async (req) => {
     }
 
     const stats = await statsResponse.json();
+    
+    // Fetch athlete profile to get updated avatar
+    let storedAvatarUrl = runner.avatar_url;
+    try {
+      const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
+        headers: { 'Authorization': `Bearer ${accessToken}` },
+      });
+
+      if (athleteResponse.ok) {
+        const athleteProfile = await athleteResponse.json();
+        const stravaAvatarUrl = athleteProfile.profile || athleteProfile.profile_medium;
+        
+        // Download and store avatar if it's different or missing
+        if (stravaAvatarUrl && stravaAvatarUrl !== runner.avatar_url) {
+          console.log('Updating avatar from Strava...');
+          const avatarResponse = await fetch(stravaAvatarUrl);
+          if (avatarResponse.ok) {
+            const avatarBlob = await avatarResponse.blob();
+            const fileExt = stravaAvatarUrl.split('.').pop()?.split('?')[0] || 'jpg';
+            const fileName = `${runner.strava_user_id}-${Date.now()}.${fileExt}`;
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('avatars')
+              .upload(fileName, avatarBlob, {
+                contentType: avatarResponse.headers.get('content-type') || 'image/jpeg',
+                upsert: true
+              });
+
+            if (!uploadError) {
+              const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+              storedAvatarUrl = publicUrl;
+              console.log('Avatar updated successfully:', publicUrl);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error updating avatar:', error);
+    }
 
     // Fetch all activities for streak calculation (need complete history for accurate streaks)
     // But we'll only fetch detailed activity info for NEW activities when checking PRs
@@ -585,6 +626,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('runners')
       .update({
+        avatar_url: storedAvatarUrl,
         timezone: timezone, // Save the timezone for future use
         current_streak_days: currentStreakDays,
         current_streak_miles: currentStreakMiles,

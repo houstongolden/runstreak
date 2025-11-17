@@ -64,6 +64,42 @@ Deno.serve(async (req) => {
     const athleteProfile = await athleteResponse.json();
     console.log('Fetched athlete profile:', { id: athleteProfile.id, email: athleteProfile.email });
 
+    // Download and store avatar in our own storage
+    let storedAvatarUrl = athleteProfile.profile || athleteProfile.profile_medium;
+    if (storedAvatarUrl) {
+      try {
+        console.log('Downloading avatar from Strava...');
+        const avatarResponse = await fetch(storedAvatarUrl);
+        if (avatarResponse.ok) {
+          const avatarBlob = await avatarResponse.blob();
+          const fileExt = storedAvatarUrl.split('.').pop()?.split('?')[0] || 'jpg';
+          const fileName = `${athleteProfile.id}-${Date.now()}.${fileExt}`;
+          
+          // Upload to our storage bucket
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, avatarBlob, {
+              contentType: avatarResponse.headers.get('content-type') || 'image/jpeg',
+              upsert: true
+            });
+
+          if (uploadError) {
+            console.error('Error uploading avatar:', uploadError);
+          } else {
+            // Get public URL for the uploaded avatar
+            const { data: { publicUrl } } = supabase.storage
+              .from('avatars')
+              .getPublicUrl(fileName);
+            storedAvatarUrl = publicUrl;
+            console.log('Avatar stored successfully:', publicUrl);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing avatar:', error);
+        // Fall back to Strava URL if our storage fails
+      }
+    }
+
     // Fetch athlete stats
     const statsResponse = await fetch(
       `https://www.strava.com/api/v3/athletes/${athleteProfile.id}/stats`,
@@ -295,7 +331,7 @@ Deno.serve(async (req) => {
       strava_user_id: athleteProfile.id,
       strava_username: athleteProfile.username || `${athleteProfile.firstname} ${athleteProfile.lastname}`,
       display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
-      avatar_url: athleteProfile.profile || athleteProfile.profile_medium,
+      avatar_url: storedAvatarUrl,
       email: athleteProfile.email, // Store email from Strava
       sex: athleteProfile.sex,
       weight: athleteProfile.weight,
