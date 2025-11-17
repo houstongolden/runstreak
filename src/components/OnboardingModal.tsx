@@ -80,7 +80,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
               <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">You've joined the leaderboard!</p>
-              <p className="text-base text-muted-foreground font-instrument">Welcome to the RunStreak community</p>
+              <p className="text-base text-muted-foreground font-instrument">Run at least 1 mile per day to keep your streak alive</p>
             </div>
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-6">
               <div className="flex items-center gap-4 mb-4">
