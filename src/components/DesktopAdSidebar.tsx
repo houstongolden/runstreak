@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { getCompanyLogoUrl } from "@/lib/avatars";
 
@@ -60,18 +61,29 @@ const allSponsors = [
 ];
 
 export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarProps) => {
-  // Split sponsors so left and right sidebars show different companies
-  const sponsors = side === "left" 
-    ? allSponsors.slice(0, 5) 
-    : allSponsors.slice(5, 10);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Rotate sponsors every 20 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 5) % allSponsors.length);
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Get 5 sponsors starting from current index
+  const sponsors = Array.from({ length: 5 }, (_, i) => 
+    allSponsors[(currentIndex + i) % allSponsors.length]
+  );
 
   return (
-    <div className={`hidden lg:flex fixed ${side === "left" ? "left-4" : "right-4"} top-24 flex-col gap-2 w-[220px] max-h-[calc(100vh-120px)] overflow-y-auto scrollbar-hide pb-4`}>
+    <div className={`hidden lg:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide pb-4`}>
       {/* Sponsor cards */}
       {sponsors.map((sponsor, index) => (
         <Card
-          key={`${sponsor.name}-${index}`}
-          className="flex-shrink-0 h-[110px] flex flex-col items-start justify-center gap-1.5 px-4 py-3 bg-card border-border hover:bg-muted/50 transition-colors"
+          key={`${sponsor.name}-${index}-${currentIndex}`}
+          className="flex-shrink-0 h-[110px] flex flex-col items-start justify-center gap-1.5 px-4 py-3 bg-card border-border hover:bg-muted/50 transition-all duration-300 animate-fade-in"
         >
           <div className="flex items-center gap-2.5 w-full">
             <img
@@ -97,7 +109,7 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
       {side === "right" && (
         <Card
           onClick={onAdvertiseClick}
-          className="flex-shrink-0 h-[110px] flex flex-col items-start justify-center gap-1.5 px-4 py-3 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer"
+          className="flex-shrink-0 h-[110px] flex flex-col items-start justify-center gap-1.5 px-4 py-3 bg-foreground/5 dark:bg-background/5 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all cursor-pointer mt-2"
         >
           <span className="font-semibold text-sm text-foreground">Advertise</span>
           <p className="text-xs text-muted-foreground leading-tight">

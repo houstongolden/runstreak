@@ -15,7 +15,7 @@ export function AppDownloadSection() {
 
   return (
     <>
-      <section className="py-16 px-4 lg:px-[240px]">
+      <section className="py-16 px-4 lg:px-[280px]">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Main CTA */}
           <div className="space-y-4">
