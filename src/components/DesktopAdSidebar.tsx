@@ -57,8 +57,8 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
 
   if (loading) return null;
 
-  // Calculate total slots (4 per side)
-  const totalSlots = 4;
+  // Left side gets 5 spots, right side gets 4 (to fit advertise section)
+  const totalSlots = side === "left" ? 5 : 4;
   const activeSpots = adSpots.length;
   const emptySlots = Math.max(0, totalSlots - activeSpots);
 
