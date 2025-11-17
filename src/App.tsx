@@ -25,6 +25,7 @@ import Auth from "./pages/Auth";
 import AdminSetup from "./pages/AdminSetup";
 import AdminLogin from "./pages/AdminLogin";
 import VerifyPhone from "./pages/VerifyPhone";
+import VerifyAccount from "./pages/VerifyAccount";
 import Features from "./pages/Features";
 import Story from "./pages/Story";
 import Philosophy from "./pages/Philosophy";
@@ -63,6 +64,7 @@ const App = () => (
               
               {/* Routes without sidebar layout */}
               <Route path="/connect" element={<StravaConnect />} />
+              <Route path="/verify-account" element={<VerifyAccount />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin-setup" element={<AdminSetup />} />

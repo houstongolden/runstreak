@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import UnverifiedAccountBanner from "@/components/UnverifiedAccountBanner";
 import { Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
@@ -45,6 +46,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
         {/* Main Content */}
         <main className="flex-1">
+          <div className="container mx-auto px-4 py-4">
+            <UnverifiedAccountBanner />
+          </div>
           {children}
         </main>
       </SidebarInset>
