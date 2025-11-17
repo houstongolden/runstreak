@@ -17,28 +17,29 @@ export default function UnverifiedAccountBanner() {
 
     const checkVerificationStatus = async () => {
       try {
-        // Check if runner has a linked user_id
+        // Check if runner has a linked user_id AND verification status
         const { data: runner } = await supabase
           .from('runners')
           .select('user_id, email')
           .eq('id', runnerId)
           .single();
 
-        // If no user_id, they haven't verified yet
+        // If no user_id, they definitely haven't verified
         if (!runner?.user_id) {
           setShowBanner(true);
-        } else {
-          // Check if email or phone is verified
-          const { data: settings } = await supabase
-            .from('user_settings')
-            .select('email_verified, phone_verified')
-            .eq('runner_id', runnerId)
-            .single();
+          return;
+        }
 
-          // Show banner if neither email nor phone is verified
-          if (settings && !settings.email_verified && !settings.phone_verified) {
-            setShowBanner(true);
-          }
+        // If they have user_id, check verification status in settings
+        const { data: settings } = await supabase
+          .from('user_settings')
+          .select('email_verified, phone_verified')
+          .eq('runner_id', runnerId)
+          .maybeSingle();
+
+        // Show banner if settings don't exist OR neither email nor phone is verified
+        if (!settings || (!settings.email_verified && !settings.phone_verified)) {
+          setShowBanner(true);
         }
       } catch (error) {
         console.error('Error checking verification status:', error);
@@ -46,6 +47,10 @@ export default function UnverifiedAccountBanner() {
     };
 
     checkVerificationStatus();
+    
+    // Re-check periodically in case user verifies in another tab
+    const interval = setInterval(checkVerificationStatus, 30000);
+    return () => clearInterval(interval);
   }, [runnerId]);
 
   const handleVerify = () => {
