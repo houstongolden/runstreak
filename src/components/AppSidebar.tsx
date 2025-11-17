@@ -99,7 +99,7 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="fixed left-0 top-0 z-50 h-screen"
+      className="!fixed !left-0 !top-0 !z-50 !h-screen"
     >
       <SidebarContent className="pt-14 pb-0">
         {/* Logo */}
