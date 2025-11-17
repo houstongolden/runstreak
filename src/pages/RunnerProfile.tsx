@@ -191,31 +191,37 @@ export default function RunnerProfile() {
     
     setIsSyncing(true);
     try {
-      const { error } = await supabase.functions.invoke('sync-strava', {
-        body: { runnerId: id }
-      });
-
-      if (error) throw error;
+      // First try to recalculate from existing data (no API call needed)
+      const { data, error: recalcError } = await supabase.functions.invoke('recalculate-streak');
+      
+      if (recalcError) {
+        console.error('Error recalculating streak:', recalcError);
+        // If recalculation fails, fall back to full sync
+        const { error } = await supabase.functions.invoke('sync-strava', {
+          body: { runnerId: id }
+        });
+        if (error) throw error;
+      }
 
       toast({
         title: "Sync Complete",
-        description: "Your Strava data has been refreshed successfully.",
+        description: "Your streak data has been refreshed successfully.",
       });
 
       // Refresh runner data
-      const { data, error: fetchError } = await (supabase as any)
+      const { data: refreshedData, error: fetchError } = await (supabase as any)
         .from("runners")
         .select("*")
         .eq("id", id)
         .maybeSingle();
 
       if (fetchError) throw fetchError;
-      setRunner(data as Runner);
+      setRunner(refreshedData as Runner);
     } catch (error) {
-      console.error("Error syncing Strava data:", error);
+      console.error("Error syncing data:", error);
       toast({
         title: "Sync Failed",
-        description: "Failed to refresh your Strava data. Please try again.",
+        description: "Failed to refresh your data. Please try again.",
         variant: "destructive",
       });
     } finally {
