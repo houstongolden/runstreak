@@ -39,6 +39,7 @@ const Index = () => {
   const [onboardingRunner, setOnboardingRunner] = useState<Runner | null>(null);
   const [leaderboardRank, setLeaderboardRank] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const [adsEnabled, setAdsEnabled] = useState(false);
 
   const fetchRunners = async () => {
     try {
@@ -67,9 +68,26 @@ const Index = () => {
     }
   };
 
+  const fetchAdsEnabled = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('setting_value')
+        .eq('setting_key', 'ads_enabled')
+        .maybeSingle();
+
+      if (error) throw error;
+      setAdsEnabled(data?.setting_value === true);
+    } catch (error) {
+      console.error('Error fetching ads setting:', error);
+      setAdsEnabled(false);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       await fetchRunners();
+      await fetchAdsEnabled();
       
       // Check if user is already connected to Strava and handle success callback
       const searchParams = new URLSearchParams(window.location.search);
@@ -131,13 +149,17 @@ const Index = () => {
     <AppLayout>
       <div className="min-h-screen bg-background">
         {/* Desktop Ad Sidebars */}
-        <DesktopAdSidebar side="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
-        <DesktopAdSidebar side="right" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+        {adsEnabled && (
+          <>
+            <DesktopAdSidebar side="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+            <DesktopAdSidebar side="right" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+          </>
+        )}
 
         {/* Top Carousel (Mobile only) */}
-        <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
+        {adsEnabled && <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />}
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 xl:px-[280px] py-6 sm:py-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
