@@ -1,4 +1,4 @@
-import { Trophy, TrendingUp, Plus, Shield, Gift, Flame, Zap, Users } from "lucide-react";
+import { Trophy, TrendingUp, Plus, Shield, Gift, Flame, Zap, Users, MessageSquare } from "lucide-react";
 import ShinyText from "@/components/ui/shiny-text";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -212,6 +212,19 @@ export function AppSidebar() {
                     >
                       <TrendingUp className="h-4 w-4" />
                       <span>Feed</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink 
+                      to="/inbox" 
+                      className="flex items-center gap-2 py-2 px-3 text-sm hover:text-foreground transition-colors"
+                      activeClassName="text-foreground font-medium"
+                      onClick={handleNavClick}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      <span>Inbox</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
