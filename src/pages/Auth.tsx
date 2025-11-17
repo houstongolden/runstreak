@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Flame } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +15,9 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -49,6 +55,46 @@ export default function Auth() {
     }
   };
 
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`
+          }
+        });
+        
+        if (error) throw error;
+        toast.success('Account created! Please check your email to verify.');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (error) throw error;
+        toast.success('Logged in successfully!');
+        navigate('/');
+      }
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      toast.error(error.message || 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
@@ -58,23 +104,77 @@ export default function Auth() {
           </div>
           <CardTitle className="text-3xl">Welcome to RunStreak</CardTitle>
           <CardDescription>
-            Connect your Strava account to join the leaderboard
+            Sign in to join the leaderboard
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Button
-            onClick={handleStravaConnect}
-            disabled={isLoading}
-            size="lg"
-            className="w-full"
-          >
-            <Flame className="mr-2 h-5 w-5" />
-            {isLoading ? 'Connecting...' : 'Connect with Strava'}
-          </Button>
-
-          <p className="text-sm text-center text-muted-foreground">
-            RunStreak requires Strava to verify your daily runs and maintain an accurate leaderboard
-          </p>
+          <Tabs defaultValue="strava" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="strava">Strava</TabsTrigger>
+              <TabsTrigger value="email">Email</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="strava" className="space-y-4">
+              <Button
+                onClick={handleStravaConnect}
+                disabled={isLoading}
+                size="lg"
+                className="w-full"
+              >
+                <Flame className="mr-2 h-5 w-5" />
+                {isLoading ? 'Connecting...' : 'Connect with Strava'}
+              </Button>
+              <p className="text-sm text-center text-muted-foreground">
+                Sync your runs automatically from Strava
+              </p>
+            </TabsContent>
+            
+            <TabsContent value="email" className="space-y-4">
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  size="lg"
+                  className="w-full"
+                >
+                  {isLoading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm text-muted-foreground hover:text-foreground w-full text-center"
+                  disabled={isLoading}
+                >
+                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                </button>
+              </form>
+              <p className="text-sm text-center text-muted-foreground">
+                Connect Strava later in Settings to sync your runs
+              </p>
+            </TabsContent>
+          </Tabs>
 
           <Button
             variant="outline"
