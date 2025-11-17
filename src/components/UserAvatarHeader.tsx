@@ -1,15 +1,14 @@
-import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronRight } from "lucide-react";
 import { UserProfileMenu } from "@/components/UserProfileMenu";
 
-export function UserProfileDropdown() {
+export function UserAvatarHeader() {
   const { user, runnerId } = useAuth();
   const [runnerData, setRunnerData] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
 
@@ -46,23 +45,15 @@ export function UserProfileDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="w-full focus:outline-none">
-        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
-          <Avatar className="h-10 w-10 border-2 border-border">
-            {runnerData?.avatar_url && (
-              <AvatarImage src={runnerData.avatar_url} alt={runnerData.display_name} />
-            )}
-            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 text-left min-w-0">
-            <p className="text-sm font-medium truncate">
-              {runnerData?.display_name || 'Loading...'}
-            </p>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        </div>
+      <DropdownMenuTrigger className="focus:outline-none">
+        <Avatar className="h-9 w-9 border-2 border-border hover:border-primary transition-colors cursor-pointer">
+          {runnerData?.avatar_url && (
+            <AvatarImage src={runnerData.avatar_url} alt={runnerData.display_name} />
+          )}
+          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <UserProfileMenu runnerId={runnerId} runnerData={runnerData} align="end" />
     </DropdownMenu>
