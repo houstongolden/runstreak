@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Flame, TrendingUp, Users, ChevronRight, Award, BarChart3, Heart, Zap, Target, CheckCircle2, ArrowRight } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Runner } from "@/types";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,9 +84,12 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
               <div className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
                 <div className="text-2xl font-bold text-primary">#{leaderboardRank}</div>
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-                    {runner?.display_name?.charAt(0) || 'R'}
-                  </div>
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={runner?.avatar_url || ''} alt={runner?.display_name || 'Runner'} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-bold">
+                      {runner?.display_name?.charAt(0) || 'R'}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">{runner?.display_name || 'Your Name'}</p>
                     <p className="text-sm text-muted-foreground">@{runner?.strava_username || 'username'}</p>
