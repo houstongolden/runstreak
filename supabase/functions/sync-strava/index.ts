@@ -520,6 +520,7 @@ Deno.serve(async (req) => {
       total_runs: number;
     }> = [];
     
+    // Use only dates with 1+ mile for streak calculation
     const sortedActivityDates = Array.from(activityDates).sort();
     let currentHistoricalStreak: {
       start: Date;
@@ -551,7 +552,10 @@ Deno.serve(async (req) => {
           // Streak broken, save the previous one if it's 5+ days
           if (currentHistoricalStreak.dates.size >= 5) {
             const streakActivities = allActivities.filter((a: any) => {
-              const aDate = new Date(a.start_date).toISOString().split('T')[0];
+              const year = new Date(a.start_date).getFullYear();
+              const month = String(new Date(a.start_date).getMonth() + 1).padStart(2, '0');
+              const day = String(new Date(a.start_date).getDate()).padStart(2, '0');
+              const aDate = `${year}-${month}-${day}`;
               return currentHistoricalStreak!.dates.has(aDate);
             });
             
@@ -582,7 +586,10 @@ Deno.serve(async (req) => {
     // Don't forget the last streak
     if (currentHistoricalStreak && currentHistoricalStreak.dates.size >= 5) {
       const streakActivities = allActivities.filter((a: any) => {
-        const aDate = new Date(a.start_date).toISOString().split('T')[0];
+        const year = new Date(a.start_date).getFullYear();
+        const month = String(new Date(a.start_date).getMonth() + 1).padStart(2, '0');
+        const day = String(new Date(a.start_date).getDate()).padStart(2, '0');
+        const aDate = `${year}-${month}-${day}`;
         return currentHistoricalStreak!.dates.has(aDate);
       });
       
