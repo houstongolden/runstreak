@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Flame, Mail, Phone } from "lucide-react";
+import { Flame, Mail, Phone, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
@@ -22,9 +22,58 @@ export default function VerifyAccount() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<"email" | "phone">("email");
+  const [emailAlreadyVerified, setEmailAlreadyVerified] = useState(false);
+
+  // Check if user's email is already verified in Supabase Auth
+  useState(() => {
+    const checkEmailVerification = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email && user.email_confirmed_at) {
+        setEmail(user.email);
+        setEmailAlreadyVerified(true);
+        
+        // Update runner and user_settings with verified email
+        if (runnerId) {
+          await supabase
+            .from('runners')
+            .update({ email: user.email })
+            .eq('id', runnerId);
+          
+          const { data: existingSettings } = await supabase
+            .from('user_settings')
+            .select('*')
+            .eq('runner_id', runnerId)
+            .maybeSingle();
+          
+          if (existingSettings) {
+            await supabase
+              .from('user_settings')
+              .update({ email: user.email, email_verified: true })
+              .eq('runner_id', runnerId);
+          } else {
+            await supabase
+              .from('user_settings')
+              .insert({
+                runner_id: runnerId,
+                email: user.email,
+                email_verified: true
+              });
+          }
+        }
+      }
+    };
+    checkEmailVerification();
+  });
 
   const handleEmailVerification = async () => {
     try {
+      // If email is already verified, just navigate to profile
+      if (emailAlreadyVerified) {
+        toast.success('Email already verified!');
+        setTimeout(() => navigate('/'), 1000);
+        return;
+      }
+
       // Validate email
       const validatedEmail = emailSchema.parse(email.trim());
       
@@ -56,17 +105,30 @@ export default function VerifyAccount() {
 
         if (updateError) throw updateError;
 
-        // Create user settings
-        await supabase
+        // Create or update user settings
+        const { data: existingSettings } = await supabase
           .from('user_settings')
-          .insert({
-            runner_id: runnerId,
-            email: validatedEmail,
-            email_verified: false
-          });
+          .select('*')
+          .eq('runner_id', runnerId)
+          .maybeSingle();
+
+        if (existingSettings) {
+          await supabase
+            .from('user_settings')
+            .update({ email: validatedEmail, email_verified: false })
+            .eq('runner_id', runnerId);
+        } else {
+          await supabase
+            .from('user_settings')
+            .insert({
+              runner_id: runnerId,
+              email: validatedEmail,
+              email_verified: false
+            });
+        }
 
         toast.success('Verification email sent! Check your inbox.');
-        setTimeout(() => navigate(`/runner/${runnerId}`), 2000);
+        setTimeout(() => navigate('/'), 2000);
       }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -86,6 +148,30 @@ export default function VerifyAccount() {
       const validatedPhone = phoneSchema.parse(phone.trim());
       
       setIsLoading(true);
+
+      // Save phone number to user_settings (unverified)
+      if (runnerId) {
+        const { data: existingSettings } = await supabase
+          .from('user_settings')
+          .select('*')
+          .eq('runner_id', runnerId)
+          .maybeSingle();
+
+        if (existingSettings) {
+          await supabase
+            .from('user_settings')
+            .update({ phone_number: validatedPhone, phone_verified: false })
+            .eq('runner_id', runnerId);
+        } else {
+          await supabase
+            .from('user_settings')
+            .insert({
+              runner_id: runnerId,
+              phone_number: validatedPhone,
+              phone_verified: false
+            });
+        }
+      }
 
       // Send SMS verification code
       const { error: smsError } = await supabase.functions.invoke('send-verification-sms', {
