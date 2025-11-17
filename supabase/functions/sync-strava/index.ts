@@ -330,7 +330,7 @@ Deno.serve(async (req) => {
     }
 
     // Get existing best efforts from database
-    console.log('Checking for new personal bests in new activities...');
+    console.log('Checking for personal bests across all activities...');
     const { data: existingBestEfforts } = await supabase
       .from('best_efforts')
       .select('*')
@@ -343,17 +343,39 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Only fetch details for NEW activities (since last sync) to check for PRs
-    const lastSyncDate = runner.last_activity_date ? new Date(runner.last_activity_date) : null;
-    const newActivities = lastSyncDate 
-      ? allActivities.filter((a: any) => new Date(a.start_date) > lastSyncDate)
-      : allActivities; // If first sync, check all activities
+    // Check if we need a full resync of best efforts
+    const needsFullResync = !existingBestEfforts || existingBestEfforts.length < 5;
     
-    console.log(`Checking ${newActivities.length} new activities for personal bests (${allActivities.length} total activities)`);
+    // Determine which activities to check for PRs
+    let activitiesToCheck;
+    if (needsFullResync) {
+      // First sync or very few best efforts - check all activities
+      console.log('Performing full best efforts sync - checking all activities');
+      activitiesToCheck = allActivities;
+    } else {
+      // Check last 50 activities to ensure we capture any missed PRs + all new activities
+      const lastSyncDate = runner.last_activity_date ? new Date(runner.last_activity_date) : null;
+      const recentActivities = allActivities.slice(0, 50);
+      const newActivities = lastSyncDate 
+        ? allActivities.filter((a: any) => new Date(a.start_date) > lastSyncDate)
+        : [];
+      
+      // Combine recent + new, removing duplicates
+      const activityIds = new Set();
+      activitiesToCheck = [...recentActivities, ...newActivities].filter(a => {
+        if (activityIds.has(a.id)) return false;
+        activityIds.add(a.id);
+        return true;
+      });
+      
+      console.log(`Checking ${newActivities.length} new activities + ${recentActivities.length} recent activities for PRs`);
+    }
+    
+    console.log(`Checking ${activitiesToCheck.length} activities for personal bests (${allActivities.length} total activities)`);
     
     const newBestEfforts = [];
     
-    for (const activity of newActivities) {
+    for (const activity of activitiesToCheck) {
       try {
         const detailResponse = await fetch(
           `https://www.strava.com/api/v3/activities/${activity.id}`,
