@@ -128,13 +128,13 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
-    <div>
-      <h3 className="text-sm font-medium mb-2">Activity Heatmap</h3>
-      <div className="bg-card rounded-lg p-3 border">
-        <div className="overflow-x-auto" ref={scrollContainerRef}>
+    <div className="w-full">
+      <h3 className="text-sm font-semibold mb-3">Activity Heatmap</h3>
+      <div className="bg-card rounded-lg p-4 sm:p-5 border">
+        <div className="overflow-x-auto scrollbar-hide" ref={scrollContainerRef}>
           <div className="inline-block min-w-full">
             {/* Month labels */}
-            <div className="flex gap-[2px] mb-2 ml-6">
+            <div className="flex gap-[2px] mb-2 ml-6 sm:ml-8">
               {heatmapData.map((week, weekIndex) => {
                 const firstDay = week.find(day => day !== null);
                 if (!firstDay || weekIndex === 0) return <div key={weekIndex} className="w-3" />;
@@ -143,7 +143,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                 const isFirstWeekOfMonth = date.getDate() <= 7;
                 
                 return (
-                  <div key={weekIndex} className="w-3 text-xs text-muted-foreground">
+                  <div key={weekIndex} className="w-3 sm:w-3.5 text-[10px] sm:text-xs text-muted-foreground">
                     {isFirstWeekOfMonth ? months[date.getMonth()] : ""}
                   </div>
                 );
@@ -153,14 +153,14 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
             {/* Heatmap grid */}
             <div className="flex gap-[2px]">
               {/* Day labels */}
-              <div className="flex flex-col gap-[2px] text-xs text-muted-foreground pr-2">
-                <div className="h-3">Mon</div>
-                <div className="h-3"></div>
-                <div className="h-3">Wed</div>
-                <div className="h-3"></div>
-                <div className="h-3">Fri</div>
-                <div className="h-3"></div>
-                <div className="h-3">Sun</div>
+              <div className="flex flex-col gap-[2px] text-[10px] sm:text-xs text-muted-foreground pr-2 sm:pr-3">
+                <div className="h-3 sm:h-3.5">Mon</div>
+                <div className="h-3 sm:h-3.5"></div>
+                <div className="h-3 sm:h-3.5">Wed</div>
+                <div className="h-3 sm:h-3.5"></div>
+                <div className="h-3 sm:h-3.5">Fri</div>
+                <div className="h-3 sm:h-3.5"></div>
+                <div className="h-3 sm:h-3.5">Sun</div>
               </div>
 
               {/* Activity squares */}
@@ -169,14 +169,14 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                   <div key={weekIndex} className="flex flex-col gap-[2px]">
                     {week.map((day, dayIndex) => {
                       if (!day) {
-                        return <div key={dayIndex} className="w-3 h-3" />;
+                        return <div key={dayIndex} className="w-3 sm:w-3.5 h-3 sm:h-3.5" />;
                       }
 
                       return (
                         <Tooltip key={dayIndex}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`w-3 h-3 rounded-sm transition-colors hover:ring-2 hover:ring-primary cursor-pointer ${getIntensityClass(
+                              className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm transition-colors hover:ring-2 hover:ring-primary cursor-pointer ${getIntensityClass(
                                 day.distance
                               )}`}
                             />
@@ -213,15 +213,15 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
         </div>
 
         {/* Legend Below Heatmap */}
-        <div className="flex items-center justify-end gap-2 mt-4 text-xs text-muted-foreground">
+        <div className="flex items-center justify-end gap-2 mt-4 text-[10px] sm:text-xs text-muted-foreground">
           <span>Less</span>
           <div className="flex gap-1">
-            <div className="w-3 h-3 rounded-sm bg-muted/20" />
-            <div className="w-3 h-3 rounded-sm bg-[hsl(25_80%_85%)]" />
-            <div className="w-3 h-3 rounded-sm bg-[hsl(25_90%_70%)]" />
-            <div className="w-3 h-3 rounded-sm bg-[hsl(22_95%_60%)]" />
-            <div className="w-3 h-3 rounded-sm bg-[hsl(20_100%_52%)]" />
-            <div className="w-3 h-3 rounded-sm bg-[hsl(15_100%_45%)]" />
+            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-muted/20" />
+            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(25_80%_85%)]" />
+            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(25_90%_70%)]" />
+            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(22_95%_60%)]" />
+            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(20_100%_52%)]" />
+            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(15_100%_45%)]" />
           </div>
           <span>More</span>
         </div>
