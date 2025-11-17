@@ -40,12 +40,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Fetch runner ID when user logs in
-        if (session?.user) {
-          setTimeout(() => {
-            fetchRunnerId(session.user.id);
-          }, 0);
-        } else {
+        // Clear runner ID on logout
+        if (!session?.user) {
           setRunnerId(null);
         }
       }
@@ -55,16 +51,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchRunnerId(session.user.id);
-      }
-      
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch runner ID when user changes (separate from auth state listener)
+  useEffect(() => {
+    if (user?.id) {
+      fetchRunnerId(user.id);
+    } else {
+      setRunnerId(null);
+    }
+  }, [user?.id]);
 
   const fetchRunnerId = async (userId: string) => {
     try {
