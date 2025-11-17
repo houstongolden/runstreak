@@ -399,7 +399,7 @@ export default function RunnerProfile() {
                 </div>
               </div>
               
-              <div className="w-full lg:w-auto lg:max-w-[420px] min-w-0 flex-shrink-0">
+              <div className="w-full lg:w-auto lg:max-w-[420px] overflow-hidden flex-shrink-0">
                 <ActivityHeatmap runnerId={runner.id} />
               </div>
             </div>
