@@ -239,11 +239,15 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                           <TooltipContent>
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {new Date(day.dateStr + 'T00:00:00').toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                })}
+                                {(() => {
+                                  const [year, month, dayNum] = day.dateStr.split('-');
+                                  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(dayNum));
+                                  return date.toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  });
+                                })()}
                               </div>
                               <div>
                                 {day.runCount > 0 ? (
