@@ -1,4 +1,4 @@
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import UnverifiedAccountBanner from "@/components/UnverifiedAccountBanner";
 import { Flame } from "lucide-react";
@@ -14,7 +14,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       
-      <SidebarInset>
+      <div className="w-full min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center px-4 gap-4">
@@ -52,7 +52,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
           {children}
         </main>
-      </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }
