@@ -230,10 +230,10 @@ Deno.serve(async (req) => {
     const daysOnStreak60 = calculateDaysOnStreak(60);
     const daysOnStreak90 = calculateDaysOnStreak(90);
 
-    // Check if this is an existing user to get their join date
+    // Check if this is an existing user to get their join date and email
     const { data: existingRunner } = await supabase
       .from('runners')
-      .select('id, joined_runstreak_at')
+      .select('id, joined_runstreak_at, email')
       .eq('strava_user_id', athleteProfile.id)
       .maybeSingle();
 
@@ -327,12 +327,18 @@ Deno.serve(async (req) => {
     console.log(`Identified ${allStreaks.length} historical streaks (5+ days)`);
 
     // Prepare comprehensive runner data with all available stats
+    // Only update email if Strava provides one, otherwise keep existing email
+    const shouldUpdateEmail = !!athleteProfile.email;
+    const emailToStore = shouldUpdateEmail 
+      ? athleteProfile.email 
+      : (existingRunner?.email || null);
+    
     const runnerData: any = {
       strava_user_id: athleteProfile.id,
       strava_username: athleteProfile.username || `${athleteProfile.firstname} ${athleteProfile.lastname}`,
       display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
       avatar_url: storedAvatarUrl,
-      email: athleteProfile.email, // Store email from Strava
+      email: emailToStore, // Only update if Strava provides it, otherwise preserve existing
       sex: athleteProfile.sex,
       weight: athleteProfile.weight,
       city: athleteProfile.city,
@@ -426,18 +432,27 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use email from Strava or generate synthetic one
-    const userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreak.internal`;
-    const hasRealEmail = !!athleteProfile.email;
+    // Check for existing user_settings to preserve email
+    const { data: existingSettings } = await supabase
+      .from('user_settings')
+      .select('email')
+      .eq('runner_id', savedRunner.id)
+      .maybeSingle();
     
-    console.log(`User email: ${userEmail} (real: ${hasRealEmail})`);
+    const hasRealEmail = !!athleteProfile.email;
+    // Only update email if Strava provides one, otherwise keep existing
+    const settingsEmailToStore = hasRealEmail 
+      ? athleteProfile.email 
+      : (existingSettings?.email || null);
+    
+    console.log(`User email for settings: ${settingsEmailToStore} (from Strava: ${hasRealEmail})`);
     
     // Create or update user_settings with email
     const { error: settingsError } = await supabase
       .from('user_settings')
       .upsert({
         runner_id: savedRunner.id,
-        email: hasRealEmail ? athleteProfile.email : null,
+        email: settingsEmailToStore,
         ai_coach_enabled: true,
         ai_coach_style: 'motivational',
         ai_coach_frequency: 'daily',
@@ -483,21 +498,28 @@ Deno.serve(async (req) => {
     // For existing users with auth account, generate magic link for auto sign-in
     if (userId) {
       try {
-        // Generate a sign-in link for the user
-        const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-          type: 'magiclink',
-          email: userEmail,
-          options: {
-            redirectTo: `${redirectUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`
-          }
-        });
+        // Get the auth user's email for magic link
+        const { data: authUser, error: authUserError } = await supabase.auth.admin.getUserById(userId);
         
-        if (linkError) {
-          console.error('Error generating magic link:', linkError);
-        } else if (linkData?.properties?.action_link) {
-          // Redirect to the magic link which will sign them in
-          console.log('Generated magic link for auto sign-in');
-          redirectUrl = linkData.properties.action_link;
+        if (authUserError) {
+          console.error('Error fetching auth user:', authUserError);
+        } else if (authUser?.user?.email) {
+          // Generate a sign-in link for the user
+          const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+            type: 'magiclink',
+            email: authUser.user.email,
+            options: {
+              redirectTo: `${redirectUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`
+            }
+          });
+          
+          if (linkError) {
+            console.error('Error generating magic link:', linkError);
+          } else if (linkData?.properties?.action_link) {
+            // Redirect to the magic link which will sign them in
+            console.log('Generated magic link for auto sign-in');
+            redirectUrl = linkData.properties.action_link;
+          }
         }
       } catch (error) {
         console.error('Failed to generate magic link:', error);

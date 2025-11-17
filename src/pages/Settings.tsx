@@ -45,7 +45,7 @@ export default function Settings() {
   const [verificationCode, setVerificationCode] = useState("");
   const [sendingTestMessage, setSendingTestMessage] = useState(false);
   const [settings, setSettings] = useState<UserSettings>({
-    runner_id: "temp-id", // This would come from auth in a real app
+    runner_id: currentRunnerId || "", // Use actual runner ID from auth context
     email: "",
     phone_number: "",
     phone_verified: false,
@@ -58,8 +58,10 @@ export default function Settings() {
   });
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
+    if (currentRunnerId) {
+      fetchSettings();
+    }
+  }, [currentRunnerId]);
 
   const fetchSettings = async () => {
     try {
@@ -100,6 +102,15 @@ export default function Settings() {
   };
 
   const handleSave = async () => {
+    if (!currentRunnerId) {
+      toast({
+        title: "Error",
+        description: "Unable to save settings. Please try refreshing the page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       // Validate settings data
