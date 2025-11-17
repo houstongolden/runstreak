@@ -90,7 +90,7 @@ export function AggregateStatsCard() {
   }
 
   return (
-    <section className="py-12 px-4 bg-background">
+    <section className="py-12 px-4 lg:px-[240px] bg-background">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold mb-2">
