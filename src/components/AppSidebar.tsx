@@ -100,9 +100,9 @@ export function AppSidebar() {
     <Sidebar
       collapsible="offcanvas"
     >
-      <SidebarContent className="pt-0 pb-0">
-        {/* Logo */}
-        <div className="px-4 pt-4 pb-4 border-b border-border/50 sticky top-0 bg-sidebar z-10">
+      <SidebarContent className="flex flex-col h-full p-0">
+        {/* Logo - Fixed at Top */}
+        <div className="px-4 pt-4 pb-4 border-b border-border/50 flex-shrink-0 bg-sidebar">
           <div className="flex items-center gap-0.5 group">
             <Flame 
               className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
@@ -126,8 +126,11 @@ export function AppSidebar() {
             </svg>
           </div>
         </div>
-        {!user ? (
-          <div className="px-2 py-4">
+
+        {/* Scrollable Content - Middle */}
+        <div className="flex-1 overflow-hidden">
+          {!user ? (
+            <div className="px-2 py-4 h-full overflow-y-auto">
             <SidebarGroup>
               <SidebarGroupLabel className="text-sm mb-3">Start Your Streak</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -177,11 +180,11 @@ export function AppSidebar() {
             </SidebarGroup>
           </div>
         ) : (
-          <div className="flex flex-col h-full">
-            {/* Streak Countdown - Sticky at top */}
-            {currentRunner && <StreakCountdown lastActivityDate={currentRunner.last_activity_date} variant="sidebar" />}
-            
-            <ScrollArea className="flex-1">
+          <>
+            <div className="h-full overflow-y-auto">
+              {/* Streak Countdown - Sticky within scroll */}
+              {currentRunner && <StreakCountdown lastActivityDate={currentRunner.last_activity_date} variant="sidebar" />}
+              
               {/* Main Navigation */}
               <SidebarGroup>
                 <SidebarGroupContent>
@@ -338,10 +341,15 @@ export function AppSidebar() {
                   </SidebarGroup>
                 </>
               )}
-            </ScrollArea>
+            </div>
+          </>
+        )}
+        </div>
 
-            {/* Fixed User Profile at Bottom */}
-            <div className="mt-auto border-t border-border p-3">
+        {/* Fixed User Profile at Bottom - Only for authenticated users */}
+        {user && (
+          <div className="flex-shrink-0 border-t border-border bg-sidebar">
+            <div className="p-3">
               <UserProfileDropdown />
             </div>
           </div>
