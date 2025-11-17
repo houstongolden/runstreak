@@ -137,7 +137,7 @@ const Index = () => {
         {/* Top Carousel (Mobile only) */}
         <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 lg:px-[280px] py-6 sm:py-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
