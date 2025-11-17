@@ -111,16 +111,14 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border/50">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Distance</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Time</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Pace</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-foreground">Date</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Distance</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Time</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Pace</th>
+                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -131,26 +129,26 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
                     index === 0 ? 'border-t border-border/50' : ''
                   }`}
                 >
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-2 sm:px-4">
                     <div className="flex items-center gap-2">
                       <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="font-semibold text-foreground">
+                      <span className="font-semibold text-foreground whitespace-nowrap">
                         {DISTANCE_LABELS[effort.distance] || `${(effort.distance / 1000).toFixed(1)}km`}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="font-mono text-base text-foreground">
+                  <td className="py-3 px-2 sm:px-4">
+                    <span className="font-mono text-sm sm:text-base text-foreground whitespace-nowrap">
                       {formatTime(effort.elapsed_time)}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm text-primary font-medium">
+                  <td className="py-3 px-2 sm:px-4">
+                    <span className="text-xs sm:text-sm text-primary font-medium whitespace-nowrap">
                       {formatPace(effort.distance, effort.moving_time)}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm text-muted-foreground">
+                  <td className="py-3 px-2 sm:px-4">
+                    <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                       {new Date(effort.start_date).toLocaleDateString('en-US', { 
                         month: 'short',
                         day: 'numeric',
@@ -162,8 +160,6 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
               ))}
             </tbody>
           </table>
-        </div>
-      </CardContent>
         </div>
       </CardContent>
     </Card>
