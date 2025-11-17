@@ -8,7 +8,7 @@ import { Flame, TrendingUp, Users, ChevronRight, Award, BarChart3, Heart, Zap, T
 import { Runner } from "@/types";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface OnboardingModalProps {
   open: boolean;
@@ -20,9 +20,9 @@ interface OnboardingModalProps {
 
 const steps = [
   { id: 1, title: "Join the Leaderboard" },
-  { id: 2, title: "Increase Your Consistency" },
-  { id: 3, title: "Your Projected Growth" },
-  { id: 4, title: "RunStreak Community" },
+  { id: 2, title: "Track Your Consistency" },
+  { id: 3, title: "Stay Accountable" },
+  { id: 4, title: "Join the Community" },
   { id: 5, title: "Start Your Streak" },
 ];
 
@@ -59,19 +59,9 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
 
   if (!runner) return null;
 
-  const consistencyData = [
-    { day: 'Mon', withoutApp: 40, withApp: 85 }, { day: 'Tue', withoutApp: 35, withApp: 90 },
-    { day: 'Wed', withoutApp: 30, withApp: 88 }, { day: 'Thu', withoutApp: 25, withApp: 92 },
-    { day: 'Fri', withoutApp: 20, withApp: 87 }, { day: 'Sat', withoutApp: 45, withApp: 95 }, { day: 'Sun', withoutApp: 50, withApp: 93 }
-  ];
-
-  const yourPotentialData = [
-    { week: 'Week 1', streak: runner?.current_streak_days || 0 },
-    { week: 'Week 2', streak: (runner?.current_streak_days || 0) + 5 },
-    { week: 'Week 3', streak: (runner?.current_streak_days || 0) + 12 },
-    { week: 'Week 4', streak: (runner?.current_streak_days || 0) + 20 },
-    { week: 'Month 2', streak: (runner?.current_streak_days || 0) + 45 },
-    { week: 'Month 3', streak: (runner?.current_streak_days || 0) + 75 }
+  const accountabilityData = [
+    { category: 'Without', value: 35 },
+    { category: 'With RunStreak', value: 88 }
   ];
 
   return (
@@ -151,53 +141,68 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
         {currentStep === 3 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Your Projected Growth</p>
-              <p className="text-base text-muted-foreground">Here's where you could be in 90 days</p>
+              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Stay Accountable</p>
+              <p className="text-base text-muted-foreground font-instrument">Runners with accountability maintain consistency</p>
             </div>
             <Card className="bg-card border-primary/20 p-4 sm:p-6">
               <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={yourPotentialData}>
+                <BarChart data={accountabilityData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="week" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="category" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
                   <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value} days`, 'Streak']} />
-                  <Line type="monotone" dataKey="streak" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ fill: 'hsl(var(--primary))', r: 5 }} />
-                </LineChart>
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value}%`, 'Consistency']} />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]}>
+                    {accountabilityData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? 'hsl(0 0% 100%)' : 'hsl(var(--primary))'} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </Card>
             <div className="text-center">
-              <p className="text-3xl font-bold text-primary font-instrument">{(runner?.current_streak_days || 0) + 75} days</p>
-              <p className="text-sm text-muted-foreground mt-1">Your potential streak in 3 months</p>
+              <p className="text-3xl font-bold text-primary font-instrument">+53%</p>
+              <p className="text-sm text-muted-foreground mt-1 font-instrument">Higher consistency with accountability</p>
             </div>
           </div>
         )}
 
         {currentStep === 4 && stats && (
-          <div className="space-y-4 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-2">
-              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-8 w-8 text-primary" />
-              </div>
-              <p className="text-lg text-muted-foreground max-w-md mx-auto">
-                Real numbers from our community
-              </p>
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-3">
+              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Join the Community</p>
+              <p className="text-base text-muted-foreground font-instrument">Real stats from runners like you</p>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { icon: TrendingUp, value: `${stats.avg_days_on_streak_percentage.toFixed(0)}%`, label: 'Consistency', color: 'primary' },
-                { icon: Users, value: stats.total_users.toLocaleString(), label: 'Runners', color: 'accent' },
-                { icon: Flame, value: stats.active_streaks_count.toLocaleString(), label: 'Streaks', color: 'primary' }
+                { icon: Users, value: stats.total_users.toLocaleString(), label: 'Runners' },
+                { icon: Flame, value: stats.active_streaks_count.toLocaleString(), label: 'Active Streaks' },
+                { icon: TrendingUp, value: `${stats.avg_days_on_streak_percentage.toFixed(0)}%`, label: 'Consistency' }
               ].map((stat, i) => (
                 <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                   <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
-                  <p className="text-xl sm:text-2xl font-bold text-primary">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-primary font-instrument">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1 font-instrument">{stat.label}</p>
                 </Card>
               ))}
             </div>
             <Card className="bg-muted/30 border-primary/20 p-6 text-center">
-              <p className="text-base sm:text-lg text-foreground leading-relaxed">
-                Join a community of runners who show up every single day.
+              <p className="text-base sm:text-lg text-foreground leading-relaxed font-instrument">
+                A community of runners who show up every single day
+              </p>
+            </Card>
+          </div>
+        )}
+
+        {currentStep === 5 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-3">
+              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Ready to Start Your Streak</p>
+              <p className="text-base text-muted-foreground font-instrument">Your runs are already syncing from Strava</p>
+            </div>
+            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-6 text-center">
+              <Flame className="h-16 w-16 text-primary mx-auto mb-4" />
+              <p className="text-base sm:text-lg text-foreground leading-relaxed font-instrument">
+                Every day you run, your streak grows. The community is watching. Stay consistent.
               </p>
             </Card>
           </div>
