@@ -72,7 +72,7 @@ export const DesktopAdSidebar = ({ side, onAdvertiseClick }: DesktopAdSidebarPro
   const emptySlots = Math.max(0, maxSponsors - sponsors.length);
 
   return (
-    <div className={`hidden 2xl:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[600px] pb-4`}>
+    <div className={`hidden xl:flex fixed ${side === "left" ? "left-8" : "right-8"} top-1/2 -translate-y-1/2 flex-col gap-2 w-[220px] max-h-[600px] pb-4`}>
       {/* Sponsor cards */}
       {sponsors.map((sponsor, index) => (
         <Card

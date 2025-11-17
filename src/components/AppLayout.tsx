@@ -12,8 +12,9 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
-      <SidebarInset>
+      <div className="relative flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex-1 w-full">
         {/* Header */}
         <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center px-4 gap-4">
@@ -44,14 +45,15 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1">
-          <div className="container mx-auto px-4 py-4">
-            <UnverifiedAccountBanner />
-          </div>
-          {children}
-        </main>
-      </SidebarInset>
+          {/* Main Content */}
+          <main className="flex-1">
+            <div className="container mx-auto px-4 py-4">
+              <UnverifiedAccountBanner />
+            </div>
+            {children}
+          </main>
+        </div>
+      </div>
     </SidebarProvider>
   );
 }
