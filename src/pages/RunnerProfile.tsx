@@ -328,8 +328,8 @@ export default function RunnerProfile() {
         {/* Profile Header */}
         <Card className="mb-6 sm:mb-8 overflow-hidden">
           <CardContent className="p-4 sm:p-6 lg:p-8">
-            <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0 overflow-hidden">
+            <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0">
                 <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
@@ -399,7 +399,7 @@ export default function RunnerProfile() {
                 </div>
               </div>
               
-              <div className="w-full lg:w-auto lg:max-w-[420px] max-w-full overflow-hidden flex-shrink-0">
+              <div className="w-full lg:w-auto lg:max-w-[420px] min-w-0 flex-shrink-0">
                 <ActivityHeatmap runnerId={runner.id} />
               </div>
             </div>
