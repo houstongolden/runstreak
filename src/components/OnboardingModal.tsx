@@ -192,7 +192,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
                   <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
                   <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
                   <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} />
-                  <Bar dataKey="withoutApp" name="Without" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="withoutApp" name="Without" fill="hsl(0 0% 100%)" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="withApp" name="With RunStreak" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
