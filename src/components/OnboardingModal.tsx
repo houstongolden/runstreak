@@ -25,8 +25,7 @@ const steps = [
   { id: 1, title: "Welcome" },
   { id: 2, title: "Track Your Consistency" },
   { id: 3, title: "Stay Accountable" },
-  { id: 4, title: "Join the Community" },
-  { id: 5, title: "Start Your Streak" },
+  { id: 4, title: "Start Your Streak" },
 ];
 
 export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, totalRunners }: OnboardingModalProps) {
@@ -57,7 +56,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
     }
   }, [open, currentStep]);
 
-  const handleNext = () => currentStep < steps.length ? setCurrentStep(currentStep + 1) : (onOpenChange(false), navigate(`/runner/${runner?.id}`));
+  const handleNext = () => currentStep < steps.length ? setCurrentStep(currentStep + 1) : (onOpenChange(false), navigate(`/runner/${runner?.id}?onboarding=complete`));
   const handleSkip = () => (onOpenChange(false), navigate(`/runner/${runner?.id}`));
 
   if (!runner) return null;
@@ -175,45 +174,29 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {currentStep === 4 && stats && (
+        {currentStep === 4 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Join the Community</p>
-              <p className="text-base text-muted-foreground font-instrument">Real stats from runners like you</p>
+            <div className="text-center space-y-6">
+              <div className="space-y-3">
+                <Flame className="h-20 w-20 text-primary mx-auto animate-pulse" />
+                <p className="text-3xl sm:text-4xl font-bold font-instrument text-foreground">Let's Go! 🔥</p>
+                <p className="text-lg text-muted-foreground font-instrument">Your runs are syncing from Strava</p>
+              </div>
+              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-8 text-center">
+                <p className="text-xl sm:text-2xl font-semibold text-foreground leading-relaxed font-instrument mb-3">
+                  Every mile counts. Every day matters.
+                </p>
+                <p className="text-base text-muted-foreground font-instrument">
+                  You're now part of a community that shows up daily. Ready to build your streak?
+                </p>
+              </Card>
+              <div className="flex flex-col gap-3 text-center">
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Zap className="h-5 w-5" />
+                  <span className="font-semibold font-instrument">Day 1 starts now</span>
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { icon: Users, value: stats.total_users.toLocaleString(), label: 'Runners' },
-                { icon: Flame, value: stats.active_streaks_count.toLocaleString(), label: 'Active Streaks' },
-                { icon: TrendingUp, value: `${stats.avg_days_on_streak_percentage.toFixed(0)}%`, label: 'Consistency' }
-              ].map((stat, i) => (
-                <Card key={i} className="p-4 text-center bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                  <stat.icon className="h-6 w-6 sm:h-8 sm:w-8 text-primary mx-auto mb-2" />
-                  <p className="text-xl sm:text-2xl font-bold text-primary font-instrument">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1 font-instrument">{stat.label}</p>
-                </Card>
-              ))}
-            </div>
-            <Card className="bg-muted/30 border-primary/20 p-6 text-center">
-              <p className="text-base sm:text-lg text-foreground leading-relaxed font-instrument">
-                A community of runners who show up every single day
-              </p>
-            </Card>
-          </div>
-        )}
-
-        {currentStep === 5 && (
-          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Ready to Start Your Streak</p>
-              <p className="text-base text-muted-foreground font-instrument">Your runs are already syncing from Strava</p>
-            </div>
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-6 text-center">
-              <Flame className="h-16 w-16 text-primary mx-auto mb-4" />
-              <p className="text-base sm:text-lg text-foreground leading-relaxed font-instrument">
-                Every day you run, your streak grows. The community is watching. Stay consistent.
-              </p>
-            </Card>
           </div>
         )}
 

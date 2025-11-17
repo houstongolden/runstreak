@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { Runner } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,37 @@ export default function RunnerProfile() {
   useEffect(() => {
     if (searchParams.get('edit') === 'true' && isOwnProfile) {
       setShowProfileEditor(true);
+    }
+  }, [searchParams, isOwnProfile]);
+
+  // Trigger confetti when arriving from completed onboarding
+  useEffect(() => {
+    if (searchParams.get('onboarding') === 'complete' && isOwnProfile) {
+      const duration = 3000;
+      const end = Date.now() + duration;
+      
+      const frame = () => {
+        confetti({
+          particleCount: 7,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.6 },
+          colors: ['#FF6B35', '#F7931E', '#FDC830']
+        });
+        confetti({
+          particleCount: 7,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.6 },
+          colors: ['#FF6B35', '#F7931E', '#FDC830']
+        });
+        
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      
+      frame();
     }
   }, [searchParams, isOwnProfile]);
 
