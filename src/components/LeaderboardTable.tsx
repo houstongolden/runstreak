@@ -61,7 +61,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
               return (
                 <TableRow
                   key={runner.id}
-                  className="hover:bg-muted/50 transition-colors cursor-pointer"
+                  className="hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/40"
                 >
                   <TableCell className="font-medium">
                     <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
           {sortedRunners.map((runner, index) => (
             <TableRow
               key={runner.id}
-              className="hover:bg-muted/50 transition-colors cursor-pointer"
+              className="hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/40"
             >
               <TableCell className="font-medium">
                 <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
