@@ -11,7 +11,7 @@ const allSponsors = [
   { name: "On Running", domain: "on-running.com" },
   { name: "Nike", domain: "nike.com" },
   { name: "Whoop", domain: "whoop.com" },
-  { name: "BPN", domain: "bareperformancenutrition.com" },
+  { name: "Garmin", domain: "garmin.com" },
   { name: "Hoka", domain: "hoka.com" },
 ];
 
