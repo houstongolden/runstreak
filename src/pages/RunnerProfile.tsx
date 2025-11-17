@@ -252,9 +252,9 @@ export default function RunnerProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Header with Back Button and Actions */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
@@ -326,32 +326,32 @@ export default function RunnerProfile() {
         </div>
 
         {/* Profile Header */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex flex-col lg:flex-row items-start gap-6">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1">
-                <Avatar className="h-32 w-32">
+        <Card className="mb-6 sm:mb-8">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1 w-full">
+                <Avatar className="h-28 w-28 sm:h-32 sm:w-32 flex-shrink-0">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
                     {runner.display_name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 text-center sm:text-left">
-                  <h1 className="text-3xl font-bold mb-2">{runner.display_name}</h1>
+                <div className="flex-1 text-center sm:text-left w-full">
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-3">{runner.display_name}</h1>
                   
                   {runner.bio && (
-                    <p className="text-muted-foreground mb-3">{runner.bio}</p>
+                    <p className="text-muted-foreground mb-4 text-sm sm:text-base">{runner.bio}</p>
                   )}
                   
                   {(runner.city || runner.state || runner.country) && (
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-muted-foreground mb-4">
                       📍 {[runner.city, runner.state, runner.country].filter(Boolean).join(', ')}
                     </p>
                   )}
 
                   {/* Follower/Following Counts */}
-                  <div className="flex gap-4 mb-3 justify-center sm:justify-start">
+                  <div className="flex gap-6 mb-4 justify-center sm:justify-start">
                     <div className="text-center">
                       <div className="text-xl font-bold text-foreground">{followerCount}</div>
                       <div className="text-xs text-muted-foreground">Followers</div>
@@ -364,7 +364,7 @@ export default function RunnerProfile() {
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
-                    <div className="flex gap-2 mb-3 flex-wrap justify-center sm:justify-start">
+                    <div className="flex gap-2 mb-4 flex-wrap justify-center sm:justify-start">
                       <FollowButton
                         targetRunnerId={runner.id}
                         currentRunnerId={currentRunnerId}
@@ -399,7 +399,7 @@ export default function RunnerProfile() {
                 </div>
               </div>
               
-              <div className="w-full lg:w-auto lg:min-w-[300px]">
+              <div className="w-full lg:w-auto lg:min-w-[380px] xl:min-w-[420px]">
                 <ActivityHeatmap runnerId={runner.id} />
               </div>
             </div>
