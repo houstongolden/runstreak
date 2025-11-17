@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/formatters";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -84,6 +86,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [adSpots, setAdSpots] = useState<AdSpot[]>([]);
   const [adsLoading, setAdsLoading] = useState(true);
+  const [adsEnabled, setAdsEnabled] = useState(false);
+  const [adsToggleLoading, setAdsToggleLoading] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -95,6 +99,7 @@ export default function Admin() {
     fetchAnalytics();
     fetchRunners();
     fetchAdSpots();
+    fetchAdsEnabled();
   }, []);
 
   const fetchAnalytics = async () => {
@@ -141,6 +146,41 @@ export default function Admin() {
       toast.error('Failed to load ad spots');
     } finally {
       setAdsLoading(false);
+    }
+  };
+
+  const fetchAdsEnabled = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('setting_value')
+        .eq('setting_key', 'ads_enabled')
+        .maybeSingle();
+
+      if (error) throw error;
+      setAdsEnabled(data?.setting_value === true);
+    } catch (error) {
+      console.error('Error fetching ads setting:', error);
+    }
+  };
+
+  const handleToggleAds = async (enabled: boolean) => {
+    setAdsToggleLoading(true);
+    try {
+      const { error } = await supabase
+        .from('app_settings')
+        .update({ setting_value: enabled })
+        .eq('setting_key', 'ads_enabled');
+
+      if (error) throw error;
+      
+      setAdsEnabled(enabled);
+      toast.success(`Ads ${enabled ? 'enabled' : 'disabled'} globally`);
+    } catch (error) {
+      console.error('Error toggling ads:', error);
+      toast.error('Failed to update ads setting');
+    } finally {
+      setAdsToggleLoading(false);
     }
   };
 
@@ -440,6 +480,34 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="ads" className="space-y-6">
+          {/* Global Ads Toggle */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Global Ad Settings</CardTitle>
+              <CardDescription>
+                Control whether ads are displayed across the entire site
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="ads-toggle" className="text-base font-medium">
+                    Display Ads
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {adsEnabled ? "Ads are currently visible to all users" : "Ads are currently hidden from all users"}
+                  </p>
+                </div>
+                <Switch
+                  id="ads-toggle"
+                  checked={adsEnabled}
+                  onCheckedChange={handleToggleAds}
+                  disabled={adsToggleLoading}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Ad Spot Management</CardTitle>
