@@ -128,7 +128,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   return (
-    <div className="w-full min-w-0 max-w-[300px]">
+    <div className="w-full min-w-0 max-w-[350px]">
       <h3 className="text-sm font-semibold mb-3">Activity Heatmap</h3>
       <div className="bg-card rounded-lg p-4 sm:p-5 border overflow-hidden">
         <div className="overflow-x-auto scrollbar-hide" ref={scrollContainerRef}>
