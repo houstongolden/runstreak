@@ -128,9 +128,10 @@ Keep responses under 160 characters for SMS. Be conversational and personal.`;
         source: 'sms',
       });
 
-    // Send SMS response
+    // Send SMS response using API Key authentication
     const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const twilioApiKeySid = Deno.env.get('TWILIO_API_KEY_SID');
+    const twilioApiKeySecret = Deno.env.get('TWILIO_API_KEY_SECRET');
     const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
@@ -144,7 +145,7 @@ Keep responses under 160 characters for SMS. Be conversational and personal.`;
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+        'Authorization': `Basic ${btoa(`${twilioApiKeySid}:${twilioApiKeySecret}`)}`,
       },
       body: responseBody.toString(),
     });
