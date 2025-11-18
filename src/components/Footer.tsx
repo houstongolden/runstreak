@@ -109,7 +109,7 @@ export function Footer() {
           {/* Large background text */}
           <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none">
             <div className="text-center">
-              <h2 className="text-[120px] sm:text-[180px] md:text-[240px] lg:text-[320px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap">
+              <h2 className="text-[80px] sm:text-[140px] md:text-[200px] lg:text-[280px] xl:text-[320px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap">
                 RUNSTREAK
               </h2>
             </div>
