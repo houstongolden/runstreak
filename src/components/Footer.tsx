@@ -105,6 +105,15 @@ export function Footer() {
               .
             </p>
           </div>
+
+          {/* Large background text */}
+          <div className="relative overflow-hidden h-48 -mb-24 pointer-events-none">
+            <div className="absolute inset-x-0 bottom-0 text-center">
+              <h2 className="text-[280px] font-bold leading-none bg-gradient-to-r from-orange-500/10 via-orange-600/20 to-orange-500/10 bg-clip-text text-transparent select-none">
+                RUNSTREAK
+              </h2>
+            </div>
+          </div>
         </div>
       </footer>
 
