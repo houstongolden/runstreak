@@ -52,45 +52,6 @@ const getTimezoneAbbr = (timezone: string): string => {
   return parts[parts.length - 1].replace(/_/g, ' ');
 };
 
-// Calculate what "today" is in a specific timezone
-const getTodayInTimezone = (timezone: string): string => {
-  // Get the current time in the target timezone
-  const now = new Date();
-  const offsetMinutes = getTimezoneOffset(timezone);
-  const localTime = new Date(now.getTime() + offsetMinutes * 60000);
-  
-  const year = localTime.getUTCFullYear();
-  const month = String(localTime.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(localTime.getUTCDate()).padStart(2, '0');
-  
-  return `${year}-${month}-${day}`;
-};
-
-// Get timezone offset in minutes from UTC
-const getTimezoneOffset = (timezone: string): number => {
-  const now = new Date();
-  const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
-  const tzDate = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
-  return (tzDate.getTime() - utcDate.getTime()) / 60000;
-};
-
-// Calculate time until midnight in a specific timezone
-const getTimeUntilMidnight = (timezone: string): { hours: number; minutes: number } => {
-  const now = new Date();
-  const offsetMinutes = getTimezoneOffset(timezone);
-  const localTime = new Date(now.getTime() + offsetMinutes * 60000);
-  
-  const midnight = new Date(localTime);
-  midnight.setUTCHours(24, 0, 0, 0);
-  
-  const difference = midnight.getTime() - localTime.getTime();
-  
-  return {
-    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((difference / 1000 / 60) % 60),
-  };
-};
-
 export function RunnerStreakStatus({ lastActivityDate, timezone, country }: RunnerStreakStatusProps) {
   const [timeLeft, setTimeLeft] = useState<{
     hours: number;
@@ -99,21 +60,31 @@ export function RunnerStreakStatus({ lastActivityDate, timezone, country }: Runn
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      try {
-        setTimeLeft(getTimeUntilMidnight(timezone));
-      } catch (error) {
-        console.error('Error calculating time left:', error);
-      }
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
+      
+      const difference = midnight.getTime() - now.getTime();
+      
+      setTimeLeft({
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+      });
     };
 
     calculateTimeLeft();
     const timer = setInterval(calculateTimeLeft, 60000); // Update every minute
 
     return () => clearInterval(timer);
-  }, [timezone]);
+  }, []);
 
-  // Check if runner has run today in THEIR timezone
-  const todayStr = getTodayInTimezone(timezone);
+  // Check if runner has run today - using BROWSER'S local time (same as working StreakCountdown)
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+  
   const hasRunToday = lastActivityDate === todayStr;
 
   // Get country code for flag
