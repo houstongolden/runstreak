@@ -493,7 +493,7 @@ const Index = () => {
 
           {/* Large background text */}
           <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none">
-            <div className="text-center relative">
+            <div className="flex items-center justify-center relative">
               <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
                 RUNSTREAK
               </h2>
