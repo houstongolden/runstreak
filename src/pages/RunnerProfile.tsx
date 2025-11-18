@@ -475,7 +475,7 @@ export default function RunnerProfile() {
 
           <TabsContent value="overview" className="space-y-6 mt-6">
             {/* Streak Countdown - Only on own profile */}
-            {isOwnProfile && <StreakCountdown lastActivityDate={runner.last_activity_date} variant="profile" />}
+            {isOwnProfile && <StreakCountdown lastActivityDate={runner.last_activity_date} timezone={runner.timezone || 'America/Los_Angeles'} variant="profile" />}
             
             {/* Current Streak */}
             <CurrentStreakCard

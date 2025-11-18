@@ -12,6 +12,7 @@ export function StreakCountdownBanner() {
     total: number;
   }>({ hours: 0, minutes: 0, seconds: 0, total: 0 });
   const [lastActivityDate, setLastActivityDate] = useState<string | null>(null);
+  const [timezone, setTimezone] = useState<string>('America/Los_Angeles');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,12 +25,13 @@ export function StreakCountdownBanner() {
       try {
         const { data, error } = await supabase
           .from('runners')
-          .select('last_activity_date')
+          .select('last_activity_date, timezone')
           .eq('id', runnerId)
           .single();
 
         if (error) throw error;
         setLastActivityDate(data?.last_activity_date || null);
+        setTimezone(data?.timezone || 'America/Los_Angeles');
       } catch (error) {
         console.error('Error fetching runner data:', error);
       } finally {
@@ -42,11 +44,15 @@ export function StreakCountdownBanner() {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date();
-      const midnight = new Date();
+      // Get current time in the runner's timezone
+      const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
+      const runnerTime = new Date(nowInRunnerTz);
+      
+      // Calculate midnight in runner's timezone
+      const midnight = new Date(runnerTime);
       midnight.setHours(24, 0, 0, 0);
       
-      const difference = midnight.getTime() - now.getTime();
+      const difference = midnight.getTime() - runnerTime.getTime();
       
       if (difference > 0) {
         setTimeLeft({
@@ -62,13 +68,14 @@ export function StreakCountdownBanner() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [timezone]);
 
-  // Check if user has run today - using BROWSER'S local time (same as working StreakCountdown)
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  // Calculate "today" in the runner's specific timezone
+  const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
+  const runnerTime = new Date(nowInRunnerTz);
+  const year = runnerTime.getFullYear();
+  const month = String(runnerTime.getMonth() + 1).padStart(2, '0');
+  const day = String(runnerTime.getDate()).padStart(2, '0');
   const todayStr = `${year}-${month}-${day}`;
   
   const hasRunToday = lastActivityDate === todayStr;
