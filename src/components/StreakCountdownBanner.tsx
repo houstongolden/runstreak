@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock, AlertTriangle } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -74,10 +74,31 @@ export function StreakCountdownBanner() {
   const hasRunToday = lastActivityDate === todayStr;
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours
 
-  // Don't show if loading, no runner, or already ran today
-  if (loading || !runnerId || hasRunToday) {
+  // Don't show if loading or no runner
+  if (loading || !runnerId) {
     return null;
   }
+
+  // Show success state if user has completed their streak today
+  if (hasRunToday) {
+    return (
+      <div className="w-full border-b bg-green-500/10 border-green-500/20">
+        <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24">
+          <div className="flex items-center justify-center gap-3 py-2.5">
+            <CheckCircle className="h-5 w-5 text-green-500" />
+            <span className="text-sm font-semibold">
+              Congrats! You're good for the day
+            </span>
+            <span className="text-sm text-muted-foreground hidden sm:inline">
+              Your streak is safe until tomorrow
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show countdown state if user hasn't run today
 
   return (
     <div 
