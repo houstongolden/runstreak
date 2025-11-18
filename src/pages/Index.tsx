@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { AdvertiseModal } from "@/components/AdvertiseModal";
 import { SponsorCarousel } from "@/components/SponsorCarousel";
@@ -25,15 +24,12 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 
-type LeaderboardView = "total" | "percent" | "fiveday";
-
 const Index = () => {
   const navigate = useNavigate();
   const { user, runnerId } = useAuth();
   const [runners, setRunners] = useState<Runner[]>([]);
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [view, setView] = useState<LeaderboardView>("total");
   const [displayCount, setDisplayCount] = useState(10);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingRunner, setOnboardingRunner] = useState<Runner | null>(null);
@@ -247,19 +243,12 @@ const Index = () => {
 
         {/* Leaderboard Section */}
         <div className="mb-6 px-4 sm:px-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4 sm:mb-5">
-            <Tabs value={view} onValueChange={(v) => setView(v as LeaderboardView)} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:flex h-11 sm:h-10">
-                <TabsTrigger value="total" className="text-xs sm:text-sm">Daily Streaks</TabsTrigger>
-                <TabsTrigger value="fiveday" className="text-xs sm:text-sm">5-Day Week</TabsTrigger>
-                <TabsTrigger value="percent" className="text-xs sm:text-sm">Most Miles</TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-4 sm:mb-5">
             <Select defaultValue="streak">
               <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border-border bg-background hover:bg-muted/50">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border-border z-50">
                 <SelectItem value="streak">Longest streak</SelectItem>
                 <SelectItem value="miles">Most miles</SelectItem>
               </SelectContent>
@@ -268,7 +257,7 @@ const Index = () => {
               <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border-border bg-background hover:bg-muted/50">
                 <SelectValue placeholder="Time period" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border-border z-50">
                 <SelectItem value="all">All time</SelectItem>
                 <SelectItem value="year">This year</SelectItem>
                 <SelectItem value="month">This month</SelectItem>
@@ -286,7 +275,7 @@ const Index = () => {
             </div>
           ) : (
             <>
-              <LeaderboardTable runners={displayedRunners} view={view} />
+              <LeaderboardTable runners={displayedRunners} view="total" />
               
                {hasMore && (
                  <div className="mt-5 flex flex-col items-center gap-4">
