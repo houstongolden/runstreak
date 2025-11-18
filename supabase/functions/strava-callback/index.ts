@@ -168,6 +168,60 @@ Deno.serve(async (req) => {
       console.log('Fetched athlete stats');
     }
 
+    // Check if runner already exists in database with activity data
+    const { data: returningRunner } = await supabase
+      .from('runners')
+      .select('id, last_activity_date')
+      .eq('strava_user_id', athleteProfile.id)
+      .maybeSingle();
+
+    const isReturningUser = returningRunner && returningRunner.last_activity_date;
+    
+    if (isReturningUser) {
+      console.log('Returning user detected - skipping activity sync, only authenticating');
+      
+      // Update tokens only, no activity sync needed
+      const { error: updateError } = await supabase
+        .from('runners')
+        .update({
+          strava_access_token: tokenData.access_token,
+          strava_refresh_token: tokenData.refresh_token,
+          token_expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', returningRunner.id);
+
+      if (updateError) {
+        console.error('Error updating runner tokens:', updateError);
+      }
+
+      // Generate session for returning user and redirect immediately
+      const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
+        type: 'magiclink',
+        email: userEmail,
+      });
+
+      if (sessionError || !sessionData) {
+        console.error('Session generation error:', sessionError);
+        throw new Error('Failed to generate session');
+      }
+
+      const redirectUrl = new URL('https://runstreak.to');
+      redirectUrl.searchParams.set('access_token', sessionData.properties.action_link.split('#access_token=')[1].split('&')[0]);
+      redirectUrl.searchParams.set('refresh_token', sessionData.properties.action_link.split('&refresh_token=')[1].split('&')[0]);
+
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': redirectUrl.toString(),
+          ...corsHeaders
+        }
+      });
+    }
+
+    // NEW USER - proceed with activity sync
+    console.log('New user detected - fetching activities for initial sync');
+    
     // Fetch ONLY first 1-2 pages for initial streak calculation (quick signup)
     let allActivities: any[] = [];
     let page = 1;

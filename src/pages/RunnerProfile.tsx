@@ -316,9 +316,24 @@ export default function RunnerProfile() {
   const handleSync = async () => {
     if (!id) return;
     
+    // Check if user synced in last 15 minutes
+    if (runner?.updated_at) {
+      const lastSyncTime = new Date(runner.updated_at).getTime();
+      const fifteenMinutesAgo = Date.now() - (15 * 60 * 1000);
+      
+      if (lastSyncTime > fifteenMinutesAgo) {
+        toast({
+          title: "Sync Rate Limited",
+          description: "You can only sync once every 15 minutes. Webhooks handle automatic updates.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     setIsSyncing(true);
     try {
-      // Always do full Strava sync to fetch latest activities
+      // Manual sync - rate limited to prevent API abuse
       const { error } = await supabase.functions.invoke('sync-strava', {
         body: { runnerId: id }
       });
