@@ -468,8 +468,8 @@ Deno.serve(async (req) => {
     // Determine if this is a new user
     const isNewUser = !existingRunner;
     
-    // Get redirect base URL
-    const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
+    // Get redirect base URL - use production domain
+    const baseUrl = 'https://runstreak.to';
     
     // Create a session token directly for the user
     // Generate a session using the service role to bypass email verification
@@ -561,7 +561,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in strava-callback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
+    const baseUrl = 'https://runstreak.to';
     return new Response(null, {
       status: 302,
       headers: {
