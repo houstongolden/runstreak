@@ -67,7 +67,7 @@ const App = () => (
               
               {/* Routes without sidebar layout */}
               <Route path="/connect" element={<StravaConnect />} />
-              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/onboarding/*" element={<Onboarding />} />
               <Route path="/verify-account" element={<VerifyAccount />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin/login" element={<AdminLogin />} />

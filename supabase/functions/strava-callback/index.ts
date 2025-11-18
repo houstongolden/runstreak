@@ -504,9 +504,9 @@ Deno.serve(async (req) => {
     // Determine redirect URL based on whether user is new
     let finalRedirectUrl = redirectUrl;
     
-    // New users go to onboarding, existing users go to their profile
+    // New users go to onboarding step 1, existing users go to their profile
     if (isNewUser) {
-      finalRedirectUrl = `${redirectUrl}/onboarding?runnerId=${runnerId}`;
+      finalRedirectUrl = `${redirectUrl}/onboarding/step-1?runnerId=${runnerId}`;
     } else {
       finalRedirectUrl = `${redirectUrl}/runner/${runnerId}`;
     }
