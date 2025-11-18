@@ -214,7 +214,7 @@ export default function SocialFeed() {
                       {activity.distance && (
                         <>
                           <span className="font-medium text-foreground">
-                            {(activity.distance * 0.000621371).toFixed(2)} mi
+                            {activity.distance.toFixed(2)} mi
                           </span>
                           <span>•</span>
                         </>
@@ -257,21 +257,17 @@ export default function SocialFeed() {
                 </div>
 
                 {/* Kudos and Comments - Fixed at bottom */}
-                <div className="pt-3 border-t">
-                  <div className="flex items-start gap-4">
-                    <div className="shrink-0">
-                      <ActivityKudos 
-                        runnerId={activity.runner_id} 
-                        activityDate={activity.activity_date}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <ActivityComments
-                        activityRunnerId={activity.runner_id}
-                        activityDate={activity.activity_date}
-                        currentRunnerId={currentRunnerId || undefined}
-                      />
-                    </div>
+                <div className="pt-3 border-t space-y-3">
+                  <div className="flex items-center gap-4">
+                    <ActivityKudos 
+                      runnerId={activity.runner_id} 
+                      activityDate={activity.activity_date}
+                    />
+                    <ActivityComments
+                      activityRunnerId={activity.runner_id}
+                      activityDate={activity.activity_date}
+                      currentRunnerId={currentRunnerId || undefined}
+                    />
                   </div>
                 </div>
               </div>

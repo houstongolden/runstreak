@@ -163,7 +163,7 @@ export default function ActivityComments({
   };
 
   return (
-    <div className="w-full">
+    <>
       <Button
         variant="ghost"
         size="sm"
@@ -175,7 +175,7 @@ export default function ActivityComments({
       </Button>
 
       {showComments && (
-        <div className="w-full mt-4 space-y-4">
+        <div className="w-full space-y-4">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading comments...</p>
           ) : (
