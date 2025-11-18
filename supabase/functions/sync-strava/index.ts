@@ -478,7 +478,7 @@ Deno.serve(async (req) => {
     
     if (joinedDate) {
       joinedDate.setHours(0, 0, 0, 0);
-      totalDaysSinceJoining = Math.floor((todayDate.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24));
+      totalDaysSinceJoining = Math.floor((todayDate.getTime() - joinedDate.getTime()) / (1000 * 60 * 60 * 24)) + 1; // +1 for inclusive count
       
       // Count days with activity since joining
       daysOnStreakSinceJoining = allActivityDates.filter(dateStr => {
