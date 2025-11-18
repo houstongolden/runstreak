@@ -386,7 +386,7 @@ export default function Settings() {
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
         <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Settings</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-instrument font-medium mb-2">Settings</h1>
             <p className="text-muted-foreground text-sm sm:text-base">
               Manage your account and AI coach preferences
             </p>

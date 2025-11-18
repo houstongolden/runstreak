@@ -245,7 +245,7 @@ export default function RunnerProfile() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Runner not found</h2>
+          <h2 className="text-2xl font-instrument font-medium mb-4">Runner not found</h2>
           <Button onClick={() => navigate("/")}>Back to Leaderboard</Button>
         </div>
       </div>
@@ -360,7 +360,7 @@ export default function RunnerProfile() {
                 </Avatar>
 
                 <div className="flex-1 text-center sm:text-left w-full min-w-0">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 break-words">{runner.display_name}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-instrument font-medium mb-2 sm:mb-3 break-words">{runner.display_name}</h1>
                   
                   {runner.bio && (
                     <p className="text-muted-foreground mb-3 sm:mb-4 text-sm sm:text-base break-words">{runner.bio}</p>
@@ -493,7 +493,7 @@ export default function RunnerProfile() {
 
             {/* AI Analysis Section */}
             <div>
-              <h2 className="text-xl font-semibold mb-4">AI Performance Insights</h2>
+              <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
               <AIAnalysisCards runner={runner} />
             </div>
 

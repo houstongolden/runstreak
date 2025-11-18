@@ -188,7 +188,7 @@ export default function Inbox() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Leaderboard
         </Button>
-        <h1 className="text-3xl font-bold font-instrument">Inbox</h1>
+        <h1 className="text-3xl font-instrument font-medium">Inbox</h1>
         <p className="text-muted-foreground">Message runners you follow</p>
       </div>
 
