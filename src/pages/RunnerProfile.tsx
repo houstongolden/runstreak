@@ -39,6 +39,7 @@ import { RunnerActivities } from "@/components/RunnerActivities";
 import { TabsContent } from "@/components/ui/tabs";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { StreakCountdown } from "@/components/StreakCountdown";
+import { RunnerStreakStatus } from "@/components/RunnerStreakStatus";
 
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
@@ -401,16 +402,26 @@ export default function RunnerProfile() {
                   )}
                   
                   <div className="flex flex-col gap-2 justify-center sm:justify-start">
-                    <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
-                      {streakActive ? (
-                        <>
-                          <Flame className="h-4 w-4 mr-1" />
-                          {runner.current_streak_days} {runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak
-                        </>
-                      ) : (
-                        "No Active Streak"
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
+                        {streakActive ? (
+                          <>
+                            <Flame className="h-4 w-4 mr-1" />
+                            {runner.current_streak_days} {runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak
+                          </>
+                        ) : (
+                          "No Active Streak"
+                        )}
+                      </Badge>
+                      
+                      {!isOwnProfile && runner.timezone && streakActive && (
+                        <RunnerStreakStatus 
+                          lastActivityDate={runner.last_activity_date}
+                          timezone={runner.timezone}
+                          country={runner.country}
+                        />
                       )}
-                    </Badge>
+                    </div>
                     
                     {runner.joined_runstreak_at && (
                       <div className="text-xs text-muted-foreground">
@@ -469,6 +480,8 @@ export default function RunnerProfile() {
               streakMiles={runner.current_streak_miles || 0}
               streakStatus={runner.streak_status}
               avgMilesPerDay={runner.average_miles_per_day || 0}
+              streakStartDate={runner.streak_start_date}
+              lastActivityDate={runner.last_activity_date}
             />
 
             {/* Days on Streak - Primary Metric */}
