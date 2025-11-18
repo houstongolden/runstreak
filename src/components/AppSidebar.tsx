@@ -136,23 +136,29 @@ export function AppSidebar() {
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-3">
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to="/auth" 
-                        className="hover:bg-primary/10 transition-all min-h-[72px] py-3 px-3 rounded-lg border border-transparent hover:border-primary/20" 
-                        activeClassName="bg-muted text-primary font-medium"
-                        onClick={handleNavClick}
-                      >
-                        <div className="flex items-start gap-3 w-full">
-                          <div className="p-2 rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
-                            <Zap className="h-4 w-4 text-primary" />
-                          </div>
-                          <div className="flex flex-col gap-1 flex-1">
-                            <span className="font-semibold text-sm leading-tight">Join Free - Takes 10s</span>
-                            <span className="text-xs text-muted-foreground leading-tight">Connect Strava & start your streak</span>
-                          </div>
+                    <SidebarMenuButton 
+                      onClick={async () => {
+                        try {
+                          const { data, error } = await supabase.functions.invoke('strava-auth');
+                          if (error) throw error;
+                          if (data?.authUrl) {
+                            window.location.href = data.authUrl;
+                          }
+                        } catch (error) {
+                          console.error('Error connecting to Strava:', error);
+                        }
+                      }}
+                      className="hover:bg-primary/10 transition-all min-h-[72px] py-3 px-3 rounded-lg border border-transparent hover:border-primary/20"
+                    >
+                      <div className="flex items-start gap-3 w-full">
+                        <div className="p-2 rounded-md bg-primary/10 flex-shrink-0 mt-0.5">
+                          <Zap className="h-4 w-4 text-primary" />
                         </div>
-                      </NavLink>
+                        <div className="flex flex-col gap-1 flex-1">
+                          <span className="font-semibold text-sm leading-tight">Join Free - Takes 10s</span>
+                          <span className="text-xs text-muted-foreground leading-tight">Connect Strava & start your streak</span>
+                        </div>
+                      </div>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>

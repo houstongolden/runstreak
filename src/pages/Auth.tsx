@@ -17,7 +17,6 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -66,27 +65,14 @@ export default function Auth() {
     try {
       setIsLoading(true);
       
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`
-          }
-        });
-        
-        if (error) throw error;
-        toast.success('Account created! Please check your email to verify.');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        
-        if (error) throw error;
-        toast.success('Logged in successfully!');
-        navigate('/');
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      toast.success('Logged in successfully!');
+      navigate('/');
     } catch (error: any) {
       console.error('Auth error:', error);
       toast.error(error.message || 'Authentication failed');
@@ -102,9 +88,9 @@ export default function Auth() {
           <div className="flex justify-center mb-4">
             <Flame className="w-12 h-12 text-primary" />
           </div>
-          <CardTitle className="text-3xl">Welcome to RunStreak</CardTitle>
+          <CardTitle className="text-3xl">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to join the leaderboard
+            Sign in to your RunStreak account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -159,19 +145,11 @@ export default function Auth() {
                   size="lg"
                   className="w-full"
                 >
-                  {isLoading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+                  {isLoading ? 'Loading...' : 'Sign In'}
                 </Button>
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-sm text-muted-foreground hover:text-foreground w-full text-center"
-                  disabled={isLoading}
-                >
-                  {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-                </button>
               </form>
               <p className="text-sm text-center text-muted-foreground">
-                Connect Strava later in Settings to sync your runs
+                Set up email/password in Settings after connecting Strava
               </p>
             </TabsContent>
           </Tabs>
