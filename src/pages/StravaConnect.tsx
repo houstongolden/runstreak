@@ -15,34 +15,13 @@ export default function StravaConnect() {
     const message = searchParams.get('message');
     const runnerId = searchParams.get('runnerId');
     
-    // Check if this page was opened in a popup
-    const isPopup = window.opener && !window.opener.closed;
-    
     if (stravaStatus === 'success') {
-      if (isPopup) {
-        // Post message to parent window and let it handle the redirect
-        window.opener.postMessage({
-          type: 'strava-auth-success',
-          runnerId: runnerId
-        }, window.location.origin);
-        // Popup will be closed by parent
-      } else {
-        // Regular flow for non-popup
-        if (runnerId) {
-          toast.success('Successfully connected to Strava!');
-          setTimeout(() => navigate(`/runner/${runnerId}`), 1500);
-        }
+      if (runnerId) {
+        toast.success('Successfully connected to Strava!');
+        setTimeout(() => navigate(`/runner/${runnerId}`), 1500);
       }
     } else if (stravaStatus === 'error') {
-      if (isPopup) {
-        window.opener.postMessage({
-          type: 'strava-auth-error',
-          message: message || 'Unknown error'
-        }, window.location.origin);
-        // Popup will be closed by parent
-      } else {
-        toast.error(`Failed to connect: ${message || 'Unknown error'}`);
-      }
+      toast.error(`Failed to connect: ${message || 'Unknown error'}`);
     }
   }, [searchParams, navigate]);
 

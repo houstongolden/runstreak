@@ -45,45 +45,7 @@ export default function Auth() {
       if (error) throw error;
       
       if (data?.authUrl) {
-        // Open Strava OAuth in popup window
-        const width = 600;
-        const height = 700;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-        
-        const popup = window.open(
-          data.authUrl,
-          'stravaAuth',
-          `width=${width},height=${height},left=${left},top=${top},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
-        );
-        
-        // Listen for message from popup
-        const messageHandler = (event: MessageEvent) => {
-          if (event.origin !== window.location.origin) return;
-          
-          if (event.data.type === 'strava-auth-success') {
-            popup?.close();
-            toast.success('Successfully connected to Strava!');
-            if (event.data.runnerId) {
-              navigate(`/runner/${event.data.runnerId}`);
-            }
-            window.removeEventListener('message', messageHandler);
-          } else if (event.data.type === 'strava-auth-error') {
-            popup?.close();
-            toast.error(event.data.message || 'Failed to connect to Strava');
-            window.removeEventListener('message', messageHandler);
-            setIsLoading(false);
-          }
-        };
-        
-        window.addEventListener('message', messageHandler);
-        
-        // Fallback if popup is blocked
-        if (!popup || popup.closed) {
-          window.removeEventListener('message', messageHandler);
-          toast.error('Popup was blocked. Please allow popups for this site.');
-          setIsLoading(false);
-        }
+        window.location.href = data.authUrl;
       }
     } catch (error) {
       console.error('Error connecting to Strava:', error);
