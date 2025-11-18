@@ -93,7 +93,7 @@ export function AggregateStatsCard() {
     <section className="py-12 px-6 sm:px-8 lg:px-16 xl:px-24 bg-background">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+          <h2 className="text-2xl sm:text-3xl font-instrument font-medium mb-2">
             RunStreak Impact
           </h2>
           <p className="text-muted-foreground">

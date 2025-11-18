@@ -20,7 +20,7 @@ export function AppDownloadSection() {
           {/* Main CTA */}
           <div className="space-y-4">
             <Smartphone className="h-16 w-16 mx-auto text-primary" />
-            <h2 className="text-3xl sm:text-4xl font-bold">
+            <h2 className="text-3xl sm:text-4xl font-instrument font-medium">
               Download the App Today
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

@@ -78,7 +78,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
         {currentStep === 1 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">You've joined the leaderboard!</p>
+              <p className="text-2xl sm:text-3xl font-instrument font-medium text-foreground">You've joined the leaderboard!</p>
               <p className="text-base text-muted-foreground font-instrument">Run at least 1 mile per day to keep your streak alive</p>
             </div>
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-6">
@@ -112,7 +112,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
         {currentStep === 2 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Increase Your Consistency</p>
+              <p className="text-2xl sm:text-3xl font-instrument font-medium text-foreground">Increase Your Consistency</p>
               <p className="text-base text-muted-foreground">Track every run with your activity heatmap</p>
             </div>
             <Card className="bg-card border-primary/20 p-6">
@@ -149,7 +149,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
         {currentStep === 3 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-bold font-instrument text-foreground">Stay Accountable</p>
+              <p className="text-2xl sm:text-3xl font-instrument font-medium text-foreground">Stay Accountable</p>
               <p className="text-base text-muted-foreground font-instrument">Runners with accountability maintain consistency</p>
             </div>
             <Card className="bg-card border-primary/20 p-4 sm:p-6">
@@ -179,7 +179,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
             <div className="text-center space-y-6">
               <div className="space-y-3">
                 <Flame className="h-20 w-20 text-primary mx-auto animate-pulse" />
-                <p className="text-3xl sm:text-4xl font-bold font-instrument text-foreground">Let's Go! 🔥</p>
+                <p className="text-3xl sm:text-4xl font-instrument font-medium text-foreground">Let's Go! 🔥</p>
                 <p className="text-lg text-muted-foreground font-instrument">Your runs are syncing from Strava</p>
               </div>
               <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-8 text-center">

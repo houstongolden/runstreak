@@ -159,7 +159,7 @@ const Index = () => {
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-instrument-serif font-normal flex items-center gap-2.5 sm:gap-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-instrument font-medium flex items-center gap-2.5 sm:gap-3">
               <Flame 
                 className="h-7 w-7 sm:h-9 sm:w-9 lg:h-10 lg:w-10 animate-shiny-text"
                 style={{

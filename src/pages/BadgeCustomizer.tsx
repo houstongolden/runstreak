@@ -80,7 +80,7 @@ const BadgeCustomizer = () => {
               Back to Profile
             </Button>
           </Link>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Customize Your Badge</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-instrument font-medium mb-2">Customize Your Badge</h1>
           <p className="text-muted-foreground text-sm sm:text-base lg:text-lg">
             Create an embeddable badge to showcase your running streak
           </p>

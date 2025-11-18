@@ -17,7 +17,7 @@ const BadgeDocs = () => {
               Back to Home
             </Button>
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">RunStreak Badges</h1>
+          <h1 className="text-3xl sm:text-4xl font-instrument font-medium mb-2">RunStreak Badges</h1>
           <p className="text-muted-foreground text-lg">
             Showcase your running dedication with embeddable badges
           </p>

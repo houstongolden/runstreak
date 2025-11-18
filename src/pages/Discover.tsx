@@ -159,7 +159,7 @@ export default function Discover() {
   return (
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Discover Runners</h1>
+        <h1 className="text-4xl font-instrument font-medium mb-2">Discover Runners</h1>
         <p className="text-muted-foreground">Find runners near you and with similar goals</p>
         
         {/* Search Bar */}
