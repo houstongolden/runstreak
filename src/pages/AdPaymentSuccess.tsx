@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, Flame } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 export default function AdPaymentSuccess() {
   const navigate = useNavigate();
@@ -71,6 +72,12 @@ export default function AdPaymentSuccess() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-2xl mx-auto px-4 py-8">
+        {/* Logo Header */}
+        <Link to="/" className="flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
+          <Flame className="h-6 w-6 text-primary" />
+          <span className="text-xl font-semibold">RunStreak</span>
+        </Link>
+        
         <Card>
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -85,7 +92,7 @@ export default function AdPaymentSuccess() {
                 : "Thank you for your purchase. Now let's set up your ad spot."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pb-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="companyName">
