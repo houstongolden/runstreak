@@ -75,9 +75,23 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
             
             <div className="text-center space-y-2">
               <p className="text-xl font-bold text-foreground font-instrument">{runner.display_name}</p>
-              <p className="text-sm text-muted-foreground font-instrument">
-                We're syncing your Strava data and calculating your streak
-              </p>
+              <div className="flex items-center justify-center gap-2">
+                <p className="text-3xl font-bold text-primary font-instrument">
+                  #{leaderboardRank}
+                </p>
+                <p className="text-sm text-muted-foreground font-instrument">
+                  of {totalRunners} runners
+                </p>
+              </div>
+              {runner.current_streak_days > 0 ? (
+                <p className="text-sm text-muted-foreground font-instrument">
+                  Current Streak: <span className="text-primary font-semibold">{runner.current_streak_days} days</span>
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground font-instrument">
+                  We're syncing your activities in the background
+                </p>
+              )}
             </div>
           </div>
         </Card>
