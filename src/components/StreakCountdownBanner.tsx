@@ -64,7 +64,7 @@ export function StreakCountdownBanner() {
     return () => clearInterval(timer);
   }, []);
 
-  // Check if user has run today - using same logic as working StreakCountdown
+  // Check if user has run today - using BROWSER'S local time (same as working StreakCountdown)
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
