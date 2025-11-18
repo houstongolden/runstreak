@@ -188,7 +188,7 @@ export default function ProfileEditor({ runner, onUpdate, onCancel, defaultEditi
                 className="font-mono"
               />
               <p className="text-xs text-muted-foreground">
-                Your shareable profile URL: runstreak.app/runner/{username || "your-username"}
+                Your shareable profile URL: runstreak.to/runner/{username || "your-username"}
               </p>
             </div>
             <div className="space-y-2">
