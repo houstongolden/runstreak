@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { runnerId } = await req.json();
+    const { runnerId, quickSync, maxPages, skipFirstPage } = await req.json();
 
     if (!runnerId) {
       throw new Error('Runner ID is required');
@@ -172,26 +172,47 @@ Deno.serve(async (req) => {
 
     // Fetch all activities for streak calculation (need complete history for accurate streaks)
     // But we'll only fetch detailed activity info for NEW activities when checking PRs
+    // Support quick sync (first page only) for fast initial rank calculation
     let allActivities: any[] = [];
-    let page = 1;
+    let page = skipFirstPage ? 2 : 1; // Skip first page if this is a full sync after quick sync
     const perPage = 200;
+    const maxPagesToFetch = maxPages || Infinity; // Limit pages for quick sync
+    let pagesFetched = 0;
+
+    console.log(`Starting activity fetch (${quickSync ? 'QUICK' : 'FULL'} sync, starting page ${page}, max pages: ${maxPagesToFetch})...`);
     
-    while (true) {
+    while (pagesFetched < maxPagesToFetch) {
+      pagesFetched++;
+      console.log(`Fetching page ${page}...`);
+      
       const activitiesResponse = await fetch(
         `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}&include_all_efforts=true`,
         { headers: { 'Authorization': `Bearer ${accessToken}` } }
       );
 
-      if (!activitiesResponse.ok) break;
+      if (!activitiesResponse.ok) {
+        console.log('Activities fetch failed, stopping pagination');
+        break;
+      }
       
       const activities = await activitiesResponse.json();
-      if (activities.length === 0) break;
+      if (activities.length === 0) {
+        console.log('No more activities, stopping pagination');
+        break;
+      }
       
-      allActivities = allActivities.concat(activities.filter((a: any) => a.type === 'Run'));
+      const runActivities = activities.filter((a: any) => a.type === 'Run');
+      allActivities = allActivities.concat(runActivities);
+      console.log(`Page ${page}: Found ${runActivities.length} running activities`);
       
-      if (activities.length < perPage) break;
+      if (activities.length < perPage) {
+        console.log('Last page reached (fewer than perPage activities)');
+        break;
+      }
       page++;
     }
+
+    console.log(`Activity fetch complete: ${allActivities.length} total running activities (${quickSync ? 'QUICK' : 'FULL'} sync)`);
 
     // Determine runner's timezone from coordinates
     let timezone = runner.timezone;
