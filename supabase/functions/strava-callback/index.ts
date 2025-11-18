@@ -75,7 +75,13 @@ Deno.serve(async (req) => {
     );
 
     if (!athleteResponse.ok) {
-      throw new Error('Failed to fetch athlete profile');
+      const errorBody = await athleteResponse.text();
+      console.error('Strava API error:', { 
+        status: athleteResponse.status, 
+        statusText: athleteResponse.statusText,
+        body: errorBody 
+      });
+      throw new Error(`Failed to fetch athlete profile: ${athleteResponse.status} ${errorBody}`);
     }
 
     const athleteProfile = await athleteResponse.json();
