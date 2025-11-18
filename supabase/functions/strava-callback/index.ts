@@ -471,21 +471,19 @@ Deno.serve(async (req) => {
     // Get redirect base URL - use production domain
     const baseUrl = 'https://runstreak.to';
     
-    // Create a session token directly for the user
-    // Generate a session using the service role to bypass email verification
-    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+    // Create session tokens for the user
+    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email: userEmail,
     });
 
-    if (linkError || !linkData) {
-      console.error('Error generating session link:', linkError);
+    if (sessionError || !sessionData) {
+      console.error('Error generating session:', sessionError);
       throw new Error('Failed to generate session');
     }
 
-    // Extract access and refresh tokens from the generated link
-    // The action_link contains the auth URL with the token
-    const actionLink = linkData.properties.action_link;
+    // Extract access and refresh tokens
+    const actionLink = sessionData.properties.action_link;
     const linkUrl = new URL(actionLink);
     const hashToken = linkUrl.searchParams.get('token');
 
@@ -494,7 +492,7 @@ Deno.serve(async (req) => {
       throw new Error('Failed to extract session token');
     }
 
-    // Exchange the token for an actual session
+    // Exchange for actual session tokens
     const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
       token_hash: hashToken,
       type: 'magiclink',
@@ -505,48 +503,52 @@ Deno.serve(async (req) => {
       throw new Error('Failed to create session');
     }
     
-    console.log('Session created successfully');
+    const accessToken = verifyData.session.access_token;
+    const refreshToken = verifyData.session.refresh_token;
     
-    // Start TWO-STAGE background sync for activity history:
-    // Stage 1: Quick sync (first 200 activities) - completes in 5-10 seconds
-    // Stage 2: Full sync (remaining activities) - continues in background
-    console.log('Starting two-stage background sync...');
-    fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ runnerId: savedRunner.id, quickSync: true, maxPages: 1 })
-    })
-      .then(async quickResponse => {
-        if (quickResponse.ok) {
-          console.log('Quick sync completed, starting full sync...');
-          // After quick sync, trigger full sync for remaining activities
-          return fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${supabaseKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ runnerId: savedRunner.id, skipFirstPage: true })
-          });
-        } else {
-          console.error('Quick sync failed:', quickResponse.status);
-        }
-      })
-      .then(fullResponse => {
-        if (fullResponse && fullResponse.ok) {
-          console.log('Full background sync triggered');
-        }
-      })
-      .catch(err => console.error('Background sync error:', err));
+    console.log('Session tokens generated successfully');
     
-    // Build redirect URL - session is already established via verifyOtp above
-    // No need to pass tokens in URL since session cookies are set
+    // Only sync activities for NEW users
+    // Returning users already have their data and just need to authenticate
+    if (isNewUser) {
+      console.log('Starting two-stage background sync for new user...');
+      fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ runnerId: savedRunner.id, quickSync: true, maxPages: 1 })
+      })
+        .then(async quickResponse => {
+          if (quickResponse.ok) {
+            console.log('Quick sync completed, starting full sync...');
+            return fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ runnerId: savedRunner.id, skipFirstPage: true })
+            });
+          } else {
+            console.error('Quick sync failed:', quickResponse.status);
+          }
+        })
+        .then(fullResponse => {
+          if (fullResponse && fullResponse.ok) {
+            console.log('Full background sync triggered');
+          }
+        })
+        .catch(err => console.error('Background sync error:', err));
+    } else {
+      console.log('Skipping activity sync for returning user');
+    }
+    
+    // Build redirect URL with session tokens for client-side auth
     const redirectUrl = isNewUser 
-      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}`
-      : `${baseUrl}/runner/${savedRunner.id}`;
+      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&access_token=${accessToken}&refresh_token=${refreshToken}`
+      : `${baseUrl}/?access_token=${accessToken}&refresh_token=${refreshToken}`;
     
     console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user to ${redirectUrl}`);
 
