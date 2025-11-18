@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   runnerId: string | null;
+  runnerData: { display_name: string; avatar_url: string | null } | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   runnerId: null,
+  runnerData: null,
 });
 
 export const useAuth = () => {
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [runnerId, setRunnerId] = useState<string | null>(null);
+  const [runnerData, setRunnerData] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
 
   useEffect(() => {
     // Set up auth state listener
@@ -41,9 +44,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Clear runner ID on logout
+        // Clear runner ID and data on logout
         if (!session?.user) {
           setRunnerId(null);
+          setRunnerData(null);
         }
       }
     );
@@ -59,12 +63,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch runner ID when user changes (separate from auth state listener)
+  // Fetch runner ID and data when user changes (separate from auth state listener)
   useEffect(() => {
     if (user?.id) {
       fetchRunnerId(user.id);
     } else {
       setRunnerId(null);
+      setRunnerData(null);
     }
   }, [user?.id]);
 
@@ -72,10 +77,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('[AuthContext] Fetching runner for user_id:', userId);
       
-      // Get runner by user_id (secure server-side link)
+      // Get runner by user_id with display_name and avatar_url
       const { data, error } = await supabase
         .from('runners')
-        .select('id')
+        .select('id, display_name, avatar_url')
         .eq('user_id', userId)
         .maybeSingle();
       
@@ -87,6 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data) {
         console.log('[AuthContext] Found runner:', data.id);
         setRunnerId(data.id);
+        setRunnerData({ display_name: data.display_name, avatar_url: data.avatar_url });
       } else {
         console.warn('[AuthContext] No runner found for user_id:', userId);
       }
@@ -98,10 +104,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setRunnerId(null);
+    setRunnerData(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut, runnerId }}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, runnerId, runnerData }}>
       {children}
     </AuthContext.Provider>
   );

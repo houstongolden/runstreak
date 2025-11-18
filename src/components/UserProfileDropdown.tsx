@@ -1,6 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -10,55 +8,30 @@ import { ChevronRight } from "lucide-react";
 import { UserProfileMenu } from "@/components/UserProfileMenu";
 
 export function UserProfileDropdown() {
-  const { user, runnerId } = useAuth();
-  const [runnerData, setRunnerData] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
+  const { user, runnerId, runnerData } = useAuth();
 
-  useEffect(() => {
-    if (runnerId) {
-      fetchRunnerData();
-    }
-  }, [runnerId]);
+  if (!user || !runnerData) return null;
 
-  const fetchRunnerData = async () => {
-    if (!runnerId) return;
-    
-    const { data } = await supabase
-      .from('runners')
-      .select('display_name, avatar_url')
-      .eq('id', runnerId)
-      .single();
-    
-    if (data) {
-      setRunnerData(data);
-    }
-  };
-
-  if (!user) return null;
-
-  const initials = runnerData?.display_name
-    ? runnerData.display_name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : '?';
+  const initials = runnerData.display_name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="w-full focus:outline-none">
         <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
           <Avatar className="h-10 w-10 border-2 border-border">
-            {runnerData?.avatar_url && (
-              <AvatarImage src={runnerData.avatar_url} alt={runnerData.display_name} />
-            )}
+            <AvatarImage src={runnerData.avatar_url || undefined} alt={runnerData.display_name} />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 text-left min-w-0">
             <p className="text-sm font-medium truncate">
-              {runnerData?.display_name || 'Loading...'}
+              {runnerData.display_name}
             </p>
           </div>
           <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
