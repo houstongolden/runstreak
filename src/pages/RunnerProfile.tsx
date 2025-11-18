@@ -52,7 +52,7 @@ export default function RunnerProfile() {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const { runnerId: currentRunnerId } = useAuth();
-  const isOwnProfile = currentRunnerId === id;
+  const isOwnProfile = runner ? currentRunnerId === runner.id : false;
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
   
@@ -117,18 +117,83 @@ export default function RunnerProfile() {
   }, [toast]);
 
   useEffect(() => {
-    const fetchRunner = async () => {
+    const fetchRunnerAndStats = async () => {
       if (!id) return;
 
       try {
-        const { data, error } = await (supabase as any)
-          .from("runners")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
+        // Try to fetch by username first, then by ID
+        let data = null;
+        let error = null;
+
+        // Check if id looks like a UUID
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+        if (isUUID) {
+          // Fetch by ID
+          const result = await (supabase as any)
+            .from("runners")
+            .select("*")
+            .eq("id", id)
+            .maybeSingle();
+          data = result.data;
+          error = result.error;
+        } else {
+          // Fetch by username
+          const result = await (supabase as any)
+            .from("runners")
+            .select("*")
+            .eq("username", id)
+            .maybeSingle();
+          data = result.data;
+          error = result.error;
+        }
 
         if (error) throw error;
+        
+        if (!data) {
+          setIsLoading(false);
+          return;
+        }
+
         setRunner(data as Runner);
+        const runnerId = data.id;
+
+        // Now fetch follow counts using the actual runner ID
+        try {
+          const { count: followers } = await supabase
+            .from("user_follows")
+            .select("*", { count: "exact", head: true })
+            .eq("following_id", runnerId);
+
+          const { count: following } = await supabase
+            .from("user_follows")
+            .select("*", { count: "exact", head: true })
+            .eq("follower_id", runnerId);
+
+          setFollowerCount(followers || 0);
+          setFollowingCount(following || 0);
+        } catch (error) {
+          console.error("Error fetching follow counts:", error);
+        }
+
+        // Fetch leaderboard stats for onboarding modal
+        try {
+          const { count } = await supabase
+            .from("runners")
+            .select("*", { count: "exact", head: true });
+          
+          setTotalRunners(count || 0);
+
+          const { data: rankData } = await supabase
+            .from("runners")
+            .select("id")
+            .order("current_streak_days", { ascending: false });
+          
+          const rank = rankData?.findIndex(r => r.id === runnerId) ?? -1;
+          setLeaderboardRank(rank + 1);
+        } catch (error) {
+          console.error("Error fetching leaderboard stats:", error);
+        }
       } catch (error) {
         console.error("Error fetching runner:", error);
       } finally {
@@ -136,54 +201,7 @@ export default function RunnerProfile() {
       }
     };
 
-    const fetchFollowCounts = async () => {
-      if (!id) return;
-
-      try {
-        const { count: followers } = await supabase
-          .from("user_follows")
-          .select("*", { count: "exact", head: true })
-          .eq("following_id", id);
-
-        const { count: following } = await supabase
-          .from("user_follows")
-          .select("*", { count: "exact", head: true })
-          .eq("follower_id", id);
-
-        setFollowerCount(followers || 0);
-        setFollowingCount(following || 0);
-      } catch (error) {
-        console.error("Error fetching follow counts:", error);
-      }
-    };
-
-    fetchRunner();
-    fetchFollowCounts();
-
-    // Fetch leaderboard stats for onboarding modal
-    const fetchLeaderboardStats = async () => {
-      if (!id) return;
-      
-      try {
-        const { count } = await supabase
-          .from("runners")
-          .select("*", { count: "exact", head: true });
-        
-        setTotalRunners(count || 0);
-
-        const { data: rankData } = await supabase
-          .from("runners")
-          .select("id")
-          .order("current_streak_days", { ascending: false });
-        
-        const rank = rankData?.findIndex(r => r.id === id) ?? -1;
-        setLeaderboardRank(rank + 1);
-      } catch (error) {
-        console.error("Error fetching leaderboard stats:", error);
-      }
-    };
-
-    fetchLeaderboardStats();
+    fetchRunnerAndStats();
   }, [id]);
 
   const handleSync = async () => {
