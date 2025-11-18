@@ -1,0 +1,171 @@
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+export default function AdPaymentSuccess() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isTestMode = searchParams.get("test") === "true";
+  
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    companyName: "",
+    domain: "",
+    description: "",
+    logoUrl: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.companyName || !formData.domain || !formData.description) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      // Get the next display_order
+      const { data: existingSpots, error: fetchError } = await supabase
+        .from("ad_spots")
+        .select("display_order")
+        .order("display_order", { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      const nextOrder = (existingSpots?.[0]?.display_order || 0) + 1;
+
+      // Insert new ad spot
+      const { error: insertError } = await supabase
+        .from("ad_spots")
+        .insert({
+          company_name: formData.companyName,
+          domain: formData.domain,
+          description: formData.description,
+          logo_url: formData.logoUrl || null,
+          display_order: nextOrder,
+          is_active: true,
+        });
+
+      if (insertError) throw insertError;
+
+      toast.success("Ad spot created successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error creating ad spot:", error);
+      toast.error("Failed to create ad spot");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-2xl mx-auto px-4 py-8">
+        <Card>
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <CardTitle className="text-2xl">
+              {isTestMode ? "Test Mode - Skip to Ad Setup" : "Payment Successful!"}
+            </CardTitle>
+            <CardDescription>
+              {isTestMode 
+                ? "Fill in your ad details to create a test spot" 
+                : "Thank you for your purchase. Now let's set up your ad spot."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="companyName">
+                  Company Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="companyName"
+                  value={formData.companyName}
+                  onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                  placeholder="Nike"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="domain">
+                  Website Domain <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="domain"
+                  value={formData.domain}
+                  onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                  placeholder="nike.com"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Where should the ad link to? (without https://)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="description">
+                  Description <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Premium running shoes and athletic wear for serious athletes"
+                  rows={3}
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Brief description of your product or service
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="logoUrl">Logo URL (Optional)</Label>
+                <Input
+                  id="logoUrl"
+                  type="url"
+                  value={formData.logoUrl}
+                  onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                  placeholder="https://example.com/logo.png"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Leave blank to use Clearbit logo API
+                </p>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full" 
+                size="lg"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating ad spot...
+                  </>
+                ) : (
+                  "Activate my ad spot"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
