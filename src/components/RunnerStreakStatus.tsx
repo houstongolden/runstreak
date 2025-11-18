@@ -60,11 +60,15 @@ export function RunnerStreakStatus({ lastActivityDate, timezone, country }: Runn
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date();
-      const midnight = new Date();
+      // Get current time in the runner's timezone
+      const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
+      const runnerTime = new Date(nowInRunnerTz);
+      
+      // Calculate midnight in runner's timezone
+      const midnight = new Date(runnerTime);
       midnight.setHours(24, 0, 0, 0);
       
-      const difference = midnight.getTime() - now.getTime();
+      const difference = midnight.getTime() - runnerTime.getTime();
       
       setTimeLeft({
         hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
@@ -73,16 +77,17 @@ export function RunnerStreakStatus({ lastActivityDate, timezone, country }: Runn
     };
 
     calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 60000); // Update every minute
+    const timer = setInterval(calculateTimeLeft, 60000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [timezone]);
 
-  // Check if runner has run today - using BROWSER'S local time (same as working StreakCountdown)
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  // Calculate "today" in the runner's specific timezone
+  const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
+  const runnerTime = new Date(nowInRunnerTz);
+  const year = runnerTime.getFullYear();
+  const month = String(runnerTime.getMonth() + 1).padStart(2, '0');
+  const day = String(runnerTime.getDate()).padStart(2, '0');
   const todayStr = `${year}-${month}-${day}`;
   
   const hasRunToday = lastActivityDate === todayStr;
