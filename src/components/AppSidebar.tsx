@@ -156,6 +156,17 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
+                    <div className="px-3 py-2">
+                      <NavLink 
+                        to="/auth" 
+                        className="text-xs text-muted-foreground hover:text-foreground transition-colors underline" 
+                        onClick={handleNavClick}
+                      >
+                        Returning user? Sign in
+                      </NavLink>
+                    </div>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <NavLink 
                         to="/" 

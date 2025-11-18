@@ -197,7 +197,7 @@ const Index = () => {
         {/* Actions */}
         {!user && (
           <div className="mb-10 sm:mb-12">
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-3">
               <Button
                 onClick={() => navigate('/auth')}
                 size="lg"
@@ -206,6 +206,12 @@ const Index = () => {
                 <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
                 Connect with Strava
               </Button>
+              <button
+                onClick={() => navigate('/auth')}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+              >
+                Already have an account? Sign in
+              </button>
             </div>
           </div>
         )}
