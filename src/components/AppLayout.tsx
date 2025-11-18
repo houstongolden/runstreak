@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import UnverifiedAccountBanner from "@/components/UnverifiedAccountBanner";
 import { UserAvatarHeader } from "@/components/UserAvatarHeader";
+import { StreakCountdownBanner } from "@/components/StreakCountdownBanner";
 import { Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
@@ -50,6 +51,9 @@ export function AppLayout({ children }: AppLayoutProps) {
             <UserAvatarHeader />
           </div>
         </header>
+
+        {/* Streak Countdown Banner - Shows site-wide when user hasn't run today */}
+        <StreakCountdownBanner />
 
         {/* Main Content */}
         <main className="flex-1">
