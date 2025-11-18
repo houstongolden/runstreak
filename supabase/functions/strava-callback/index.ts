@@ -499,9 +499,19 @@ Deno.serve(async (req) => {
     const runnerId = savedRunner?.id || '';
     const isNewUser = !existingRunner;
     
-    console.log('Redirecting to homepage with onboarding trigger', { isNewUser, userId });
+    console.log('Redirecting to appropriate page', { isNewUser, userId, runnerId });
     
-    // For existing users with auth account, generate magic link for auto sign-in
+    // Determine redirect URL based on whether user is new
+    let finalRedirectUrl = redirectUrl;
+    
+    // New users go to onboarding, existing users go to their profile
+    if (isNewUser) {
+      finalRedirectUrl = `${redirectUrl}/onboarding?runnerId=${runnerId}`;
+    } else {
+      finalRedirectUrl = `${redirectUrl}/runner/${runnerId}`;
+    }
+    
+    // For users with auth account, generate magic link for auto sign-in
     if (userId) {
       try {
         // Get the auth user's email for magic link
@@ -515,7 +525,7 @@ Deno.serve(async (req) => {
             type: 'magiclink',
             email: authUser.user.email,
             options: {
-              redirectTo: `${redirectUrl}/?strava=success&runnerId=${runnerId}&welcome=${isNewUser}`
+              redirectTo: finalRedirectUrl
             }
           });
           
@@ -524,7 +534,7 @@ Deno.serve(async (req) => {
           } else if (linkData?.properties?.action_link) {
             // Redirect to the magic link which will sign them in
             console.log('Generated magic link for auto sign-in');
-            redirectUrl = linkData.properties.action_link;
+            finalRedirectUrl = linkData.properties.action_link;
           }
         }
       } catch (error) {
@@ -536,7 +546,7 @@ Deno.serve(async (req) => {
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': redirectUrl,
+        'Location': finalRedirectUrl,
       },
     });
 
