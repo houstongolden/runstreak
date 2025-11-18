@@ -163,7 +163,7 @@ export default function ActivityComments({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="w-full">
       <Button
         variant="ghost"
         size="sm"
@@ -171,11 +171,11 @@ export default function ActivityComments({
         className="text-muted-foreground hover:text-foreground"
       >
         <MessageSquare className="h-4 w-4 mr-2" />
-        {comments.length > 0 ? `${comments.length} ${comments.length === 1 ? 'comment' : 'comments'}` : 'Add comment'}
+        {comments.length > 0 ? `${comments.length}` : 'Comment'}
       </Button>
 
       {showComments && (
-        <div className="space-y-4 mt-2">
+        <div className="w-full mt-4 space-y-4">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading comments...</p>
           ) : (
@@ -219,12 +219,12 @@ export default function ActivityComments({
               )}
 
               {currentRunnerId ? (
-                <form onSubmit={handleSubmit} className="relative">
+                <form onSubmit={handleSubmit} className="relative w-full">
                   <Textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Leave an encouraging message..."
-                    className="min-h-[60px] resize-none pr-12 border-border/50 bg-background/50"
+                    className="min-h-[60px] resize-none pr-12 border-border/50 bg-background/50 w-full"
                     disabled={submitting}
                   />
                   <Button
@@ -237,9 +237,7 @@ export default function ActivityComments({
                   </Button>
                 </form>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-2">
-                  Sign in to leave a comment
-                </p>
+                <p className="text-sm text-muted-foreground">Sign in to leave a comment</p>
               )}
             </>
           )}
