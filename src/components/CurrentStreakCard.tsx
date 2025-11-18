@@ -7,6 +7,8 @@ interface CurrentStreakCardProps {
   streakMiles: number;
   streakStatus: string | null;
   avgMilesPerDay: number;
+  streakStartDate: string | null;
+  lastActivityDate: string | null;
 }
 
 export function CurrentStreakCard({
@@ -14,7 +16,34 @@ export function CurrentStreakCard({
   streakMiles,
   streakStatus,
   avgMilesPerDay,
+  streakStartDate,
+  lastActivityDate,
 }: CurrentStreakCardProps) {
+  // Format date range for current streak
+  const formatDateRange = () => {
+    if (!streakStartDate) return null;
+    
+    const startDate = new Date(streakStartDate);
+    const endDate = lastActivityDate ? new Date(lastActivityDate) : new Date();
+    
+    const formatOptions: Intl.DateTimeFormatOptions = { 
+      month: 'short', 
+      day: 'numeric',
+      year: startDate.getFullYear() !== endDate.getFullYear() ? 'numeric' : undefined
+    };
+    
+    const startStr = startDate.toLocaleDateString('en-US', formatOptions);
+    const endStr = endDate.toLocaleDateString('en-US', formatOptions);
+    
+    if (startStr === endStr) {
+      return startStr;
+    }
+    
+    return `${startStr} - ${endStr}`;
+  };
+
+  const dateRange = formatDateRange();
+
   return (
     <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20 overflow-hidden">
       <CardHeader>
@@ -40,6 +69,11 @@ export function CurrentStreakCard({
             <p className="text-xs text-muted-foreground">
               {streakDays === 1 ? "day" : "days"} in a row
             </p>
+            {dateRange && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {dateRange}
+              </p>
+            )}
           </div>
 
           {/* Streak Miles */}
