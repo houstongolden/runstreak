@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { format } from "date-fns";
 
 interface DailyActivity {
   activity_date: string;
@@ -57,9 +58,6 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
     // Dates in database are already in runner's local timezone
     const activityMap = new Map();
     activities.forEach(activity => {
-      if (activity.run_count > 0) {
-        console.log('DB activity date:', activity.activity_date, 'distance:', activity.distance);
-      }
       activityMap.set(activity.activity_date, {
         distance: activity.distance,
         runCount: activity.run_count,
@@ -87,16 +85,6 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
       
       const activityData = activityMap.get(dateStr);
       const isInYear = currentDate.getFullYear() === selectedYear;
-      
-      // Debug logging for activities with data
-      if (activityData && activityData.runCount > 0) {
-        console.log('Heatmap date with activity:', {
-          dateStr,
-          currentDateObj: currentDate.toString(),
-          activityData,
-          rawDbDate: activities.find(a => a.activity_date === dateStr)?.activity_date
-        });
-      }
       
       if (isInYear) {
         // Store the date string directly to avoid timezone issues
@@ -252,14 +240,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                           <TooltipContent>
                             <div className="text-sm">
                               <div className="font-semibold">
-                                {(() => {
-                                  // Parse date string directly without Date object conversion
-                                  const [year, month, dayNum] = day.dateStr.split('-');
-                                  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                                  const formatted = `${monthNames[parseInt(month) - 1]} ${parseInt(dayNum)}, ${year}`;
-                                  console.log('Tooltip display:', { dateStr: day.dateStr, formatted });
-                                  return formatted;
-                                })()}
+                                {format(new Date(day.dateStr), "MMM d, yyyy")}
                               </div>
                               <div>
                                 {day.runCount > 0 ? (
