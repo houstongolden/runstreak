@@ -58,12 +58,17 @@ export function StreakCountdown({ lastActivityDate, variant = "profile" }: Strea
   const hasRunToday = lastActivityDate === todayStr;
   const hasRunYesterday = lastActivityDate === yesterdayStr;
   
-  // Don't show if they've run today
-  if (hasRunToday) {
-    return null;
-  }
-
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours
+  
+  // Debug logging
+  console.log('StreakCountdown Debug:', {
+    lastActivityDate,
+    todayStr,
+    yesterdayStr,
+    hasRunToday,
+    hasRunYesterday,
+    now: now.toString()
+  });
 
   if (variant === "sidebar") {
     return (
