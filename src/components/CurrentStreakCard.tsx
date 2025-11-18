@@ -23,7 +23,7 @@ export function CurrentStreakCard({
           Current Streak
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Your active running streak and performance metrics
+          Days in a row running 1+ mile per day
         </p>
       </CardHeader>
       <CardContent className="overflow-hidden">
