@@ -76,25 +76,25 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Ultra-dark theme - Enhanced with premium feel */
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
+    /* Pure dark theme - Black, grays, and orange gradients only */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
 
-    --card: 222 47% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222 47% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
 
     --primary: 16 100% 50%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 16 100% 60%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 215 28% 17%;
-    --muted-foreground: 217 19% 63%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 63%;
 
     --accent: 16 100% 60%;
     --accent-foreground: 0 0% 100%;
@@ -111,8 +111,8 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 16 100% 50%;
 
     --radius: 0.75rem;
@@ -121,8 +121,8 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(135deg, hsl(16 100% 50%) 0%, hsl(14 100% 48%) 100%);
     --gradient-primary-subtle: linear-gradient(135deg, hsl(16 100% 60% / 0.15) 0%, hsl(14 100% 55% / 0.08) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(16 100% 60%) 0%, hsl(14 100% 55%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(222 47% 10% / 0.9) 0%, hsl(222 47% 8% / 0.7) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(222 47% 4%) 0%, hsl(22 100% 8%) 50%, hsl(16 100% 8%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 8% / 0.9) 0%, hsl(0 0% 10% / 0.7) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 4%) 0%, hsl(0 0% 6%) 50%, hsl(0 0% 8%) 100%);
 
     /* Elegant Shadows - Dark */
     --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
@@ -133,13 +133,13 @@ All colors MUST be HSL.
     --shadow-glow-accent: 0 0 30px hsl(16 100% 60% / 0.4), 0 0 60px hsl(16 100% 60% / 0.2);
 
     /* Sidebar */
-    --sidebar-background: 222 47% 6%;
-    --sidebar-foreground: 210 40% 90%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 90%;
     --sidebar-primary: 16 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14%;
     --sidebar-ring: 16 100% 50%;
   }
 }
