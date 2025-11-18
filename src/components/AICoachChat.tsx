@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,12 +21,14 @@ interface AICoachChatProps {
 }
 
 export default function AICoachChat({ runnerId }: AICoachChatProps) {
+  const [searchParams] = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isNewSession, setIsNewSession] = useState(searchParams.get('new') === 'true');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -72,8 +75,8 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
 
       if (currentSessionId) {
         query = query.eq('session_id', currentSessionId);
-      } else {
-        // If no session selected, get the most recent session's messages
+      } else if (!isNewSession) {
+        // Only auto-load most recent session if NOT starting a new session
         const { data: sessions } = await supabase
           .from('coaching_sessions')
           .select('id')
@@ -107,16 +110,24 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
     setInput("");
 
     try {
+      // If this is a new session and no session ID yet, pass null to create new session
+      const sessionIdToUse = isNewSession && !currentSessionId ? null : currentSessionId;
+      
       const { data, error } = await supabase.functions.invoke('send-coach-message', {
         body: {
           runner_id: runnerId,
           message: userMessage,
           source: 'app',
-          session_id: currentSessionId
+          session_id: sessionIdToUse
         }
       });
 
       if (error) throw error;
+
+      // If this was a new session, mark it as no longer new
+      if (isNewSession) {
+        setIsNewSession(false);
+      }
 
       // Messages will be added via realtime subscription
     } catch (error) {
@@ -142,6 +153,9 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
   const handleNewSession = () => {
     setCurrentSessionId(null);
     setMessages([]);
+    setIsNewSession(true);
+    // Update URL to show new=true parameter
+    window.history.replaceState({}, '', `/coach/${runnerId}?new=true`);
   };
 
   const handleSessionSelect = async (sessionId: string) => {
