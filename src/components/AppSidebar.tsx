@@ -83,8 +83,8 @@ export function AppSidebar() {
   };
 
   const handleNewChat = () => {
-    // Navigate without session parameter to create new chat
-    window.location.href = `/coach/${authRunnerId}`;
+    // Navigate with new=true parameter to create new chat
+    window.location.href = `/coach/${authRunnerId}?new=true`;
     setOpenMobile(false);
   };
 
