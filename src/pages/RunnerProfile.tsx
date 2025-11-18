@@ -298,6 +298,18 @@ export default function RunnerProfile() {
                 <span>Edit</span>
               </Button>
             )}
+            {!isOwnProfile && runner.strava_user_id && (
+              <Button 
+                variant="outline"
+                onClick={() => window.open(`https://www.strava.com/athletes/${runner.strava_user_id}`, '_blank')}
+                className="gap-2"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                </svg>
+                <span className="hidden sm:inline">Follow on Strava</span>
+              </Button>
+            )}
             <Button 
               variant="outline"
               onClick={() => {
@@ -402,22 +414,22 @@ export default function RunnerProfile() {
                     </div>
                   )}
                   
-                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                    <Badge variant={streakActive ? "default" : "secondary"}>
+                  <div className="flex flex-col gap-2 justify-center sm:justify-start">
+                    <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
                       {streakActive ? (
                         <>
                           <Flame className="h-4 w-4 mr-1" />
-                          Active Streak
+                          {runner.current_streak_days} {runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak
                         </>
                       ) : (
                         "No Active Streak"
                       )}
                     </Badge>
                     
-                    {runner.created_at_strava && (
-                      <Badge variant="outline">
-                        Member since {new Date(runner.created_at_strava).getFullYear()}
-                      </Badge>
+                    {runner.joined_runstreak_at && (
+                      <div className="text-xs text-muted-foreground">
+                        RunStreak member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                      </div>
                     )}
                   </div>
                 </div>
