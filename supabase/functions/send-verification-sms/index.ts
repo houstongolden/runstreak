@@ -77,35 +77,43 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to store verification code");
     }
 
-    // Send SMS via Twilio using Account SID and Auth Token
-    const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-    const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
+    // Send SMS via Vonage
+    const vonageApiKey = Deno.env.get("VONAGE_API_KEY");
+    const vonageApiSecret = Deno.env.get("VONAGE_API_SECRET");
+    const vonagePhoneNumber = Deno.env.get("VONAGE_PHONE_NUMBER");
 
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
-    const body = new URLSearchParams({
-      To: phoneNumber,
-      From: twilioPhoneNumber!,
-      Body: `Your RunStreak verification code is: ${code}. This code expires in 10 minutes.`,
-    });
+    const vonageUrl = "https://rest.nexmo.com/sms/json";
+    const vonageBody = {
+      api_key: vonageApiKey,
+      api_secret: vonageApiSecret,
+      to: phoneNumber.replace('+', ''),
+      from: vonagePhoneNumber,
+      text: `Your RunStreak verification code is: ${code}. This code expires in 10 minutes.`,
+    };
 
-    const twilioResponse = await fetch(twilioUrl, {
+    const vonageResponse = await fetch(vonageUrl, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+        "Content-Type": "application/json",
       },
-      body: body.toString(),
+      body: JSON.stringify(vonageBody),
     });
 
-    if (!twilioResponse.ok) {
-      const errorText = await twilioResponse.text();
-      console.error("Twilio error response:", {
-        status: twilioResponse.status,
-        statusText: twilioResponse.statusText,
+    if (!vonageResponse.ok) {
+      const errorText = await vonageResponse.text();
+      console.error("Vonage error response:", {
+        status: vonageResponse.status,
+        statusText: vonageResponse.statusText,
         body: errorText
       });
-      throw new Error(`Twilio error (${twilioResponse.status}): ${errorText}`);
+      throw new Error(`Vonage error (${vonageResponse.status}): ${errorText}`);
+    }
+
+    const vonageResult = await vonageResponse.json();
+    console.log("Vonage response:", vonageResult);
+
+    if (vonageResult.messages[0].status !== "0") {
+      throw new Error(`Vonage message failed: ${vonageResult.messages[0]['error-text']}`);
     }
 
     console.log("Verification code sent successfully");

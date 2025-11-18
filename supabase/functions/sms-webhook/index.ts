@@ -128,31 +128,37 @@ Keep responses under 160 characters for SMS. Be conversational and personal.`;
         source: 'sms',
       });
 
-    // Send SMS response using Account SID and Auth Token
-    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+    // Send SMS response using Vonage
+    const vonageApiKey = Deno.env.get('VONAGE_API_KEY');
+    const vonageApiSecret = Deno.env.get('VONAGE_API_SECRET');
+    const vonagePhoneNumber = Deno.env.get('VONAGE_PHONE_NUMBER');
 
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
-    const responseBody = new URLSearchParams({
-      To: from,
-      From: twilioPhoneNumber!,
-      Body: coachResponse,
-    });
+    const vonageUrl = "https://rest.nexmo.com/sms/json";
+    const vonageBody = {
+      api_key: vonageApiKey,
+      api_secret: vonageApiSecret,
+      to: from.replace('+', ''),
+      from: vonagePhoneNumber,
+      text: coachResponse,
+    };
 
-    const twilioResponse = await fetch(twilioUrl, {
+    const vonageResponse = await fetch(vonageUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
+        'Content-Type': 'application/json',
       },
-      body: responseBody.toString(),
+      body: JSON.stringify(vonageBody),
     });
 
-    if (!twilioResponse.ok) {
+    if (!vonageResponse.ok) {
       console.error('SMS send error');
     } else {
-      console.log('SMS response sent successfully');
+      const result = await vonageResponse.json();
+      if (result.messages[0].status === "0") {
+        console.log('SMS response sent successfully');
+      } else {
+        console.error('SMS send failed:', result.messages[0]['error-text']);
+      }
     }
 
     return new Response('OK', { status: 200 });
