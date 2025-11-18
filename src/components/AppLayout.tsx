@@ -4,7 +4,7 @@ import UnverifiedAccountBanner from "@/components/UnverifiedAccountBanner";
 import { UserAvatarHeader } from "@/components/UserAvatarHeader";
 import { StreakCountdownBanner } from "@/components/StreakCountdownBanner";
 import { Flame } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
 
 interface AppLayoutProps {
@@ -12,6 +12,9 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const location = useLocation();
+  const isHomepage = location.pathname === '/';
+
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
@@ -33,9 +36,11 @@ export function AppLayout({ children }: AppLayoutProps) {
                     filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
                   }}
                 />
-                <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
-                  <ShinyText text="RunStreak" speed={5} />
-                </span>
+                {!isHomepage && (
+                  <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
+                    <ShinyText text="RunStreak" speed={5} />
+                  </span>
+                )}
                 <svg width="0" height="0" style={{ position: 'absolute' }}>
                   <defs>
                     <linearGradient id="gradient-logo-header" x1="0%" y1="0%" x2="100%" y2="100%">
