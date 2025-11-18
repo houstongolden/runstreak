@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Flame, Trophy } from "lucide-react";
+import { Flame, Trophy, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Step1Props {
   runner: any;
@@ -13,39 +14,71 @@ interface Step1Props {
 
 export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Props) {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(runner.current_streak_days === 0);
+  const [currentRunner, setCurrentRunner] = useState(runner);
+  const [currentRank, setCurrentRank] = useState(leaderboardRank);
 
   useEffect(() => {
-    // Trigger confetti on mount
-    const duration = 3000;
-    const animationEnd = Date.now() + duration;
+    // Trigger confetti on mount (only if data is loaded)
+    if (!isLoading) {
+      const duration = 3000;
+      const animationEnd = Date.now() + duration;
 
-    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+      const interval = setInterval(() => {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          return;
+        }
 
-    const interval = setInterval(() => {
-      const timeLeft = animationEnd - Date.now();
-      if (timeLeft <= 0) {
-        clearInterval(interval);
-        return;
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.6 },
+          colors: ['#ff6b35', '#f7931e', '#fdc830'],
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.6 },
+          colors: ['#ff6b35', '#f7931e', '#fdc830'],
+        });
+      }, 50);
+
+      return () => clearInterval(interval);
+    }
+  }, [isLoading]);
+
+  // Poll for updated data while loading
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const pollInterval = setInterval(async () => {
+      const { data: updatedRunner } = await supabase
+        .from('runners')
+        .select('*')
+        .eq('id', runner.id)
+        .single();
+
+      if (updatedRunner && updatedRunner.current_streak_days > 0) {
+        // Data is ready! Update state and trigger confetti
+        setCurrentRunner(updatedRunner);
+        
+        // Recalculate rank
+        const { count: betterRunners } = await supabase
+          .from('runners')
+          .select('*', { count: 'exact', head: true })
+          .gt('current_streak_days', updatedRunner.current_streak_days || 0);
+        
+        setCurrentRank((betterRunners || 0) + 1);
+        setIsLoading(false);
       }
+    }, 2000); // Poll every 2 seconds
 
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.6 },
-        colors: ['#ff6b35', '#f7931e', '#fdc830'],
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.6 },
-        colors: ['#ff6b35', '#f7931e', '#fdc830'],
-      });
-    }, 50);
-
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(pollInterval);
+  }, [isLoading, runner.id]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -64,8 +97,8 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
-                src={runner.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${runner.display_name}`}
-                alt={runner.display_name}
+                src={currentRunner.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentRunner.display_name}`}
+                alt={currentRunner.display_name}
                 className="w-20 h-20 rounded-full border-4 border-primary/30"
               />
               <div className="absolute -bottom-2 -right-2 bg-primary text-primary-foreground rounded-full p-2">
@@ -73,33 +106,42 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
               </div>
             </div>
             
-            <div className="text-center space-y-2">
-              <p className="text-xl font-bold text-foreground font-instrument">{runner.display_name}</p>
-              {runner.current_streak_days > 0 ? (
-                <div className="flex items-center justify-center gap-2">
-                  <p className="text-3xl font-bold text-primary font-instrument">
-                    #{leaderboardRank}
-                  </p>
-                  <p className="text-sm text-muted-foreground font-instrument">
-                    of {totalRunners} runners
-                  </p>
+            <div className="text-center space-y-3">
+              <p className="text-xl font-bold text-foreground font-instrument">{currentRunner.display_name}</p>
+              
+              {isLoading ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-3">
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                    <div className="text-left">
+                      <p className="text-lg font-semibold text-foreground font-instrument">
+                        Calculating your rank...
+                      </p>
+                      <p className="text-sm text-muted-foreground font-instrument">
+                        Syncing your Strava activities
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <div className="h-2 w-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                    <div className="h-2 w-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                    <div className="h-2 w-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                  </div>
                 </div>
               ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  <p className="text-sm text-muted-foreground font-instrument">
-                    Calculating your rank...
+                <>
+                  <div className="flex items-center justify-center gap-2 animate-fade-in">
+                    <p className="text-3xl font-bold text-primary font-instrument">
+                      #{currentRank}
+                    </p>
+                    <p className="text-sm text-muted-foreground font-instrument">
+                      of {totalRunners} runners
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground font-instrument animate-fade-in">
+                    Current Streak: <span className="text-primary font-semibold">{currentRunner.current_streak_days} days</span>
                   </p>
-                </div>
-              )}
-              {runner.current_streak_days > 0 ? (
-                <p className="text-sm text-muted-foreground font-instrument">
-                  Current Streak: <span className="text-primary font-semibold">{runner.current_streak_days} days</span>
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground font-instrument">
-                  We're syncing your activities in the background
-                </p>
+                </>
               )}
             </div>
           </div>

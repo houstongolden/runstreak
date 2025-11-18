@@ -475,16 +475,40 @@ Deno.serve(async (req) => {
     
     console.log('Session created successfully');
     
-    // Start background sync for full activity history (don't wait for it)
-    console.log('Starting background sync for full activity history...');
+    // Start TWO-STAGE background sync for activity history:
+    // Stage 1: Quick sync (first 200 activities) - completes in 5-10 seconds
+    // Stage 2: Full sync (remaining activities) - continues in background
+    console.log('Starting two-stage background sync...');
     fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ runnerId: savedRunner.id })
-    }).catch(err => console.error('Background sync error:', err));
+      body: JSON.stringify({ runnerId: savedRunner.id, quickSync: true, maxPages: 1 })
+    })
+      .then(async quickResponse => {
+        if (quickResponse.ok) {
+          console.log('Quick sync completed, starting full sync...');
+          // After quick sync, trigger full sync for remaining activities
+          return fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ runnerId: savedRunner.id, skipFirstPage: true })
+          });
+        } else {
+          console.error('Quick sync failed:', quickResponse.status);
+        }
+      })
+      .then(fullResponse => {
+        if (fullResponse && fullResponse.ok) {
+          console.log('Full background sync triggered');
+        }
+      })
+      .catch(err => console.error('Background sync error:', err));
     
     // Get redirect URL
     const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
