@@ -12,7 +12,24 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const verifyToken = Deno.env.get('STRAVA_WEBHOOK_VERIFY_TOKEN');
+    
+    // Initialize Supabase client first
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get API mode from app_settings to determine which credentials to use
+    const { data: settingData } = await supabase
+      .from('app_settings')
+      .select('setting_value')
+      .eq('setting_key', 'strava_api_mode')
+      .maybeSingle();
+    
+    const apiMode = (settingData?.setting_value as 'live' | 'test') || 'live';
+    
+    const verifyToken = apiMode === 'test'
+      ? Deno.env.get('STRAVA_WEBHOOK_VERIFY_TOKEN_2')
+      : Deno.env.get('STRAVA_WEBHOOK_VERIFY_TOKEN');
 
     // Handle GET request for webhook verification
     if (req.method === 'GET') {
@@ -38,10 +55,6 @@ Deno.serve(async (req) => {
     if (req.method === 'POST') {
       const event = await req.json();
       console.log('Received webhook event:', JSON.stringify(event));
-
-      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Process activity events (create, update, delete)
       if (event.object_type === 'activity') {

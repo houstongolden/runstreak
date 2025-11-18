@@ -35,11 +35,29 @@ Deno.serve(async (req) => {
       throw new Error('No authorization code provided');
     }
 
-    const clientId = Deno.env.get('STRAVA_CLIENT_ID');
-    const clientSecret = Deno.env.get('STRAVA_CLIENT_SECRET');
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get API mode from app_settings to use correct credentials
+    const { data: settingData } = await supabase
+      .from('app_settings')
+      .select('setting_value')
+      .eq('setting_key', 'strava_api_mode')
+      .maybeSingle();
+    
+    const apiMode = (settingData?.setting_value as 'live' | 'test') || 'live';
+    
+    const clientId = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_ID_2')
+      : Deno.env.get('STRAVA_CLIENT_ID');
+    const clientSecret = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_SECRET_2')
+      : Deno.env.get('STRAVA_CLIENT_SECRET');
     
     if (!clientId || !clientSecret) {
-      throw new Error('Strava credentials not configured');
+      throw new Error('Strava credentials not configured for ' + apiMode + ' mode');
     }
 
     // Exchange code for tokens
@@ -60,11 +78,6 @@ Deno.serve(async (req) => {
 
     const tokenData = await tokenResponse.json();
     console.log('Token exchange successful:', { athlete: tokenData.athlete.id });
-
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch full athlete profile with all details
     const athleteResponse = await fetch(
