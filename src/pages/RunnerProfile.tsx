@@ -453,8 +453,8 @@ export default function RunnerProfile() {
                     </div>
                   )}
                   
-                  <div className="flex flex-col gap-2 justify-center sm:justify-start">
-                    <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex flex-col gap-2 items-center">
+                    <div className="flex items-center gap-2 flex-wrap justify-center">
                       <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
                         {streakActive ? (
                           <>
@@ -476,7 +476,7 @@ export default function RunnerProfile() {
                     </div>
                     
                     {runner.joined_runstreak_at && (
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground text-center">
                         RunStreak member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                       </div>
                     )}
