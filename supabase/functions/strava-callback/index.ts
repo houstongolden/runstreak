@@ -222,15 +222,14 @@ Deno.serve(async (req) => {
     // NEW USER - proceed with activity sync
     console.log('New user detected - fetching activities for initial sync');
     
-    // Fetch ONLY first 1-2 pages for initial streak calculation (quick signup)
+    // MVP: Fetch ALL activities (no page limit)
     let allActivities: any[] = [];
     let page = 1;
     const perPage = 200;
-    const maxPages = 2; // Only fetch 2 pages (400 activities) for quick signup
     
-    console.log('Starting quick activity fetch for signup (2 pages max)...');
+    console.log('Starting full activity fetch for signup (all pages)...');
     
-    while (page <= maxPages) {
+    while (true) {
       const activitiesResponse = await fetch(
         `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}`,
         {
@@ -254,6 +253,7 @@ Deno.serve(async (req) => {
       
       // Stop if we got fewer than perPage results (no more pages)
       if (activities.length < perPage) {
+        console.log('Last page reached');
         break;
       }
       
@@ -261,7 +261,7 @@ Deno.serve(async (req) => {
     }
     
     const activities = allActivities;
-    console.log(`Quick fetch complete: ${activities.length} activities for initial streak calculation`);
+    console.log(`Full fetch complete: ${activities.length} total activities for initial sync`);
 
     // Get runner's timezone from Strava profile, fallback to America/Los_Angeles
     const timezone = athleteProfile.timezone || 'America/Los_Angeles';
