@@ -92,10 +92,7 @@ export function StreakCountdownBanner() {
           <div className="flex items-center justify-center gap-3 py-2.5">
             <CheckCircle className="h-5 w-5 text-green-500" />
             <span className="text-sm font-semibold">
-              Congrats! You're good for the day
-            </span>
-            <span className="text-sm text-muted-foreground hidden sm:inline">
-              Your streak is safe until tomorrow
+              Streak safe. You're good for the day.
             </span>
           </div>
         </div>
