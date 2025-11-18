@@ -33,6 +33,7 @@ const steps = [
   { id: 3, title: "Leaderboard" },
   { id: 4, title: "Activity Heatmap" },
   { id: 5, title: "Stay Accountable" },
+  { id: 6, title: "Start Your Streak" },
 ];
 
 export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, totalRunners }: OnboardingModalProps) {
@@ -345,6 +346,32 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                   AI coach insights to improve performance
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 6 && (
+          <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
+            <div className="text-center space-y-6">
+              <div className="space-y-3">
+                <Flame className="h-20 w-20 text-primary mx-auto animate-pulse" />
+                <p className="text-3xl sm:text-4xl font-instrument font-medium text-foreground">Let's Go! 🔥</p>
+                <p className="text-lg text-muted-foreground font-instrument">Your runs are syncing from Strava</p>
+              </div>
+              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-8 text-center">
+                <p className="text-xl sm:text-2xl font-semibold text-foreground leading-relaxed font-instrument mb-3">
+                  Every mile counts. Every day matters.
+                </p>
+                <p className="text-base text-muted-foreground font-instrument">
+                  You're now part of a community that shows up daily. Ready to build your streak?
+                </p>
+              </Card>
+              <div className="flex flex-col gap-3 text-center">
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Zap className="h-5 w-5" />
+                  <span className="font-semibold font-instrument">Day 1 starts now</span>
+                </div>
               </div>
             </div>
           </div>
