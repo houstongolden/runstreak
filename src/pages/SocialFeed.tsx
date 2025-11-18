@@ -165,78 +165,86 @@ export default function SocialFeed() {
       </h1>
 
       <div className="space-y-3">
-        {activities.map((activity, index) => (
-          <Card
-            key={`${activity.runner_id}-${activity.activity_date}-${index}`}
-            className="p-4 hover:bg-muted/50 transition-colors"
-          >
-            <div
-              className="flex items-start gap-3 cursor-pointer mb-3"
-              onClick={() => navigate(`/runner/${activity.runner_id}`)}
+        {activities.map((activity, index) => {
+          const isOwnActivity = activity.runner_id === currentRunnerId;
+          
+          return (
+            <Card
+              key={`${activity.runner_id}-${activity.activity_date}-${index}`}
+              className="overflow-hidden"
             >
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarImage src={activity.runner_avatar} />
-                <AvatarFallback className="text-xs">
-                  {activity.runner_name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <div className="p-4">
+                <div
+                  className="flex items-start gap-3 cursor-pointer mb-4"
+                  onClick={() => navigate(`/runner/${activity.runner_id}`)}
+                >
+                  <Avatar className={`h-10 w-10 shrink-0 ${isOwnActivity ? 'ring-2 ring-orange-500' : ''}`}>
+                    <AvatarImage src={activity.runner_avatar} />
+                    <AvatarFallback className="text-xs">
+                      {activity.runner_name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-sm">
-                    {activity.runner_name}
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    kept streak alive
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>
-                    {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true })}
-                  </span>
-                  <span>•</span>
-                  <span>Day {activity.current_streak} of streak</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                {activity.average_temp !== null && activity.average_temp !== undefined && (
-                  <div className="shrink-0" title={`${activity.average_temp.toFixed(0)}°C`}>
-                    {activity.average_temp < 0 ? (
-                      <CloudSnow className="h-4 w-4 text-blue-400" />
-                    ) : activity.average_temp < 10 ? (
-                      <Wind className="h-4 w-4 text-blue-300" />
-                    ) : activity.average_temp > 30 ? (
-                      <Sun className="h-4 w-4 text-orange-500" />
-                    ) : activity.average_temp > 20 ? (
-                      <Sun className="h-4 w-4 text-yellow-500" />
-                    ) : (
-                      <CloudRain className="h-4 w-4 text-gray-400" />
-                    )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-sm">
+                        {activity.runner_name}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        kept streak alive
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true })}
+                      </span>
+                      <span>•</span>
+                      <span>Day {activity.current_streak} of streak</span>
+                    </div>
                   </div>
-                )}
-                <div className="bg-orange-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                  <Flame className="h-4 w-4 text-orange-500" />
-                  <span className="font-semibold text-sm">{activity.current_streak}</span>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {activity.average_temp !== null && activity.average_temp !== undefined && (
+                      <div className="shrink-0" title={`${activity.average_temp.toFixed(0)}°C`}>
+                        {activity.average_temp < 0 ? (
+                          <CloudSnow className="h-4 w-4 text-blue-400" />
+                        ) : activity.average_temp < 10 ? (
+                          <Wind className="h-4 w-4 text-blue-300" />
+                        ) : activity.average_temp > 30 ? (
+                          <Sun className="h-4 w-4 text-orange-500" />
+                        ) : activity.average_temp > 20 ? (
+                          <Sun className="h-4 w-4 text-yellow-500" />
+                        ) : (
+                          <CloudRain className="h-4 w-4 text-gray-400" />
+                        )}
+                      </div>
+                    )}
+                    <div className="bg-orange-500/10 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                      <Flame className="h-4 w-4 text-orange-500" />
+                      <span className="font-semibold text-sm">{activity.current_streak}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kudos and Comments - Fixed at bottom */}
+                <div className="pt-3 border-t">
+                  <div className="flex items-center gap-4">
+                    <ActivityKudos 
+                      runnerId={activity.runner_id} 
+                      activityDate={activity.activity_date}
+                    />
+                    <ActivityComments
+                      activityRunnerId={activity.runner_id}
+                      activityDate={activity.activity_date}
+                      currentRunnerId={currentRunnerId || undefined}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Kudos and Comments */}
-            <div className="flex items-center gap-4 pt-2 border-t">
-              <ActivityKudos 
-                runnerId={activity.runner_id} 
-                activityDate={activity.activity_date}
-              />
-              <ActivityComments
-                activityRunnerId={activity.runner_id}
-                activityDate={activity.activity_date}
-                currentRunnerId={currentRunnerId || undefined}
-              />
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
