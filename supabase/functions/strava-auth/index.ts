@@ -9,7 +9,25 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const clientId = Deno.env.get('STRAVA_CLIENT_ID');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Import createClient dynamically
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.81.1');
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Get API mode from app_settings
+    const { data: settingData } = await supabase
+      .from('app_settings')
+      .select('setting_value')
+      .eq('setting_key', 'strava_api_mode')
+      .maybeSingle();
+    
+    const apiMode = (settingData?.setting_value as 'live' | 'test') || 'live';
+    
+    const clientId = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_ID_2')
+      : Deno.env.get('STRAVA_CLIENT_ID');
     const redirectUri = `https://pazxdeeuhlwwdxmpmplo.supabase.co/functions/v1/strava-callback`;
     
     if (!clientId) {

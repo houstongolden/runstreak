@@ -71,6 +71,21 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Get API mode from app_settings to determine which credentials to use
+    const { data: settingData } = await supabase
+      .from('app_settings')
+      .select('setting_value')
+      .eq('setting_key', 'strava_api_mode')
+      .maybeSingle();
+    
+    const apiMode = (settingData?.setting_value as 'live' | 'test') || 'live';
+    const stravaClientId = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_ID_2')
+      : Deno.env.get('STRAVA_CLIENT_ID');
+    const stravaClientSecret = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_SECRET_2')
+      : Deno.env.get('STRAVA_CLIENT_SECRET');
+
     // Get runner's current tokens
     const { data: runner, error: runnerError } = await supabase
       .from('runners')
@@ -93,8 +108,8 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          client_id: Deno.env.get('STRAVA_CLIENT_ID'),
-          client_secret: Deno.env.get('STRAVA_CLIENT_SECRET'),
+          client_id: stravaClientId,
+          client_secret: stravaClientSecret,
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
         }),

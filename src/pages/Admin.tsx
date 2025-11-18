@@ -88,6 +88,8 @@ export default function Admin() {
   const [adsLoading, setAdsLoading] = useState(true);
   const [adsEnabled, setAdsEnabled] = useState(false);
   const [adsToggleLoading, setAdsToggleLoading] = useState(false);
+  const [stravaMode, setStravaMode] = useState<'live' | 'test'>('live');
+  const [stravaModeLoading, setStravaModeLoading] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -100,6 +102,7 @@ export default function Admin() {
     fetchRunners();
     fetchAdSpots();
     fetchAdsEnabled();
+    fetchStravaMode();
   }, []);
 
   const fetchAnalytics = async () => {
@@ -164,6 +167,21 @@ export default function Admin() {
     }
   };
 
+  const fetchStravaMode = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('setting_value')
+        .eq('setting_key', 'strava_api_mode')
+        .maybeSingle();
+
+      if (error) throw error;
+      setStravaMode((data?.setting_value as 'live' | 'test') || 'live');
+    } catch (error) {
+      console.error('Error fetching Strava mode:', error);
+    }
+  };
+
   const handleToggleAds = async (enabled: boolean) => {
     setAdsToggleLoading(true);
     try {
@@ -181,6 +199,30 @@ export default function Admin() {
       toast.error('Failed to update ads setting');
     } finally {
       setAdsToggleLoading(false);
+    }
+  };
+
+  const handleStravaModeToggle = async (mode: 'live' | 'test') => {
+    setStravaModeLoading(true);
+    try {
+      const { error } = await supabase
+        .from('app_settings')
+        .upsert({
+          setting_key: 'strava_api_mode',
+          setting_value: mode
+        }, {
+          onConflict: 'setting_key'
+        });
+
+      if (error) throw error;
+      
+      setStravaMode(mode);
+      toast.success(`Switched to ${mode === 'live' ? 'Live' : 'Test'} Strava API`);
+    } catch (error) {
+      console.error('Error toggling Strava mode:', error);
+      toast.error('Failed to update Strava API mode');
+    } finally {
+      setStravaModeLoading(false);
     }
   };
 
@@ -559,7 +601,50 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">
-          <StravaWebhookManager />
+          <Card>
+            <CardHeader>
+              <CardTitle>Strava API Configuration</CardTitle>
+              <CardDescription>
+                Switch between Live and Test Strava API credentials
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="strava-mode">API Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {stravaMode === 'live' 
+                      ? 'Using production Strava API credentials'
+                      : 'Using test Strava API credentials (for development)'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm ${stravaMode === 'live' ? 'font-medium' : 'text-muted-foreground'}`}>
+                    Live
+                  </span>
+                  <Switch
+                    id="strava-mode"
+                    checked={stravaMode === 'test'}
+                    onCheckedChange={(checked) => handleStravaModeToggle(checked ? 'test' : 'live')}
+                    disabled={stravaModeLoading}
+                  />
+                  <span className={`text-sm ${stravaMode === 'test' ? 'font-medium' : 'text-muted-foreground'}`}>
+                    Test
+                  </span>
+                </div>
+              </div>
+              {stravaMode === 'test' && (
+                <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                  <p className="text-sm text-orange-500">
+                    ⚠️ Test mode active - All Strava API calls use test credentials
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <StravaWebhookManager mode={stravaMode} />
         </TabsContent>
       </Tabs>
     </div>

@@ -11,7 +11,11 @@ interface Subscription {
   created_at: string;
 }
 
-export const StravaWebhookManager = () => {
+interface StravaWebhookManagerProps {
+  mode: 'live' | 'test';
+}
+
+export const StravaWebhookManager = ({ mode }: StravaWebhookManagerProps) => {
   const [loading, setLoading] = useState(false);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
 
@@ -19,7 +23,7 @@ export const StravaWebhookManager = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('strava-subscribe-webhook', {
-        body: { action: 'subscribe' },
+        body: { action: 'subscribe', mode },
       });
 
       if (error) throw error;
@@ -41,7 +45,7 @@ export const StravaWebhookManager = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('strava-subscribe-webhook', {
-        body: { action: 'list' },
+        body: { action: 'list', mode },
       });
 
       if (error) throw error;
@@ -60,7 +64,7 @@ export const StravaWebhookManager = () => {
     setLoading(true);
     try {
       const { error } = await supabase.functions.invoke('strava-subscribe-webhook', {
-        body: { action: 'delete', subscriptionId },
+        body: { action: 'delete', subscriptionId, mode },
       });
 
       if (error) throw error;
@@ -82,10 +86,11 @@ export const StravaWebhookManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Webhook className="h-5 w-5" />
-          Strava Webhook Management
+          Strava Webhook Management {mode === 'test' ? '(Test)' : '(Live)'}
         </CardTitle>
         <CardDescription>
-          Subscribe to Strava webhooks to receive real-time activity updates
+          Subscribe to Strava webhooks to receive real-time activity updates.
+          Currently managing webhooks for the <strong>{mode === 'live' ? 'Live' : 'Test'}</strong> Strava API.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

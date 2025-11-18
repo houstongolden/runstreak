@@ -49,10 +49,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { action } = await req.json();
-    const clientId = Deno.env.get('STRAVA_CLIENT_ID');
-    const clientSecret = Deno.env.get('STRAVA_CLIENT_SECRET');
-    const verifyToken = Deno.env.get('STRAVA_WEBHOOK_VERIFY_TOKEN');
+    const { action, mode } = await req.json();
+    const apiMode = mode || 'live';
+    
+    // Use appropriate credentials based on mode
+    const clientId = apiMode === 'test' 
+      ? Deno.env.get('STRAVA_CLIENT_ID_2')
+      : Deno.env.get('STRAVA_CLIENT_ID');
+    const clientSecret = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_SECRET_2')
+      : Deno.env.get('STRAVA_CLIENT_SECRET');
+    const verifyToken = apiMode === 'test'
+      ? Deno.env.get('STRAVA_WEBHOOK_VERIFY_TOKEN_2')
+      : Deno.env.get('STRAVA_WEBHOOK_VERIFY_TOKEN');
+    
     const callbackUrl = `${supabaseUrl}/functions/v1/strava-webhook`;
 
     if (!clientId || !clientSecret || !verifyToken) {
