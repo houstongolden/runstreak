@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock, AlertTriangle } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatInTimeZone } from 'date-fns-tz';
 
@@ -59,6 +59,39 @@ export function StreakCountdown({ lastActivityDate, variant = "profile", timezon
   const hasRunYesterday = lastActivityDate === yesterdayStr;
   
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours
+
+  // Show success state if user has run today
+  if (hasRunToday && variant === "sidebar") {
+    return (
+      <div className="px-2 mb-2">
+        <Card className="p-3 border border-green-500/20 bg-green-500/5">
+          <div className="flex items-center gap-2 mb-1">
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            <span className="text-xs font-semibold text-muted-foreground">Streak Safe</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            You're good for today!
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (hasRunToday && variant === "profile") {
+    return (
+      <Card className="p-6 border border-green-500/20 bg-green-500/5">
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-2">
+            <CheckCircle className="h-8 w-8 text-green-500" />
+            <h3 className="text-2xl font-bold text-green-500">Streak Safe!</h3>
+          </div>
+          <p className="text-muted-foreground">
+            You've completed your run for today. Your streak is safe until tomorrow.
+          </p>
+        </div>
+      </Card>
+    );
+  }
 
   if (variant === "sidebar") {
     return (
