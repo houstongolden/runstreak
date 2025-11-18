@@ -46,11 +46,12 @@ Deno.serve(async (req) => {
       // Process activity events (create, update, delete)
       if (event.object_type === 'activity') {
         const athleteId = event.owner_id;
+        const activityId = event.object_id;
 
         // Find the runner by Strava user ID
         const { data: runner, error: runnerError } = await supabase
           .from('runners')
-          .select('id, current_streak_days, display_name')
+          .select('id, current_streak_days, display_name, strava_access_token, timezone')
           .eq('strava_user_id', athleteId)
           .maybeSingle();
 
@@ -62,30 +63,110 @@ Deno.serve(async (req) => {
           });
         }
 
-        console.log('Processing event for runner:', runner.id);
+        if (!runner.strava_access_token) {
+          console.error('Runner missing Strava access token');
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          });
+        }
 
-        // Trigger sync in the background for create/update events
+        console.log('Processing event for runner:', runner.id, 'Activity ID:', activityId);
+
+        // Fetch only the specific activity for create/update events
         if (event.aspect_type === 'create' || event.aspect_type === 'update') {
           const previousStreak = runner.current_streak_days || 0;
 
-          // Fire-and-forget background sync
+          // Fire-and-forget background processing
           void (async () => {
             try {
-              console.log('Triggering sync-strava for runner:', runner.id);
+              console.log('Fetching specific activity:', activityId);
               
-              const { data: syncData, error: syncError } = await supabase.functions.invoke(
-                'sync-strava',
+              // Make 1 API call to fetch only this activity
+              const activityResponse = await fetch(
+                `https://www.strava.com/api/v3/activities/${activityId}`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${runner.strava_access_token}`,
+                  },
+                }
+              );
+
+              if (!activityResponse.ok) {
+                console.error('Failed to fetch activity:', activityResponse.status);
+                return;
+              }
+
+              const activity = await activityResponse.json();
+              console.log('Fetched activity:', activity.id, activity.type, activity.distance);
+
+              // Only process running activities
+              if (activity.type !== 'Run') {
+                console.log('Activity is not a run, skipping');
+                return;
+              }
+
+              // Convert UTC to runner's local timezone
+              const activityDate = new Date(activity.start_date);
+              const timezone = runner.timezone || 'America/Los_Angeles';
+              
+              // Format date in runner's timezone
+              const localDateStr = new Intl.DateTimeFormat('en-CA', {
+                timeZone: timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+              }).format(activityDate);
+
+              const distanceInMiles = activity.distance / 1609.34;
+
+              // Upsert activity into daily_activities
+              const { error: upsertError } = await supabase
+                .from('daily_activities')
+                .upsert({
+                  runner_id: runner.id,
+                  activity_date: localDateStr,
+                  distance: distanceInMiles,
+                  moving_time: activity.moving_time,
+                  elevation_gain: activity.total_elevation_gain * 3.28084, // meters to feet
+                  run_count: 1,
+                  average_speed: activity.average_speed,
+                  max_speed: activity.max_speed,
+                  average_heartrate: activity.average_heartrate,
+                  max_heartrate: activity.max_heartrate,
+                  average_cadence: activity.average_cadence,
+                  calories: activity.calories,
+                  suffer_score: activity.suffer_score,
+                  average_temp: activity.average_temp,
+                  trainer: activity.trainer,
+                  commute: activity.commute,
+                  updated_at: new Date().toISOString(),
+                }, {
+                  onConflict: 'runner_id,activity_date',
+                  ignoreDuplicates: false,
+                });
+
+              if (upsertError) {
+                console.error('Error upserting activity:', upsertError);
+                return;
+              }
+
+              console.log('Activity saved to database, recalculating streak');
+
+              // Recalculate streak from database (0 API calls)
+              const { error: recalcError } = await supabase.functions.invoke(
+                'recalculate-streak',
                 {
                   body: { runnerId: runner.id },
                 }
               );
 
-              if (syncError) {
-                console.error('Error syncing runner:', syncError);
+              if (recalcError) {
+                console.error('Error recalculating streak:', recalcError);
                 return;
               }
 
-              console.log('Sync completed successfully:', syncData);
+              console.log('Streak recalculated successfully');
 
               // Check if streak milestone reached
               const { data: updatedRunner } = await supabase
@@ -122,7 +203,7 @@ Deno.serve(async (req) => {
                 }
               }
             } catch (error) {
-              console.error('Background sync error:', error);
+              console.error('Background activity processing error:', error);
             }
           })();
         }
