@@ -1,7 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Trophy, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trophy, TrendingUp, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Step2Props {
   runner: any;
@@ -11,6 +15,59 @@ interface Step2Props {
 
 export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Props) {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fullSyncTriggered, setFullSyncTriggered] = useState(false);
+
+  const handleEmailSubmit = async () => {
+    if (!email || !email.includes('@')) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Save email to user_settings
+      const { error: settingsError } = await supabase
+        .from('user_settings')
+        .upsert({
+          runner_id: runner.id,
+          user_email: email,
+          email_verified: false
+        });
+
+      if (settingsError) throw settingsError;
+
+      // Trigger full activity sync in background (don't wait for it)
+      if (!fullSyncTriggered) {
+        console.log('[Step2] Triggering full activity sync after email entry...');
+        setFullSyncTriggered(true);
+        
+        supabase.functions
+          .invoke('sync-strava', {
+            body: { runnerId: runner.id }
+          })
+          .then(({ error }) => {
+            if (error) {
+              console.error('[Step2] Full sync error:', error);
+            } else {
+              console.log('[Step2] Full activity sync triggered successfully');
+            }
+          });
+      }
+
+      toast.success('Email saved! Syncing your complete activity history...');
+      
+      // Navigate to next step immediately (sync continues in background)
+      setTimeout(() => navigate('../step-3'), 500);
+    } catch (error) {
+      console.error('[Step2] Error saving email:', error);
+      toast.error('Failed to save email. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-8 py-8 animate-fade-in">
@@ -57,25 +114,43 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
           </div>
         </Card>
 
-        <p className="text-base text-muted-foreground font-instrument">
-          Your position updates automatically as you maintain your streak
-        </p>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Mail className="h-4 w-4" />
+            <span className="text-sm">Enter your email to continue</span>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleEmailSubmit()}
+              className="flex-1"
+              disabled={isSubmitting}
+            />
+            <Button
+              onClick={handleEmailSubmit}
+              disabled={isSubmitting || !email}
+              size="lg"
+            >
+              {isSubmitting ? 'Saving...' : 'Continue'}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">
+            We'll sync your complete activity history in the background
+          </p>
+        </div>
       </div>
 
-      <div className="flex justify-between gap-3">
+      <div className="flex justify-start gap-3">
         <Button
           variant="outline"
           onClick={() => navigate('../step-1')}
           size="lg"
+          disabled={isSubmitting}
         >
           Back
-        </Button>
-        <Button
-          onClick={() => navigate('../step-3')}
-          size="lg"
-          className="text-base px-8"
-        >
-          Next
         </Button>
       </div>
     </div>
