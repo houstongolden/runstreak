@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { formatInTimeZone } from 'date-fns-tz';
 
 export function StreakCountdownBanner() {
   const { runnerId } = useAuth();
@@ -44,22 +45,24 @@ export function StreakCountdownBanner() {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      // Get current time in the runner's timezone
-      const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
-      const runnerTime = new Date(nowInRunnerTz);
+      // Use date-fns-tz to get current time in runner's timezone
+      const runnerTime = new Date();
+      const runnerTimeStr = formatInTimeZone(runnerTime, timezone, 'yyyy-MM-dd HH:mm:ss');
+      const [datePart, timePart] = runnerTimeStr.split(' ');
+      const [hours, minutes, seconds] = timePart.split(':').map(Number);
       
-      // Calculate midnight in runner's timezone
-      const midnight = new Date(runnerTime);
-      midnight.setHours(24, 0, 0, 0);
+      // Calculate time until midnight in runner's timezone
+      const hoursLeft = 23 - hours;
+      const minutesLeft = 59 - minutes;
+      const secondsLeft = 59 - seconds;
+      const totalMilliseconds = (hoursLeft * 3600 + minutesLeft * 60 + secondsLeft) * 1000;
       
-      const difference = midnight.getTime() - runnerTime.getTime();
-      
-      if (difference > 0) {
+      if (totalMilliseconds > 0) {
         setTimeLeft({
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-          total: difference,
+          hours: hoursLeft,
+          minutes: minutesLeft,
+          seconds: secondsLeft,
+          total: totalMilliseconds,
         });
       }
     };
@@ -70,13 +73,8 @@ export function StreakCountdownBanner() {
     return () => clearInterval(timer);
   }, [timezone]);
 
-  // Calculate "today" in the runner's specific timezone
-  const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
-  const runnerTime = new Date(nowInRunnerTz);
-  const year = runnerTime.getFullYear();
-  const month = String(runnerTime.getMonth() + 1).padStart(2, '0');
-  const day = String(runnerTime.getDate()).padStart(2, '0');
-  const todayStr = `${year}-${month}-${day}`;
+  // Get "today" in the runner's timezone using date-fns-tz
+  const todayStr = formatInTimeZone(new Date(), timezone, 'yyyy-MM-dd');
   
   const hasRunToday = lastActivityDate === todayStr;
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours

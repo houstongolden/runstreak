@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Clock, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface RunnerStreakStatusProps {
   lastActivityDate: string | null;
@@ -60,19 +61,19 @@ export function RunnerStreakStatus({ lastActivityDate, timezone, country }: Runn
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      // Get current time in the runner's timezone
-      const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
-      const runnerTime = new Date(nowInRunnerTz);
+      // Use date-fns-tz to get current time in runner's timezone
+      const runnerTime = new Date();
+      const runnerTimeStr = formatInTimeZone(runnerTime, timezone, 'yyyy-MM-dd HH:mm:ss');
+      const [datePart, timePart] = runnerTimeStr.split(' ');
+      const [hours, minutes] = timePart.split(':').map(Number);
       
-      // Calculate midnight in runner's timezone
-      const midnight = new Date(runnerTime);
-      midnight.setHours(24, 0, 0, 0);
-      
-      const difference = midnight.getTime() - runnerTime.getTime();
+      // Calculate time until midnight in runner's timezone
+      const hoursLeft = 23 - hours;
+      const minutesLeft = 59 - minutes;
       
       setTimeLeft({
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
+        hours: hoursLeft,
+        minutes: minutesLeft,
       });
     };
 
@@ -82,14 +83,8 @@ export function RunnerStreakStatus({ lastActivityDate, timezone, country }: Runn
     return () => clearInterval(timer);
   }, [timezone]);
 
-  // Calculate "today" in the runner's specific timezone
-  const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
-  const runnerTime = new Date(nowInRunnerTz);
-  const year = runnerTime.getFullYear();
-  const month = String(runnerTime.getMonth() + 1).padStart(2, '0');
-  const day = String(runnerTime.getDate()).padStart(2, '0');
-  const todayStr = `${year}-${month}-${day}`;
-  
+  // Get "today" in the runner's timezone using date-fns-tz
+  const todayStr = formatInTimeZone(new Date(), timezone, 'yyyy-MM-dd');
   const hasRunToday = lastActivityDate === todayStr;
 
   // Get country code for flag
