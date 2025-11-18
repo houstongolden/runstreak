@@ -30,6 +30,8 @@ import Features from "./pages/Features";
 import Story from "./pages/Story";
 import Philosophy from "./pages/Philosophy";
 import NotFound from "./pages/NotFound";
+import AdCheckout from "./pages/AdCheckout";
+import AdPaymentSuccess from "./pages/AdPaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +73,8 @@ const App = () => (
               <Route path="/verify-phone" element={<VerifyPhone />} />
               <Route path="/runner/:id/badge" element={<BadgeCustomizer />} />
               <Route path="/badge-docs" element={<BadgeDocs />} />
+              <Route path="/ad-checkout" element={<AdCheckout />} />
+              <Route path="/ad-payment-success" element={<AdPaymentSuccess />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
