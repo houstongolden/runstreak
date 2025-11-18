@@ -21,6 +21,8 @@ export default function Onboarding() {
 
   useEffect(() => {
     const runnerId = searchParams.get('runnerId');
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
     
     if (!runnerId) {
       toast.error('Missing runner information');
@@ -28,10 +30,27 @@ export default function Onboarding() {
       return;
     }
 
-    // Session is already established by the strava-callback function
-    // No need to set it again here - just fetch the runner data
-    console.log('[Onboarding] Starting onboarding with runner:', runnerId);
-    fetchRunner(runnerId);
+    // Establish session with tokens from OAuth callback
+    if (accessToken && refreshToken) {
+      console.log('[Onboarding] Setting up session...');
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      }).then(({ error }) => {
+        if (error) {
+          console.error('[Onboarding] Session setup error:', error);
+          toast.error('Failed to authenticate');
+          navigate('/');
+          return;
+        }
+        console.log('[Onboarding] Session established, fetching runner data');
+        fetchRunner(runnerId);
+      });
+    } else {
+      // Already authenticated, just fetch data
+      console.log('[Onboarding] Already authenticated, fetching runner data');
+      fetchRunner(runnerId);
+    }
   }, [searchParams, navigate]);
 
   const fetchRunner = async (runnerId: string) => {

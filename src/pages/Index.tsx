@@ -85,11 +85,41 @@ const Index = () => {
       await fetchRunners();
       await fetchAdsEnabled();
       
-      // Check if user is already connected to Strava and handle success callback
+      // Check if user is returning from Strava OAuth with session tokens
       const searchParams = new URLSearchParams(window.location.search);
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
       const stravaStatus = searchParams.get('strava');
       const urlRunnerId = searchParams.get('runnerId');
       const showWelcome = searchParams.get('welcome');
+
+      // Handle returning user authentication
+      if (accessToken && refreshToken) {
+        console.log('[Index] Setting up session for returning user...');
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+        
+        if (error) {
+          console.error('[Index] Session setup error:', error);
+          toast({
+            title: "Authentication Failed",
+            description: "Failed to sign in. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          console.log('[Index] Session established');
+          toast({
+            title: "Welcome Back!",
+            description: "Successfully signed in to your account.",
+          });
+        }
+        
+        // Clean up URL
+        window.history.replaceState({}, '', '/');
+        return;
+      }
       
       if (stravaStatus === 'success' && urlRunnerId && showWelcome === 'true') {
         // Fetch the runner data for onboarding

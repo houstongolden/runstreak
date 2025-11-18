@@ -236,9 +236,10 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
 
       <div className="flex justify-end gap-3">
         <Button
-          onClick={() => navigate('/onboarding/step-2')}
+          onClick={() => navigate('../step-2')}
           size="lg"
           className="text-base px-8"
+          disabled={isLoading}
         >
           Next
         </Button>

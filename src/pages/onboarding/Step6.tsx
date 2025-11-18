@@ -54,7 +54,7 @@ export default function Step6({ runner }: Step6Props) {
       <div className="flex justify-between gap-3">
         <Button
           variant="outline"
-          onClick={() => navigate('/onboarding/step-5')}
+          onClick={() => navigate('../step-5')}
           size="lg"
         >
           Back

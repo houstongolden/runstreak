@@ -72,7 +72,7 @@ export default function Step5({ runner }: Step5Props) {
       
       // Auto-advance after short delay
       setTimeout(() => {
-        navigate('/onboarding/step-6');
+        navigate('../step-6');
       }, 1000);
     } catch (error) {
       console.error('Error verifying code:', error);
@@ -83,7 +83,7 @@ export default function Step5({ runner }: Step5Props) {
   };
 
   const handleSkip = () => {
-    navigate('/onboarding/step-6');
+    navigate('../step-6');
   };
 
   return (
@@ -180,7 +180,7 @@ export default function Step5({ runner }: Step5Props) {
       <div className="flex justify-between gap-3">
         <Button
           variant="outline"
-          onClick={() => navigate('/onboarding/step-4')}
+          onClick={() => navigate('../step-4')}
           size="lg"
           disabled={isLoading}
         >
