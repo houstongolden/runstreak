@@ -82,6 +82,8 @@ const handler = async (req: Request): Promise<Response> => {
     const vonageApiSecret = Deno.env.get("VONAGE_API_SECRET");
     const vonagePhoneNumber = Deno.env.get("VONAGE_PHONE_NUMBER");
 
+    console.log("Sending SMS with Vonage from:", vonagePhoneNumber, "to:", phoneNumber);
+
     const vonageUrl = "https://rest.nexmo.com/sms/json";
     const vonageBody = {
       api_key: vonageApiKey,
@@ -90,6 +92,8 @@ const handler = async (req: Request): Promise<Response> => {
       from: vonagePhoneNumber,
       text: `Your RunStreak verification code is: ${code}. This code expires in 10 minutes.`,
     };
+
+    console.log("Vonage request body:", { ...vonageBody, api_key: "***", api_secret: "***" });
 
     const vonageResponse = await fetch(vonageUrl, {
       method: "POST",
