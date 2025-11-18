@@ -83,23 +83,7 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        {/* Header with back button */}
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-          <div className="flex items-center gap-3">
-            <Flame className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-instrument font-semibold">Welcome to RunStreak</h1>
-          </div>
-        </div>
-
+      <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Step content */}
         <Routes>
           <Route path="step-1" element={<Step1 runner={runner} leaderboardRank={leaderboardRank} totalRunners={totalRunners} />} />
