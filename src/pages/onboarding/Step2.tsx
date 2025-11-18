@@ -136,6 +136,14 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
             >
               {isSubmitting ? 'Saving...' : 'Continue'}
             </Button>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('../step-3')}
+              disabled={isSubmitting}
+              size="lg"
+            >
+              Skip
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground text-center">
             We'll sync your complete activity history in the background
