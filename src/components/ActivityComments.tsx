@@ -243,6 +243,6 @@ export default function ActivityComments({
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }
