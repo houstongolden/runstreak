@@ -77,10 +77,9 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Failed to store verification code");
     }
 
-    // Send SMS via Twilio using API Key authentication
+    // Send SMS via Twilio using Account SID and Auth Token
     const twilioAccountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const twilioApiKeySid = Deno.env.get("TWILIO_API_KEY_SID");
-    const twilioApiKeySecret = Deno.env.get("TWILIO_API_KEY_SECRET");
+    const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const twilioPhoneNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
 
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
@@ -94,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Basic ${btoa(`${twilioApiKeySid}:${twilioApiKeySecret}`)}`,
+        Authorization: `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`,
       },
       body: body.toString(),
     });
