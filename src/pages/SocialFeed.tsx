@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind, Heart, MessageSquare } from "lucide-react";
+import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind, Heart, MessageSquare, CheckCircle2, XCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import ActivityKudos from "@/components/ActivityKudos";
 import ActivityComments from "@/components/ActivityComments";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FeedActivity {
   runner_id: string;
@@ -27,6 +28,7 @@ export default function SocialFeed() {
   const { runnerId: currentRunnerId } = useAuth();
   const [activities, setActivities] = useState<FeedActivity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"kept" | "broke">("kept");
 
   useEffect(() => {
     if (currentRunnerId) {
@@ -34,7 +36,7 @@ export default function SocialFeed() {
     } else {
       setLoading(false);
     }
-  }, [currentRunnerId]);
+  }, [currentRunnerId, filter]);
 
   const loadFeed = async (runnerId: string) => {
     try {
@@ -50,44 +52,84 @@ export default function SocialFeed() {
       const followingIds = follows ? follows.map((f) => f.following_id) : [];
       const allRunnerIds = [runnerId, ...followingIds];
 
-      // Get recent activities from followed runners + self (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      if (filter === "kept") {
+        // Get recent activities from followed runners + self (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      const { data: recentActivities, error } = await supabase
-        .from("daily_activities")
-        .select("runner_id, activity_date, average_temp, distance, moving_time, run_count")
-        .in("runner_id", allRunnerIds)
-        .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0])
-        .order("activity_date", { ascending: false });
+        const { data: recentActivities, error } = await supabase
+          .from("daily_activities")
+          .select("runner_id, activity_date, average_temp, distance, moving_time, run_count")
+          .in("runner_id", allRunnerIds)
+          .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0])
+          .order("activity_date", { ascending: false });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Get runner details for each activity
-      const { data: runners } = await supabase
-        .from("runners")
-        .select("id, display_name, avatar_url, current_streak_days")
-        .in("id", allRunnerIds);
+        // Get runner details for each activity
+        const { data: runners } = await supabase
+          .from("runners")
+          .select("id, display_name, avatar_url, current_streak_days")
+          .in("id", allRunnerIds);
 
-      if (!runners) return;
+        if (!runners) return;
 
-      // Combine activities with runner info
-      const feedItems: FeedActivity[] = (recentActivities || []).map((activity) => {
-        const runner = runners.find((r) => r.id === activity.runner_id);
-        return {
-          runner_id: activity.runner_id,
-          runner_name: runner?.display_name || "Unknown Runner",
-          runner_avatar: runner?.avatar_url || "",
-          current_streak: runner?.current_streak_days || 0,
-          activity_date: activity.activity_date,
-          average_temp: activity.average_temp,
-          distance: activity.distance,
-          moving_time: activity.moving_time,
-          run_count: activity.run_count,
-        };
-      });
+        // Combine activities with runner info
+        const feedItems: FeedActivity[] = (recentActivities || []).map((activity) => {
+          const runner = runners.find((r) => r.id === activity.runner_id);
+          return {
+            runner_id: activity.runner_id,
+            runner_name: runner?.display_name || "Unknown Runner",
+            runner_avatar: runner?.avatar_url || "",
+            current_streak: runner?.current_streak_days || 0,
+            activity_date: activity.activity_date,
+            average_temp: activity.average_temp,
+            distance: activity.distance,
+            moving_time: activity.moving_time,
+            run_count: activity.run_count,
+          };
+        });
 
-      setActivities(feedItems);
+        setActivities(feedItems);
+      } else {
+        // Get recent broken streaks from streak_history (last 7 days)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const { data: brokenStreaks, error } = await supabase
+          .from("streak_history")
+          .select("runner_id, end_date, days_count, total_miles")
+          .in("runner_id", allRunnerIds)
+          .gte("end_date", sevenDaysAgo.toISOString().split("T")[0])
+          .order("end_date", { ascending: false });
+
+        if (error) throw error;
+
+        // Get runner details
+        const { data: runners } = await supabase
+          .from("runners")
+          .select("id, display_name, avatar_url, current_streak_days")
+          .in("id", allRunnerIds);
+
+        if (!runners) return;
+
+        // Combine broken streaks with runner info
+        const feedItems: FeedActivity[] = (brokenStreaks || []).map((streak) => {
+          const runner = runners.find((r) => r.id === streak.runner_id);
+          return {
+            runner_id: streak.runner_id,
+            runner_name: runner?.display_name || "Unknown Runner",
+            runner_avatar: runner?.avatar_url || "",
+            current_streak: runner?.current_streak_days || 0,
+            activity_date: streak.end_date,
+            distance: streak.total_miles,
+            moving_time: 0,
+            run_count: streak.days_count,
+          };
+        });
+
+        setActivities(feedItems);
+      }
     } catch (error) {
       console.error("Error loading feed:", error);
     } finally {
@@ -164,11 +206,26 @@ export default function SocialFeed() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-3xl space-y-3">
-      <h1 className="text-xl font-semibold flex items-center gap-2 mb-3">
-        <Flame className="h-5 w-5 text-orange-500" />
-        Streak Updates
-      </h1>
+    <div className="container mx-auto p-4 sm:p-6 max-w-3xl space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold flex items-center gap-2">
+          <Flame className="h-5 w-5 text-orange-500" />
+          Streak Feed
+        </h1>
+        
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as "kept" | "broke")} className="w-full sm:w-auto">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="kept" className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span className="text-xs sm:text-sm">Kept Streaks</span>
+            </TabsTrigger>
+            <TabsTrigger value="broke" className="flex items-center gap-1.5">
+              <XCircle className="h-3.5 w-3.5" />
+              <span className="text-xs sm:text-sm">Broke Streaks</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
       <div className="space-y-3">
         {activities.map((activity, index) => {
@@ -197,7 +254,7 @@ export default function SocialFeed() {
                         {activity.runner_name}
                       </span>
                       <span className="text-muted-foreground text-xs">
-                        kept streak alive
+                        {filter === "kept" ? "kept streak alive" : "broke their streak"}
                       </span>
                     </div>
                     
@@ -206,7 +263,12 @@ export default function SocialFeed() {
                         {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true })}
                       </span>
                       <span>•</span>
-                      <span>Day {activity.current_streak} of streak</span>
+                      <span>
+                        {filter === "kept" 
+                          ? `Day ${activity.current_streak} of streak`
+                          : `${activity.run_count}-day streak ended`
+                        }
+                      </span>
                     </div>
 
                     {/* Activity details */}
