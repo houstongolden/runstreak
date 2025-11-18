@@ -450,7 +450,10 @@ export default function Settings() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Badge variant="outline" className="text-xs">Coming soon...</Badge>
+                </div>
                 <div className="flex gap-2">
                   <Input
                     id="phone"
@@ -603,10 +606,13 @@ export default function Settings() {
           {/* AI Coach Settings */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                AI SMS Coach
-              </CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  AI SMS Coach
+                </CardTitle>
+                <Badge variant="outline" className="text-xs">Coming soon...</Badge>
+              </div>
               <CardDescription>
                 Get personalized daily reminders to stay on track with your streak goals
               </CardDescription>
