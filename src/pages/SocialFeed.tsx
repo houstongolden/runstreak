@@ -8,7 +8,7 @@ import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind, Heart, MessageSquar
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import ActivityKudos from "@/components/ActivityKudos";
-import ActivityComments from "@/components/ActivityComments";
+import ActivityComments, { ActivityCommentsSection } from "@/components/ActivityComments";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface FeedActivity {
@@ -29,6 +29,7 @@ export default function SocialFeed() {
   const [activities, setActivities] = useState<FeedActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"kept" | "broke">("kept");
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (currentRunnerId) {
@@ -182,22 +183,41 @@ export default function SocialFeed() {
 
   if (activities.length === 0) {
     return (
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-4 sm:p-6 max-w-3xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h1 className="text-xl font-semibold flex items-center gap-2">
+            <Flame className="h-5 w-5 text-orange-500" />
+            Streak Feed
+          </h1>
+          
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as "kept" | "broke")} className="w-full sm:w-auto">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="kept" className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span className="text-xs sm:text-sm">Kept Streaks</span>
+              </TabsTrigger>
+              <TabsTrigger value="broke" className="flex items-center gap-1.5">
+                <XCircle className="h-3.5 w-3.5" />
+                <span className="text-xs sm:text-sm">Broke Streaks</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Social Feed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">
-                Follow other runners to see their activities here
+          <CardContent className="py-12">
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2">
+                {filter === "kept" 
+                  ? "Follow other runners to see their activities here"
+                  : "You're not following anyone who has broken a streak yet"
+                }
               </p>
-              <p className="text-sm text-muted-foreground">
-                Visit runner profiles to follow them and stay updated on their streaks
-              </p>
+              {filter === "kept" && (
+                <p className="text-sm text-muted-foreground">
+                  Visit runner profiles to follow them and stay updated on their streaks
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -230,6 +250,8 @@ export default function SocialFeed() {
       <div className="space-y-3">
         {activities.map((activity, index) => {
           const isOwnActivity = activity.runner_id === currentRunnerId;
+          const commentKey = `${activity.runner_id}-${activity.activity_date}`;
+          const isCommentsExpanded = expandedComments.has(commentKey);
           
           return (
             <Card
@@ -318,19 +340,37 @@ export default function SocialFeed() {
                   </div>
                 </div>
 
-                {/* Kudos and Comments - Fixed at bottom */}
-                <div className="pt-3 border-t space-y-3">
+                {/* Kudos and Comments - Fixed icon bar */}
+                <div className="pt-3 border-t">
                   <div className="flex items-center gap-4">
                     <ActivityKudos 
                       runnerId={activity.runner_id} 
                       activityDate={activity.activity_date}
                     />
-                    <ActivityComments
-                      activityRunnerId={activity.runner_id}
-                      activityDate={activity.activity_date}
-                      currentRunnerId={currentRunnerId || undefined}
-                    />
+                    <div onClick={() => {
+                      const newExpanded = new Set(expandedComments);
+                      if (isCommentsExpanded) {
+                        newExpanded.delete(commentKey);
+                      } else {
+                        newExpanded.add(commentKey);
+                      }
+                      setExpandedComments(newExpanded);
+                    }}>
+                      <ActivityComments
+                        activityRunnerId={activity.runner_id}
+                        activityDate={activity.activity_date}
+                        currentRunnerId={currentRunnerId || undefined}
+                      />
+                    </div>
                   </div>
+                  
+                  {/* Comments section - loads below */}
+                  <ActivityCommentsSection
+                    activityRunnerId={activity.runner_id}
+                    activityDate={activity.activity_date}
+                    currentRunnerId={currentRunnerId || undefined}
+                    showComments={isCommentsExpanded}
+                  />
                 </div>
               </div>
             </Card>
