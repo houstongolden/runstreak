@@ -540,19 +540,9 @@ Deno.serve(async (req) => {
     const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
     
     // Extract access and refresh tokens from the magiclink
-    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
-      email: userEmail,
-    });
-    
-    if (sessionError || !sessionData) {
-      console.error('Error generating session:', sessionError);
-      throw new Error('Failed to create session');
-    }
-    
-    const url = new URL(sessionData.properties.action_link);
-    const accessToken = url.searchParams.get('access_token');
-    const refreshToken = url.searchParams.get('refresh_token');
+    const actionUrl = new URL(sessionData.properties.action_link);
+    const accessToken = actionUrl.searchParams.get('access_token');
+    const refreshToken = actionUrl.searchParams.get('refresh_token');
     
     const redirectUrl = isNewUser 
       ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&access_token=${accessToken}&refresh_token=${refreshToken}&type=magiclink`
