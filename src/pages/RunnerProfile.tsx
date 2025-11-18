@@ -209,20 +209,15 @@ export default function RunnerProfile() {
     
     setIsSyncing(true);
     try {
-      // First try to recalculate from existing data (no API call needed)
-      const { data, error: recalcError } = await supabase.functions.invoke('recalculate-streak');
+      // Always do full Strava sync to fetch latest activities
+      const { error } = await supabase.functions.invoke('sync-strava', {
+        body: { runnerId: id }
+      });
       
-      if (recalcError) {
-        console.error('Error recalculating streak:', recalcError);
-        // If recalculation fails, fall back to full sync
-        const { error } = await supabase.functions.invoke('sync-strava', {
-          body: { runnerId: id }
-        });
-        if (error) throw error;
-        
-        // Wait a moment for the edge function to complete background work
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
+      if (error) throw error;
+      
+      // Wait for edge function to complete background work
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       // Refresh runner data after sync completes
       const { data: refreshedData, error: fetchError } = await (supabase as any)
