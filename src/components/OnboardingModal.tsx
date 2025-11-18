@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Flame, CheckCircle, Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Flame, TrendingUp, Users, ChevronRight, Award, BarChart3, Heart, Zap, Target, CheckCircle2, ArrowRight, CheckCircle } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Runner } from "@/types";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -27,9 +30,9 @@ const emailSchema = z.string().email({ message: "Invalid email address" }).max(2
 const steps = [
   { id: 1, title: "Welcome" },
   { id: 2, title: "Verify Email" },
-  { id: 3, title: "Your Ranking" },
-  { id: 4, title: "Track Consistency" },
-  { id: 5, title: "Start Your Streak" },
+  { id: 3, title: "Leaderboard" },
+  { id: 4, title: "Activity Heatmap" },
+  { id: 5, title: "Stay Accountable" },
 ];
 
 export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, totalRunners }: OnboardingModalProps) {
@@ -129,18 +132,9 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
     }
   };
 
-  const handleSkipEmail = () => {
-    setCurrentStep(currentStep + 1);
-  };
-
   const handleNext = () => {
-    if (currentStep === 2) {
-      // Email verification step - validate before proceeding
-      if (email && !emailAlreadyVerified) {
-        handleEmailVerification();
-      } else {
-        setCurrentStep(currentStep + 1);
-      }
+    if (currentStep === 2 && !emailAlreadyVerified && email) {
+      handleEmailVerification();
     } else if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -156,6 +150,11 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
 
   if (!runner) return null;
 
+  const accountabilityData = [
+    { category: 'Without', value: 35 },
+    { category: 'With RunStreak', value: 88 }
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl h-[100vh] overflow-y-auto border-primary/20 [&>button]:hidden flex flex-col">
@@ -165,7 +164,6 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         </DialogHeader>
 
-        {/* Step 1: Welcome + Current Streak */}
         {currentStep === 1 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
@@ -196,7 +194,6 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {/* Step 2: Email Verification */}
         {currentStep === 2 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
@@ -237,28 +234,43 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {/* Step 3: Leaderboard Ranking */}
         {currentStep === 3 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
-              <p className="text-2xl sm:text-3xl font-instrument font-medium text-foreground">Your Ranking</p>
-              <p className="text-base text-muted-foreground font-instrument">See where you stand among {totalRunners} runners</p>
+              <p className="text-2xl sm:text-3xl font-instrument font-medium text-foreground">See how you rank</p>
+              <p className="text-base text-muted-foreground font-instrument">You're competing with runners worldwide</p>
             </div>
-            <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-8 text-center">
-              <div className="inline-flex items-center gap-3 mb-4">
-                <div className="bg-primary/20 p-4 rounded-full">
-                  <p className="text-4xl font-bold text-primary font-instrument">#{leaderboardRank}</p>
+            <Card className="bg-card border-primary/20 p-4 sm:p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className="text-lg font-bold">#{leaderboardRank}</Badge>
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={runner?.avatar_url || ''} alt={runner?.display_name} />
+                      <AvatarFallback>{runner?.display_name?.charAt(0) || 'R'}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{runner.display_name}</p>
+                      <p className="text-sm text-muted-foreground">{runner.current_streak_days || 0} days</p>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <p className="text-2xl font-bold text-primary">{totalRunners}</p>
+                    <p className="text-sm text-muted-foreground">Total Runners</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-primary">#{leaderboardRank}</p>
+                    <p className="text-sm text-muted-foreground">Your Rank</p>
+                  </div>
                 </div>
               </div>
-              <p className="text-lg font-semibold text-foreground font-instrument">Current Position</p>
-              <p className="text-sm text-muted-foreground mt-2 font-instrument">
-                You're ranked {leaderboardRank} out of {totalRunners} runners on the leaderboard
-              </p>
             </Card>
           </div>
         )}
 
-        {/* Step 4: Activity Heatmap Preview */}
         {currentStep === 4 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
             <div className="text-center space-y-3">
@@ -296,28 +308,43 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           </div>
         )}
 
-        {/* Step 5: Start Your Streak */}
         {currentStep === 5 && (
           <div className="space-y-6 py-4 animate-in fade-in-50 duration-700">
-            <div className="text-center space-y-6">
-              <div className="space-y-3">
-                <Flame className="h-20 w-20 text-primary mx-auto animate-pulse" />
-                <p className="text-3xl sm:text-4xl font-instrument font-medium text-foreground">Let's Go! 🔥</p>
-                <p className="text-lg text-muted-foreground font-instrument">Your runs are syncing from Strava</p>
-              </div>
-              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 p-8 text-center">
-                <p className="text-xl sm:text-2xl font-semibold text-foreground leading-relaxed font-instrument mb-3">
-                  Every mile counts. Every day matters.
+            <div className="text-center space-y-3">
+              <p className="text-2xl sm:text-3xl font-instrument font-medium text-foreground">Stay Accountable</p>
+              <p className="text-base text-muted-foreground font-instrument">Runners with accountability maintain consistency</p>
+            </div>
+            <Card className="bg-card border-primary/20 p-4 sm:p-6">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={accountabilityData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="category" stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" tick={{ fontSize: 12 }} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value}%`, 'Consistency']} />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]}>
+                    {accountabilityData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? 'hsl(var(--muted))' : 'hsl(var(--primary))'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+            <div className="text-center space-y-4">
+              <p className="text-3xl font-bold text-primary font-instrument">+53%</p>
+              <p className="text-sm text-muted-foreground mt-1 font-instrument">Higher consistency with accountability</p>
+              <div className="space-y-2 text-left">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  Daily reminders to keep your streak alive
                 </p>
-                <p className="text-base text-muted-foreground font-instrument">
-                  You're now part of a community that shows up daily. Ready to build your streak?
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  Community support when you need it most
                 </p>
-              </Card>
-              <div className="flex flex-col gap-3 text-center">
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <Zap className="h-5 w-5" />
-                  <span className="font-semibold font-instrument">Day 1 starts now</span>
-                </div>
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                  AI coach insights to improve performance
+                </p>
               </div>
             </div>
           </div>
@@ -334,7 +361,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
           {currentStep === 2 && !emailAlreadyVerified && (
             <Button
               variant="outline"
-              onClick={handleSkipEmail}
+              onClick={() => setCurrentStep(currentStep + 1)}
               className="flex-1"
             >
               Skip Email
