@@ -34,30 +34,18 @@ export default function AdPaymentSuccess() {
     setSubmitting(true);
 
     try {
-      // Get the next display_order
-      const { data: existingSpots, error: fetchError } = await supabase
-        .from("ad_spots")
-        .select("display_order")
-        .order("display_order", { ascending: false })
-        .limit(1);
-
-      if (fetchError) throw fetchError;
-
-      const nextOrder = (existingSpots?.[0]?.display_order || 0) + 1;
-
-      // Insert new ad spot
-      const { error: insertError } = await supabase
-        .from("ad_spots")
-        .insert({
-          company_name: formData.companyName,
+      // Call edge function to create ad spot
+      const { data, error } = await supabase.functions.invoke('create-ad-spot', {
+        body: {
+          companyName: formData.companyName,
           domain: formData.domain,
           description: formData.description,
-          logo_url: formData.logoUrl || null,
-          display_order: nextOrder,
-          is_active: true,
-        });
+          logoUrl: formData.logoUrl || null,
+        },
+      });
 
-      if (insertError) throw insertError;
+      if (error) throw error;
+      if (!data?.success) throw new Error('Failed to create ad spot');
 
       toast.success("Ad spot created successfully!");
       navigate("/");
