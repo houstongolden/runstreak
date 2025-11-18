@@ -33,12 +33,12 @@ export default function UnverifiedAccountBanner() {
         // If they have user_id, check verification status in settings
         const { data: settings } = await supabase
           .from('user_settings')
-          .select('email_verified, phone_verified')
+          .select('email_verified')
           .eq('runner_id', runnerId)
           .maybeSingle();
 
-        // Show banner if settings don't exist OR neither email nor phone is verified
-        if (!settings || (!settings.email_verified && !settings.phone_verified)) {
+        // Show banner if settings don't exist OR email is not verified (phone not required for now)
+        if (!settings || !settings.email_verified) {
           setShowBanner(true);
         }
       } catch (error) {
