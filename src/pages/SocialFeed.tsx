@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind, CheckCircle2, XCircle, Users, MapPin, Loader2 } from "lucide-react";
+import { Flame, TrendingUp, CloudRain, Sun, CloudSnow, Wind, CheckCircle2, XCircle, Users, MapPin, Loader2, Award, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import ActivityKudos from "@/components/ActivityKudos";
@@ -39,6 +39,7 @@ export default function SocialFeed() {
   const [activeTab, setActiveTab] = useState<"feed" | "discover">("feed");
   const [runners, setRunners] = useState<Runner[]>([]);
   const [runnersLoading, setRunnersLoading] = useState(false);
+  const [discoverTab, setDiscoverTab] = useState<"nearby" | "similar" | "leaders">("leaders");
 
   useEffect(() => {
     if (currentRunnerId) {
@@ -70,6 +71,42 @@ export default function SocialFeed() {
     } finally {
       setRunnersLoading(false);
     }
+  };
+
+  const getNearbyRunners = () => {
+    if (!currentRunnerId) return [];
+    const currentRunner = runners.find(r => r.id === currentRunnerId);
+    if (!currentRunner?.city) return [];
+    
+    return runners.filter(r => 
+      r.city === currentRunner.city && r.id !== currentRunnerId
+    );
+  };
+
+  const getSimilarPaceRunners = () => {
+    if (!currentRunnerId) return [];
+    const currentRunner = runners.find(r => r.id === currentRunnerId);
+    if (!currentRunner?.average_miles_per_day) return [];
+    
+    const currentPace = currentRunner.average_miles_per_day;
+    return runners
+      .filter(r => r.average_miles_per_day && r.id !== currentRunnerId)
+      .filter(r => {
+        const diff = Math.abs((r.average_miles_per_day || 0) - currentPace);
+        return diff < 2; // Within 2 miles per day
+      })
+      .sort((a, b) => {
+        const diffA = Math.abs((a.average_miles_per_day || 0) - currentPace);
+        const diffB = Math.abs((b.average_miles_per_day || 0) - currentPace);
+        return diffA - diffB;
+      });
+  };
+
+  const getStreakLeaders = () => {
+    return runners
+      .filter(r => r.id !== currentRunnerId)
+      .sort((a, b) => (b.current_streak_days || 0) - (a.current_streak_days || 0))
+      .slice(0, 20);
   };
 
   const loadFeed = async (runnerId: string) => {
@@ -172,40 +209,40 @@ export default function SocialFeed() {
             <AvatarFallback>{runner.display_name[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-lg truncate">{runner.display_name}</h3>
-              {runner.streak_status === 'active' && (
-                <Badge variant="default" className="bg-primary">
-                  {runner.current_streak_days}d streak
+            <h3 className="font-semibold text-lg truncate">{runner.display_name}</h3>
+            {(runner.city || runner.state) && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                <MapPin className="h-3 w-3" />
+                <span className="truncate">
+                  {[runner.city, runner.state].filter(Boolean).join(", ")}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="outline" className="gap-1">
+                <Flame className="h-3 w-3" />
+                {runner.current_streak_days || 0} days
+              </Badge>
+              {runner.average_miles_per_day && (
+                <Badge variant="outline" className="gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  {runner.average_miles_per_day.toFixed(1)} mi/day
                 </Badge>
               )}
             </div>
-            {runner.city && runner.state && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                <MapPin className="h-3 w-3" />
-                <span>{runner.city}, {runner.state}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-              <span>{(runner.average_miles_per_day || 0).toFixed(1)} mi/day avg</span>
-              <span>{runner.all_time_run_count || 0} runs</span>
-            </div>
-            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-              {currentRunnerId && runner.id !== currentRunnerId && (
-                <>
-                  <FollowButton 
-                    targetRunnerId={runner.id}
-                    currentRunnerId={currentRunnerId} 
-                  />
-                  <AccountabilityPartnerButton
-                    targetRunnerId={runner.id}
-                    targetRunnerName={runner.display_name}
-                    currentRunnerId={currentRunnerId}
-                  />
-                </>
-              )}
-            </div>
           </div>
+        </div>
+        <div className="flex gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
+          {currentRunnerId && runner.id !== currentRunnerId && (
+            <>
+              <FollowButton targetRunnerId={runner.id} currentRunnerId={currentRunnerId} />
+              <AccountabilityPartnerButton 
+                targetRunnerId={runner.id} 
+                targetRunnerName={runner.display_name}
+                currentRunnerId={currentRunnerId}
+              />
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -432,14 +469,65 @@ export default function SocialFeed() {
           )}
         </TabsContent>
 
-        <TabsContent value="discover" className="mt-0">
+        <TabsContent value="discover" className="mt-0 space-y-4">
+          <Tabs value={discoverTab} onValueChange={(v) => setDiscoverTab(v as "nearby" | "similar" | "leaders")} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="nearby" className="flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5" />
+                <span className="text-xs sm:text-sm">Nearby</span>
+              </TabsTrigger>
+              <TabsTrigger value="similar" className="flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5" />
+                <span className="text-xs sm:text-sm">Similar Pace</span>
+              </TabsTrigger>
+              <TabsTrigger value="leaders" className="flex items-center gap-1.5">
+                <Award className="h-3.5 w-3.5" />
+                <span className="text-xs sm:text-sm">Leaders</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           {runnersLoading ? (
             <div className="py-8 flex items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+          ) : discoverTab === "nearby" ? (
+            getNearbyRunners().length === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center">
+                    <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50 text-muted-foreground" />
+                    <p className="text-muted-foreground">No nearby runners found in your area</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {getNearbyRunners().map((runner) => (
+                  <RunnerCard key={runner.id} runner={runner} />
+                ))}
+              </div>
+            )
+          ) : discoverTab === "similar" ? (
+            getSimilarPaceRunners().length === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center">
+                    <Zap className="h-12 w-12 mx-auto mb-4 opacity-50 text-muted-foreground" />
+                    <p className="text-muted-foreground">No runners with similar pace found</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {getSimilarPaceRunners().map((runner) => (
+                  <RunnerCard key={runner.id} runner={runner} />
+                ))}
+              </div>
+            )
           ) : (
             <div className="space-y-3">
-              {runners.map((runner) => (
+              {getStreakLeaders().map((runner) => (
                 <RunnerCard key={runner.id} runner={runner} />
               ))}
             </div>
