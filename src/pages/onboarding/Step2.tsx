@@ -17,7 +17,6 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fullSyncTriggered, setFullSyncTriggered] = useState(false);
 
   const handleEmailSubmit = async () => {
     if (!email || !email.includes('@')) {
@@ -39,27 +38,9 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
 
       if (settingsError) throw settingsError;
 
-      // Trigger full activity sync in background (don't wait for it)
-      if (!fullSyncTriggered) {
-        console.log('[Step2] Triggering full activity sync after email entry...');
-        setFullSyncTriggered(true);
-        
-        supabase.functions
-          .invoke('sync-strava', {
-            body: { runnerId: runner.id }
-          })
-          .then(({ error }) => {
-            if (error) {
-              console.error('[Step2] Full sync error:', error);
-            } else {
-              console.log('[Step2] Full activity sync triggered successfully');
-            }
-          });
-      }
-
-      toast.success('Email saved! Syncing your complete activity history...');
+      toast.success('Email saved!');
       
-      // Navigate to next step immediately (sync continues in background)
+      // Navigate to next step immediately
       setTimeout(() => navigate('../step-3'), 500);
     } catch (error) {
       console.error('[Step2] Error saving email:', error);
