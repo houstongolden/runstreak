@@ -193,11 +193,6 @@ Deno.serve(async (req) => {
       page++;
     }
 
-    // Calculate streaks - filter to 1+ mile runs only
-    const sortedActivities = allActivities
-      .filter((a: any) => (a.distance / 1609.34) >= 1.0)
-      .sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
-
     // Determine runner's timezone from coordinates
     let timezone = runner.timezone;
     if (!timezone && runner.latitude && runner.longitude) {
@@ -209,6 +204,11 @@ Deno.serve(async (req) => {
       timezone = 'America/New_York'; // Default fallback
       console.log('Using fallback timezone');
     }
+
+    // Calculate streaks - filter to 1+ mile runs only
+    const sortedActivities = allActivities
+      .filter((a: any) => (a.distance / 1609.34) >= 1.0)
+      .sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
     let currentStreakDays = 0;
     let currentStreakMiles = 0;
@@ -276,8 +276,6 @@ Deno.serve(async (req) => {
 
     const avgMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
     const streakStatus = currentStreakDays > 0 ? 'active' : 'broken';
-    // CRITICAL: Always use runner's timezone, never UTC
-    const lastActivityDate = sortedActivities.length > 0 ? convertToLocalDateStr(sortedActivities[0].start_date, timezone) : null;
 
     // Store daily activities with comprehensive data using runner's timezone
     const dailyActivitiesMap = new Map<string, any>();
@@ -621,6 +619,19 @@ Deno.serve(async (req) => {
           average_miles_per_day: streak.total_miles / streak.days_count
         });
     }
+
+    // Calculate last_activity_date from daily_activities with 1+ mile
+    const { data: recentActivities } = await supabase
+      .from('daily_activities')
+      .select('activity_date, distance')
+      .eq('runner_id', runnerId)
+      .gte('distance', 1.0)
+      .order('activity_date', { ascending: false })
+      .limit(1);
+    
+    const lastActivityDate = recentActivities && recentActivities.length > 0 
+      ? recentActivities[0].activity_date 
+      : null;
 
     // Update runner stats
     await supabase
