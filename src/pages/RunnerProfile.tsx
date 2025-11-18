@@ -41,6 +41,48 @@ import { OnboardingModal } from "@/components/OnboardingModal";
 import { StreakCountdown } from "@/components/StreakCountdown";
 import { RunnerStreakStatus } from "@/components/RunnerStreakStatus";
 
+// Map country names to ISO 3166-1 alpha-2 codes for flags
+const countryCodeMap: Record<string, string> = {
+  'United States': 'us',
+  'USA': 'us',
+  'United Kingdom': 'gb',
+  'UK': 'gb',
+  'Canada': 'ca',
+  'Australia': 'au',
+  'Germany': 'de',
+  'France': 'fr',
+  'Spain': 'es',
+  'Italy': 'it',
+  'Netherlands': 'nl',
+  'Belgium': 'be',
+  'Switzerland': 'ch',
+  'Austria': 'at',
+  'Sweden': 'se',
+  'Norway': 'no',
+  'Denmark': 'dk',
+  'Finland': 'fi',
+  'Poland': 'pl',
+  'Czech Republic': 'cz',
+  'Ireland': 'ie',
+  'Portugal': 'pt',
+  'Greece': 'gr',
+  'Japan': 'jp',
+  'South Korea': 'kr',
+  'China': 'cn',
+  'India': 'in',
+  'Brazil': 'br',
+  'Mexico': 'mx',
+  'Argentina': 'ar',
+  'Chile': 'cl',
+  'New Zealand': 'nz',
+  'South Africa': 'za',
+  'Singapore': 'sg',
+};
+
+const getCountryCode = (country: string): string => {
+  return countryCodeMap[country] || 'un';
+};
+
 export default function RunnerProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -368,8 +410,17 @@ export default function RunnerProfile() {
                   )}
                   
                   {(runner.city || runner.state || runner.country) && (
-                    <p className="text-sm text-muted-foreground mb-3 sm:mb-4 break-words">
-                      📍 {[runner.city, runner.state, runner.country].filter(Boolean).join(', ')}
+                    <p className="text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center sm:justify-start">
+                      {runner.country && (
+                        <img 
+                          src={`https://flagcdn.com/16x12/${getCountryCode(runner.country)}.png`}
+                          alt={runner.country}
+                          className="rounded-sm"
+                          width="16"
+                          height="12"
+                        />
+                      )}
+                      <span>{[runner.city, runner.state, runner.country].filter(Boolean).join(', ')}</span>
                     </p>
                   )}
 
