@@ -193,8 +193,9 @@ Deno.serve(async (req) => {
       page++;
     }
 
-    // Calculate streaks
+    // Calculate streaks - filter to 1+ mile runs only
     const sortedActivities = allActivities
+      .filter((a: any) => (a.distance / 1609.34) >= 1.0)
       .sort((a: any, b: any) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
 
     // Determine runner's timezone from coordinates
