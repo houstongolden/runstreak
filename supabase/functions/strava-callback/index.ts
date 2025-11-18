@@ -542,12 +542,13 @@ Deno.serve(async (req) => {
       })
       .catch(err => console.error('Background sync error:', err));
     
-    // Build redirect URL with session tokens
+    // Build redirect URL - session is already established via verifyOtp above
+    // No need to pass tokens in URL since session cookies are set
     const redirectUrl = isNewUser 
-      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&access_token=${verifyData.session.access_token}&refresh_token=${verifyData.session.refresh_token}`
-      : `${baseUrl}/runner/${savedRunner.id}?access_token=${verifyData.session.access_token}&refresh_token=${verifyData.session.refresh_token}`;
+      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}`
+      : `${baseUrl}/runner/${savedRunner.id}`;
     
-    console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user`);
+    console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user to ${redirectUrl}`);
 
     return new Response(null, {
       status: 302,
