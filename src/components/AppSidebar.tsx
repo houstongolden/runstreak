@@ -200,7 +200,7 @@ export function AppSidebar() {
           <>
             <div className="h-full overflow-y-auto">
               {/* Streak Countdown - Sticky within scroll */}
-              {currentRunner && <StreakCountdown lastActivityDate={currentRunner.last_activity_date} variant="sidebar" />}
+              {currentRunner && <StreakCountdown lastActivityDate={currentRunner.last_activity_date} timezone={currentRunner.timezone || 'America/Los_Angeles'} variant="sidebar" />}
               
               {/* Main Navigation */}
               <SidebarGroup>

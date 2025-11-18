@@ -5,9 +5,10 @@ import { Card } from "@/components/ui/card";
 interface StreakCountdownProps {
   lastActivityDate?: string | null;
   variant?: "sidebar" | "profile";
+  timezone: string;
 }
 
-export function StreakCountdown({ lastActivityDate, variant = "profile" }: StreakCountdownProps) {
+export function StreakCountdown({ lastActivityDate, variant = "profile", timezone }: StreakCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{
     hours: number;
     minutes: number;
@@ -17,11 +18,15 @@ export function StreakCountdown({ lastActivityDate, variant = "profile" }: Strea
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date();
-      const midnight = new Date();
+      // Get current time in the runner's timezone
+      const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
+      const runnerTime = new Date(nowInRunnerTz);
+      
+      // Calculate midnight in runner's timezone
+      const midnight = new Date(runnerTime);
       midnight.setHours(24, 0, 0, 0);
       
-      const difference = midnight.getTime() - now.getTime();
+      const difference = midnight.getTime() - runnerTime.getTime();
       
       if (difference > 0) {
         setTimeLeft({
@@ -37,18 +42,18 @@ export function StreakCountdown({ lastActivityDate, variant = "profile" }: Strea
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [timezone]);
 
-  // Check if user has run today in their local timezone
-  // Create date strings using local date components to match database format
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
+  // Calculate "today" in the runner's specific timezone
+  const nowInRunnerTz = new Date().toLocaleString('en-US', { timeZone: timezone });
+  const runnerTime = new Date(nowInRunnerTz);
+  const year = runnerTime.getFullYear();
+  const month = String(runnerTime.getMonth() + 1).padStart(2, '0');
+  const day = String(runnerTime.getDate()).padStart(2, '0');
   const todayStr = `${year}-${month}-${day}`;
   
-  // Calculate yesterday in local timezone
-  const yesterdayDate = new Date();
+  // Calculate yesterday in runner's timezone
+  const yesterdayDate = new Date(runnerTime);
   yesterdayDate.setDate(yesterdayDate.getDate() - 1);
   const yesterdayYear = yesterdayDate.getFullYear();
   const yesterdayMonth = String(yesterdayDate.getMonth() + 1).padStart(2, '0');
@@ -59,16 +64,6 @@ export function StreakCountdown({ lastActivityDate, variant = "profile" }: Strea
   const hasRunYesterday = lastActivityDate === yesterdayStr;
   
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours
-  
-  // Debug logging
-  console.log('StreakCountdown Debug:', {
-    lastActivityDate,
-    todayStr,
-    yesterdayStr,
-    hasRunToday,
-    hasRunYesterday,
-    now: now.toString()
-  });
 
   if (variant === "sidebar") {
     return (
