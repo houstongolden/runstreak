@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
 
 export function StreakCountdownBanner() {
   const { runnerId } = useAuth();
@@ -13,7 +12,6 @@ export function StreakCountdownBanner() {
     total: number;
   }>({ hours: 0, minutes: 0, seconds: 0, total: 0 });
   const [lastActivityDate, setLastActivityDate] = useState<string | null>(null);
-  const [runnerTimezone, setRunnerTimezone] = useState<string>('America/Los_Angeles');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,13 +24,12 @@ export function StreakCountdownBanner() {
       try {
         const { data, error } = await supabase
           .from('runners')
-          .select('last_activity_date, timezone')
+          .select('last_activity_date')
           .eq('id', runnerId)
           .single();
 
         if (error) throw error;
         setLastActivityDate(data?.last_activity_date || null);
-        setRunnerTimezone(data?.timezone || 'America/Los_Angeles');
       } catch (error) {
         console.error('Error fetching runner data:', error);
       } finally {
@@ -45,14 +42,11 @@ export function StreakCountdownBanner() {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      // Get current time in runner's timezone
-      const nowInTimezone = toZonedTime(new Date(), runnerTimezone);
+      const now = new Date();
+      const midnight = new Date();
+      midnight.setHours(24, 0, 0, 0);
       
-      // Calculate midnight in runner's timezone
-      const midnightInTimezone = new Date(nowInTimezone);
-      midnightInTimezone.setHours(24, 0, 0, 0);
-      
-      const difference = midnightInTimezone.getTime() - nowInTimezone.getTime();
+      const difference = midnight.getTime() - now.getTime();
       
       if (difference > 0) {
         setTimeLeft({
@@ -68,10 +62,15 @@ export function StreakCountdownBanner() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [runnerTimezone]);
+  }, []);
 
-  // Check if user has run today in THEIR timezone
-  const todayStr = formatInTimeZone(new Date(), runnerTimezone, 'yyyy-MM-dd');
+  // Check if user has run today - using same logic as working StreakCountdown
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const todayStr = `${year}-${month}-${day}`;
+  
   const hasRunToday = lastActivityDate === todayStr;
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours
 
