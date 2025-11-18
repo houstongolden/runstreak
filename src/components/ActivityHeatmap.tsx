@@ -240,13 +240,10 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                             <div className="text-sm">
                               <div className="font-semibold">
                                 {(() => {
+                                  // Parse date string directly without Date object conversion
                                   const [year, month, dayNum] = day.dateStr.split('-');
-                                  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(dayNum));
-                                  return date.toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  });
+                                  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                                  return `${monthNames[parseInt(month) - 1]} ${parseInt(dayNum)}, ${year}`;
                                 })()}
                               </div>
                               <div>
