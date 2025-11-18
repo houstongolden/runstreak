@@ -112,26 +112,51 @@ export default function RunnerProfile() {
     }
   }, [searchParams, isOwnProfile]);
 
-  // Trigger confetti when arriving from completed onboarding
+  // Trigger fire animation when arriving from completed onboarding
   useEffect(() => {
     if (searchParams.get('onboarding') === 'complete' && isOwnProfile) {
       const duration = 3000;
       const end = Date.now() + duration;
       
+      const fireColors = ['#FF4500', '#FF6B35', '#FF8C00', '#FFA500', '#FFD700', '#FFFF00'];
+      
       const frame = () => {
+        // Fire bursts from bottom center
         confetti({
-          particleCount: 7,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0, y: 0.6 },
-          colors: ['#FF6B35', '#F7931E', '#FDC830']
+          particleCount: 12,
+          angle: 90,
+          spread: 45,
+          origin: { x: 0.5, y: 1 },
+          colors: fireColors,
+          startVelocity: 55,
+          gravity: 0.8,
+          scalar: 1.2,
+          ticks: 100,
+          shapes: ['circle']
+        });
+        
+        // Additional fire particles from sides
+        confetti({
+          particleCount: 8,
+          angle: 70,
+          spread: 35,
+          origin: { x: 0.3, y: 1 },
+          colors: fireColors,
+          startVelocity: 45,
+          gravity: 0.9,
+          scalar: 1.1,
+          ticks: 90
         });
         confetti({
-          particleCount: 7,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1, y: 0.6 },
-          colors: ['#FF6B35', '#F7931E', '#FDC830']
+          particleCount: 8,
+          angle: 110,
+          spread: 35,
+          origin: { x: 0.7, y: 1 },
+          colors: fireColors,
+          startVelocity: 45,
+          gravity: 0.9,
+          scalar: 1.1,
+          ticks: 90
         });
         
         if (Date.now() < end) {
