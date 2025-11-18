@@ -92,6 +92,7 @@ export default function RunnerProfile() {
   const [runner, setRunner] = useState<Runner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isBackgroundSyncing, setIsBackgroundSyncing] = useState(false);
   
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -233,6 +234,18 @@ export default function RunnerProfile() {
 
         setRunner(data as Runner);
         const runnerId = data.id;
+        
+        // Check if background sync might still be running
+        const { count: activityCount } = await supabase
+          .from("daily_activities")
+          .select("*", { count: "exact", head: true })
+          .eq("runner_id", runnerId);
+        
+        // If there are few/no activities but the user has runs in Strava, sync is likely still running
+        if ((activityCount || 0) < 5 && data.current_streak_days > 0) {
+          setIsBackgroundSyncing(true);
+          console.log('Background sync likely still running, will poll for updates');
+        }
 
         // Now fetch follow counts using the actual runner ID
         try {
@@ -279,6 +292,26 @@ export default function RunnerProfile() {
 
     fetchRunnerAndStats();
   }, [id]);
+  
+  // Poll for activity updates when background sync is running
+  useEffect(() => {
+    if (!isBackgroundSyncing || !runner) return;
+    
+    const pollInterval = setInterval(async () => {
+      const { count: activityCount } = await supabase
+        .from("daily_activities")
+        .select("*", { count: "exact", head: true })
+        .eq("runner_id", runner.id);
+      
+      // If we now have activities, sync is complete
+      if ((activityCount || 0) >= 5) {
+        setIsBackgroundSyncing(false);
+        window.location.reload(); // Refresh to show all data
+      }
+    }, 5000); // Poll every 5 seconds
+    
+    return () => clearInterval(pollInterval);
+  }, [isBackgroundSyncing, runner]);
 
   const handleSync = async () => {
     if (!id) return;
@@ -404,11 +437,13 @@ export default function RunnerProfile() {
                 <Button 
                   variant="outline" 
                   onClick={handleSync}
-                  disabled={isSyncing}
+                  disabled={isSyncing || isBackgroundSyncing}
                   className="gap-2"
                 >
-                  <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span>{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
+                  <RefreshCw className={`h-4 w-4 ${(isSyncing || isBackgroundSyncing) ? 'animate-spin' : ''}`} />
+                  <span>
+                    {isSyncing ? 'Syncing...' : isBackgroundSyncing ? 'Syncing...' : 'Sync Strava'}
+                  </span>
                 </Button>
                 <Button 
                   variant="outline" 

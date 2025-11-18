@@ -98,12 +98,12 @@ export default function Onboarding() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Step content */}
         <Routes>
-          <Route path="/step-1" element={<Step1 runner={runner} leaderboardRank={leaderboardRank} totalRunners={totalRunners} />} />
-          <Route path="/step-2" element={<Step2 runner={runner} leaderboardRank={leaderboardRank} totalRunners={totalRunners} />} />
-          <Route path="/step-3" element={<Step3 runner={runner} />} />
-          <Route path="/step-4" element={<Step4 runner={runner} />} />
-          <Route path="/step-5" element={<Step5 runner={runner} />} />
-          <Route path="/step-6" element={<Step6 runner={runner} />} />
+          <Route path="step-1" element={<Step1 runner={runner} leaderboardRank={leaderboardRank} totalRunners={totalRunners} />} />
+          <Route path="step-2" element={<Step2 runner={runner} leaderboardRank={leaderboardRank} totalRunners={totalRunners} />} />
+          <Route path="step-3" element={<Step3 runner={runner} />} />
+          <Route path="step-4" element={<Step4 runner={runner} />} />
+          <Route path="step-5" element={<Step5 runner={runner} />} />
+          <Route path="step-6" element={<Step6 runner={runner} />} />
         </Routes>
       </div>
     </div>

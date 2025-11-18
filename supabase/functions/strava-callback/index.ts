@@ -459,6 +459,9 @@ Deno.serve(async (req) => {
 
     console.log('Runner data saved successfully');
     
+    // Determine if this is a new user
+    const isNewUser = !existingRunner;
+    
     // Create auth session for the user
     const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
@@ -469,74 +472,21 @@ Deno.serve(async (req) => {
       console.error('Error generating session:', sessionError);
       throw new Error('Failed to create session');
     }
-
-    // Save streak history
-    if (allStreaks.length > 0) {
-      // Delete existing streaks for this runner to avoid duplicates
-      const { error: deleteError } = await supabase
-        .from('streak_history')
-        .delete()
-        .eq('runner_id', savedRunner.id);
-
-      if (deleteError) {
-        console.error('Error deleting old streak history:', deleteError);
-      }
-
-      // Insert all streaks
-      const streakRecords = allStreaks.map(streak => ({
-        runner_id: savedRunner.id,
-        ...streak
-      }));
-
-      const { error: streakError } = await supabase
-        .from('streak_history')
-        .insert(streakRecords);
-
-      if (streakError) {
-        console.error('Error saving streak history:', streakError);
-      } else {
-        console.log(`Saved ${allStreaks.length} streaks to history`);
-      }
-    }
-
-    // Check for existing user_settings to preserve user_email and email
-    const { data: existingSettings } = await supabase
-      .from('user_settings')
-      .select('email, user_email')
-      .eq('runner_id', savedRunner.id)
-      .maybeSingle();
     
-    const hasRealEmail = !!athleteProfile.email;
-    // Only update email if Strava provides one, otherwise keep existing
-    const settingsEmailToStore = hasRealEmail 
-      ? athleteProfile.email 
-      : (existingSettings?.email || null);
+    console.log('Session created successfully');
     
-    console.log(`User email for settings: ${settingsEmailToStore} (from Strava: ${hasRealEmail})`);
+    // Start background sync for full activity history (don't wait for it)
+    console.log('Starting background sync for full activity history...');
+    fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ runnerId: savedRunner.id })
+    }).catch(err => console.error('Background sync error:', err));
     
-    // Create or update user_settings with email, preserving user_email if it exists
-    const { error: settingsError } = await supabase
-      .from('user_settings')
-      .upsert({
-        runner_id: savedRunner.id,
-        email: settingsEmailToStore,
-        user_email: existingSettings?.user_email || null, // Preserve user-provided email
-        ai_coach_enabled: true,
-        ai_coach_style: 'motivational',
-        ai_coach_frequency: 'daily',
-        ai_coach_time: '09:00'
-      }, {
-        onConflict: 'runner_id'
-      });
-
-    if (settingsError) {
-      console.error('Error creating user settings:', settingsError);
-    } else {
-      console.log('User settings created');
-    }
-    
-    // Determine redirect URL based on whether this is a new or returning user
-    const isNewUser = !existingRunner;
+    // Get redirect URL
     const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
     
     // Extract access and refresh tokens from the magiclink
