@@ -91,7 +91,11 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               {activities.map((activity) => (
                 <TableRow key={activity.id}>
                   <TableCell className="text-sm py-2 font-medium whitespace-nowrap">
-                    {format(new Date(activity.activity_date), "MMM d, yy")}
+                    {(() => {
+                      const [year, month, day] = activity.activity_date.split('-');
+                      const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                      return format(localDate, "MMM d, yy");
+                    })()}
                   </TableCell>
                   <TableCell className="text-sm py-2">
                     {activity.run_count}
