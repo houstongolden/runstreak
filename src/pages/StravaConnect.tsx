@@ -14,11 +14,14 @@ export default function StravaConnect() {
     const stravaStatus = searchParams.get('strava');
     const message = searchParams.get('message');
     const runnerId = searchParams.get('runnerId');
+    const isNewUser = searchParams.get('welcome') === 'true';
     
     if (stravaStatus === 'success') {
       if (runnerId) {
         toast.success('Successfully connected to Strava!');
-        setTimeout(() => navigate(`/runner/${runnerId}`), 1500);
+        // New users go to onboarding, existing users go to profile
+        const destination = isNewUser ? `/onboarding?runnerId=${runnerId}` : `/runner/${runnerId}`;
+        setTimeout(() => navigate(destination), 1500);
       }
     } else if (stravaStatus === 'error') {
       toast.error(`Failed to connect: ${message || 'Unknown error'}`);
