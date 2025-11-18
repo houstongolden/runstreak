@@ -465,24 +465,41 @@ Deno.serve(async (req) => {
     // Get redirect base URL
     const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
     
-    // Create auth session for the user using admin API
-    // This creates a session directly without needing email confirmation
-    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
+    // Create a session token directly for the user
+    // Generate a session using the service role to bypass email verification
+    const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email: userEmail,
-      options: {
-        redirectTo: isNewUser 
-          ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}`
-          : `${baseUrl}/runner/${savedRunner.id}`
-      }
     });
-    
-    if (sessionError || !sessionData?.properties) {
-      console.error('Error generating session:', sessionError);
+
+    if (linkError || !linkData) {
+      console.error('Error generating session link:', linkError);
+      throw new Error('Failed to generate session');
+    }
+
+    // Extract access and refresh tokens from the generated link
+    // The action_link contains the auth URL with the token
+    const actionLink = linkData.properties.action_link;
+    const linkUrl = new URL(actionLink);
+    const hashToken = linkUrl.searchParams.get('token');
+
+    if (!hashToken) {
+      console.error('No token in generated link');
+      throw new Error('Failed to extract session token');
+    }
+
+    // Exchange the token for an actual session
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: hashToken,
+      type: 'magiclink',
+    });
+
+    if (verifyError || !verifyData.session) {
+      console.error('Error verifying token:', verifyError);
       throw new Error('Failed to create session');
     }
     
-    console.log('Session link generated successfully');
+    console.log('Session created successfully');
     
     // Start TWO-STAGE background sync for activity history:
     // Stage 1: Quick sync (first 200 activities) - completes in 5-10 seconds
@@ -519,20 +536,10 @@ Deno.serve(async (req) => {
       })
       .catch(err => console.error('Background sync error:', err));
     
-    // Extract the hashed token from the action_link for OTP verification
-    const actionUrl = new URL(sessionData.properties.action_link);
-    const token = actionUrl.searchParams.get('token');
-    const type = actionUrl.searchParams.get('type');
-    
-    if (!token) {
-      console.error('No token in magic link');
-      throw new Error('Failed to extract session token');
-    }
-    
-    // Build redirect URL with token for OTP verification
+    // Build redirect URL with session tokens
     const redirectUrl = isNewUser 
-      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&token=${token}&type=${type}`
-      : `${baseUrl}/runner/${savedRunner.id}?token=${token}&type=${type}`;
+      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&access_token=${verifyData.session.access_token}&refresh_token=${verifyData.session.refresh_token}`
+      : `${baseUrl}/runner/${savedRunner.id}?access_token=${verifyData.session.access_token}&refresh_token=${verifyData.session.refresh_token}`;
     
     console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user`);
 

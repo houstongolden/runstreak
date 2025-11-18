@@ -21,8 +21,8 @@ export default function Onboarding() {
 
   useEffect(() => {
     const runnerId = searchParams.get('runnerId');
-    const token = searchParams.get('token');
-    const type = searchParams.get('type');
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
     
     if (!runnerId) {
       toast.error('Missing runner information');
@@ -30,17 +30,17 @@ export default function Onboarding() {
       return;
     }
 
-    // Set session from token if provided
-    if (token && type) {
-      supabase.auth.verifyOtp({
-        token_hash: token,
-        type: type as any,
+    // Set session from tokens if provided
+    if (accessToken && refreshToken) {
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
       }).then(({ error }) => {
         if (error) {
-          console.error('[Onboarding] Failed to verify token:', error);
+          console.error('[Onboarding] Failed to set session:', error);
           toast.error('Authentication failed');
         } else {
-          console.log('[Onboarding] Session established from token');
+          console.log('[Onboarding] Session established successfully');
         }
       });
     }
