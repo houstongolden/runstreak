@@ -17,6 +17,39 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
   const [isLoading, setIsLoading] = useState(runner.current_streak_days === 0);
   const [currentRunner, setCurrentRunner] = useState(runner);
   const [currentRank, setCurrentRank] = useState(leaderboardRank);
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [mockupIndex, setMockupIndex] = useState(0);
+
+  const loadingMessages = [
+    "Scanning your activities...",
+    "Crunching the numbers...",
+    "Analyzing your position on the leaderboard...",
+    "Calculating your streak...",
+    "Comparing with other runners...",
+    "Almost there..."
+  ];
+
+  // Rotate loading messages
+  useEffect(() => {
+    if (!isLoading) return;
+    
+    const messageInterval = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 6000); // Change message every 6 seconds
+
+    return () => clearInterval(messageInterval);
+  }, [isLoading, loadingMessages.length]);
+
+  // Rotate mockup displays
+  useEffect(() => {
+    if (!isLoading) return;
+    
+    const mockupInterval = setInterval(() => {
+      setMockupIndex((prev) => (prev + 1) % 2); // Toggle between 2 mockups
+    }, 8000); // Change mockup every 8 seconds
+
+    return () => clearInterval(mockupInterval);
+  }, [isLoading]);
 
   useEffect(() => {
     // Trigger confetti on mount (only if data is loaded)
@@ -110,19 +143,66 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
               <p className="text-xl font-bold text-foreground font-instrument">{currentRunner.display_name}</p>
               
               {isLoading ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-3">
-                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                    <div className="text-left">
-                      <p className="text-lg font-semibold text-foreground font-instrument">
-                        Calculating your rank...
-                      </p>
-                      <p className="text-sm text-muted-foreground font-instrument">
-                        Syncing your Strava activities
-                      </p>
+                <div className="space-y-4">
+                  {/* Animated Message */}
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-foreground font-instrument animate-fade-in">
+                      {loadingMessages[messageIndex]}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-instrument mt-1">
+                      This could take 2 seconds to 2 minutes depending on your activity history
+                    </p>
+                  </div>
+
+                  {/* Visual Mockup with Scanning Animation */}
+                  <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/30 p-4 h-48">
+                    {mockupIndex === 0 ? (
+                      // Activity Heatmap Mockup
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground font-instrument mb-3">Activity Map</p>
+                        <div className="grid grid-cols-7 gap-1.5">
+                          {Array.from({ length: 35 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={`h-6 w-6 rounded ${
+                                i % 4 === 0 ? 'bg-primary/60' : 
+                                i % 3 === 0 ? 'bg-primary/40' : 
+                                i % 2 === 0 ? 'bg-primary/20' : 
+                                'bg-muted'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      // Leaderboard Mockup
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground font-instrument mb-3">Leaderboard Preview</p>
+                        {[1, 2, 3, 4, 5].map((rank) => (
+                          <div key={rank} className="flex items-center gap-3 p-2 bg-muted/50 rounded">
+                            <span className="text-xs font-bold text-muted-foreground w-6">#{rank}</span>
+                            <div className="h-6 w-6 rounded-full bg-primary/40" />
+                            <div className="h-3 flex-1 bg-muted rounded" />
+                            <div className="h-3 w-12 bg-primary/60 rounded" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Scanning Bar Animation */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="h-1 w-full bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-[scan_2s_ease-in-out_infinite]" 
+                           style={{ 
+                             animation: 'scan 2s ease-in-out infinite',
+                             position: 'absolute',
+                             top: '0',
+                           }} 
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center justify-center gap-2 mt-2">
+
+                  {/* Progress Dots */}
+                  <div className="flex items-center justify-center gap-2">
                     <div className="h-2 w-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
                     <div className="h-2 w-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
                     <div className="h-2 w-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
