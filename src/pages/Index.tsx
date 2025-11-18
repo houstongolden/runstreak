@@ -296,7 +296,7 @@ const Index = () => {
         <div className="py-4 px-4">
           <div className="flex items-center justify-center gap-2 text-muted-foreground">
             <svg
-              className="h-5 w-5"
+              className="h-5 w-5 sm:h-5 sm:w-5 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

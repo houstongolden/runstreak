@@ -23,6 +23,14 @@ export const AdvertiseModal = ({ open, onOpenChange }: AdvertiseModalProps) => {
             Reach thousands of dedicated runners maintaining daily streaks
           </DialogDescription>
         </DialogHeader>
+        
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => window.location.href = '/ad-payment-success?test=true'}
+        >
+          Test mode - Skip to ad setup
+        </Button>
 
         <div className="space-y-4 py-3">
           <div>
