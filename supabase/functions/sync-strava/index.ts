@@ -213,8 +213,8 @@ Deno.serve(async (req) => {
     let currentStreakMiles = 0;
     let longestStreak = 0;
     let tempStreak = 0;
-    let lastDate: Date | null = null;
-    let streakStartDate: Date | null = null;
+    let lastDate: string | null = null;
+    let streakStartDate: string | null = null;
     const activityDates = new Set<string>();
 
     // Convert all activities to runner's local timezone dates
@@ -243,8 +243,8 @@ Deno.serve(async (req) => {
         
         console.log(`Streak active: Last run was ${daysDiff} days ago in timezone ${timezone}`);
         tempStreak = 1;
-        if (!streakStartDate) streakStartDate = new Date(dateStr);
-        lastDate = new Date(dateStr);
+        if (!streakStartDate) streakStartDate = dateStr;
+        lastDate = dateStr;
       } else {
         const prevDateStr = sortedDates[i - 1];
         const prevDate = new Date(prevDateStr);
@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
         
         if (daysDiff === 1) {
           tempStreak++;
-          streakStartDate = new Date(dateStr);
+          streakStartDate = dateStr;
         } else {
           break;
         }
@@ -263,23 +263,20 @@ Deno.serve(async (req) => {
     currentStreakDays = tempStreak;
     longestStreak = Math.max(runner.longest_streak_ever || 0, currentStreakDays);
 
-    // Calculate current streak miles
+    // Calculate current streak miles using timezone-aware date strings
     if (streakStartDate && lastDate) {
       const streakActivities = sortedActivities.filter((activity: any) => {
-        const activityDate = new Date(activity.start_date);
-        activityDate.setHours(0, 0, 0, 0);
-        const streakStart = new Date(streakStartDate);
-        streakStart.setHours(0, 0, 0, 0);
-        const streakEnd = new Date(lastDate);
-        streakEnd.setHours(0, 0, 0, 0);
-        return activityDate >= streakStart && activityDate <= streakEnd;
+        const activityDateStr = convertToLocalDateStr(activity.start_date, timezone);
+        // String comparison works for YYYY-MM-DD format
+        return activityDateStr >= streakStartDate && activityDateStr <= lastDate;
       });
       currentStreakMiles = streakActivities.reduce((sum: number, a: any) => sum + (a.distance / 1609.34), 0);
     }
 
     const avgMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
     const streakStatus = currentStreakDays > 0 ? 'active' : 'broken';
-    const lastActivityDate = sortedActivities.length > 0 ? new Date(sortedActivities[0].start_date).toISOString().split('T')[0] : null;
+    // CRITICAL: Always use runner's timezone, never UTC
+    const lastActivityDate = sortedActivities.length > 0 ? convertToLocalDateStr(sortedActivities[0].start_date, timezone) : null;
 
     // Store daily activities with comprehensive data using runner's timezone
     const dailyActivitiesMap = new Map<string, any>();
@@ -522,8 +519,8 @@ Deno.serve(async (req) => {
     // Use only dates with 1+ mile for streak calculation
     const sortedActivityDates = Array.from(activityDates).sort();
     let currentHistoricalStreak: {
-      start: Date;
-      end: Date;
+      start: string;
+      end: string;
       dates: Set<string>;
     } | null = null;
     
@@ -534,8 +531,8 @@ Deno.serve(async (req) => {
       if (!currentHistoricalStreak) {
         // Start new streak
         currentHistoricalStreak = {
-          start: currentDate,
-          end: currentDate,
+          start: dateStr,
+          end: dateStr,
           dates: new Set([dateStr])
         };
       } else {
@@ -545,16 +542,14 @@ Deno.serve(async (req) => {
         
         if (daysDiff === 1) {
           // Continue streak
-          currentHistoricalStreak.end = currentDate;
+          currentHistoricalStreak.end = dateStr;
           currentHistoricalStreak.dates.add(dateStr);
         } else {
           // Streak broken, save the previous one if it's 5+ days
           if (currentHistoricalStreak.dates.size >= 5) {
+            // Filter activities using timezone-aware dates
             const streakActivities = allActivities.filter((a: any) => {
-              const year = new Date(a.start_date).getFullYear();
-              const month = String(new Date(a.start_date).getMonth() + 1).padStart(2, '0');
-              const day = String(new Date(a.start_date).getDate()).padStart(2, '0');
-              const aDate = `${year}-${month}-${day}`;
+              const aDate = convertToLocalDateStr(a.start_date, timezone);
               return currentHistoricalStreak!.dates.has(aDate);
             });
             
@@ -564,8 +559,8 @@ Deno.serve(async (req) => {
             const totalRuns = streakActivities.length;
             
             historicalStreaks.push({
-              start_date: currentHistoricalStreak.start.toISOString().split('T')[0],
-              end_date: currentHistoricalStreak.end.toISOString().split('T')[0],
+              start_date: currentHistoricalStreak.start,
+              end_date: currentHistoricalStreak.end,
               days_count: currentHistoricalStreak.dates.size,
               total_miles: totalMiles,
               total_runs: totalRuns
@@ -574,8 +569,8 @@ Deno.serve(async (req) => {
           
           // Start new streak
           currentHistoricalStreak = {
-            start: currentDate,
-            end: currentDate,
+            start: dateStr,
+            end: dateStr,
             dates: new Set([dateStr])
           };
         }
@@ -584,11 +579,9 @@ Deno.serve(async (req) => {
     
     // Don't forget the last streak
     if (currentHistoricalStreak && currentHistoricalStreak.dates.size >= 5) {
+      // Filter activities using timezone-aware dates
       const streakActivities = allActivities.filter((a: any) => {
-        const year = new Date(a.start_date).getFullYear();
-        const month = String(new Date(a.start_date).getMonth() + 1).padStart(2, '0');
-        const day = String(new Date(a.start_date).getDate()).padStart(2, '0');
-        const aDate = `${year}-${month}-${day}`;
+        const aDate = convertToLocalDateStr(a.start_date, timezone);
         return currentHistoricalStreak!.dates.has(aDate);
       });
       
@@ -598,8 +591,8 @@ Deno.serve(async (req) => {
       const totalRuns = streakActivities.length;
       
       historicalStreaks.push({
-        start_date: currentHistoricalStreak.start.toISOString().split('T')[0],
-        end_date: currentHistoricalStreak.end.toISOString().split('T')[0],
+        start_date: currentHistoricalStreak.start,
+        end_date: currentHistoricalStreak.end,
         days_count: currentHistoricalStreak.dates.size,
         total_miles: totalMiles,
         total_runs: totalRuns
@@ -640,7 +633,7 @@ Deno.serve(async (req) => {
         average_miles_per_day: avgMilesPerDay,
         streak_status: streakStatus,
         last_activity_date: lastActivityDate,
-        streak_start_date: streakStartDate?.toISOString().split('T')[0],
+        streak_start_date: streakStartDate,
         days_on_streak_last_30: daysOnStreak30,
         days_on_streak_last_60: daysOnStreak60,
         days_on_streak_last_90: daysOnStreak90,
