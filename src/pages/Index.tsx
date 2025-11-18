@@ -309,7 +309,7 @@ const Index = () => {
               />
             </svg>
             <p className="text-sm">
-              All streak and mileage data are verified through Strava API integration. Data is updated daily.
+              All streak and mileage data are verified through Strava API integration. Data syncs automatically within minutes of completing your run.
             </p>
           </div>
         </div>
