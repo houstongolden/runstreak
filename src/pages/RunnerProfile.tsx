@@ -40,6 +40,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { StreakCountdown } from "@/components/StreakCountdown";
 import { RunnerStreakStatus } from "@/components/RunnerStreakStatus";
+import { Footer } from "@/components/Footer";
 
 // Map country names to ISO 3166-1 alpha-2 codes for flags
 const countryCodeMap: Record<string, string> = {
@@ -571,6 +572,8 @@ export default function RunnerProfile() {
         </Tabs>
 
       </div>
+      
+      <Footer />
     </div>
   );
 }
