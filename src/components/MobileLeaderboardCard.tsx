@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Flame } from "lucide-react";
+import { RunnerStreakStatus } from "./RunnerStreakStatus";
 
 interface MobileLeaderboardCardProps {
   runner: Runner;
@@ -37,6 +38,14 @@ export function MobileLeaderboardCard({ runner, rank }: MobileLeaderboardCardPro
               @{runner.strava_username}
             </div>
           </div>
+        </div>
+        
+        <div className="mb-3">
+          <RunnerStreakStatus 
+            lastActivityDate={runner.last_activity_date}
+            timezone={runner.timezone || 'America/Los_Angeles'}
+            country={runner.country}
+          />
         </div>
         
         <div className="grid grid-cols-3 gap-2 text-center">

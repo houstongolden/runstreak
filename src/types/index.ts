@@ -28,6 +28,7 @@ export interface Runner {
   city?: string | null;
   state?: string | null;
   country?: string | null;
+  timezone?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   ai_analysis?: { insights: { title: string; description: string }[] } | null;

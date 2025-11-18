@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Flame } from "lucide-react";
 import { MobileLeaderboardCard } from "./MobileLeaderboardCard";
+import { RunnerStreakStatus } from "./RunnerStreakStatus";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LeaderboardTableProps {
@@ -134,8 +135,8 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
             <TableHead className="w-[80px]">Rank</TableHead>
             <TableHead>Runner</TableHead>
             <TableHead className="text-right">Streak Days</TableHead>
+            <TableHead className="text-right">Status</TableHead>
             <TableHead className="text-right">Total Miles</TableHead>
-            <TableHead className="text-right">Avg Miles/Day</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -176,18 +177,18 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
                   </Badge>
                 </Link>
               </TableCell>
+              <TableCell className="text-right">
+                <RunnerStreakStatus 
+                  lastActivityDate={runner.last_activity_date}
+                  timezone={runner.timezone || 'America/Los_Angeles'}
+                  country={runner.country}
+                />
+              </TableCell>
               <TableCell className="text-right font-medium">
                 <Link to={`/runner/${runner.id}`}>
                   {runner.current_streak_days > 0 
                     ? `${runner.current_streak_miles.toFixed(1)} mi` 
                     : `${runner.ytd_distance.toFixed(1)} mi (YTD)`}
-                </Link>
-              </TableCell>
-              <TableCell className="text-right text-muted-foreground">
-                <Link to={`/runner/${runner.id}`}>
-                  {runner.current_streak_days > 0 
-                    ? `${runner.average_miles_per_day.toFixed(1)} mi` 
-                    : `${(runner.ytd_distance / Math.max(new Date().getDate(), 1)).toFixed(1)} mi (YTD)`}
                 </Link>
               </TableCell>
             </TableRow>
