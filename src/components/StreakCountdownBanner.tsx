@@ -110,55 +110,51 @@ export function StreakCountdownBanner() {
           : 'bg-orange-500/10 border-orange-500/20'
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-8 lg:px-16 xl:px-24">
-        <div className="flex items-center justify-center gap-4 py-2.5">
+      <div className="container mx-auto px-3 sm:px-8 lg:px-16 xl:px-24">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 py-2">
           <div className="flex items-center gap-2">
             {isUrgent ? (
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
             ) : (
-              <Clock className="h-5 w-5 text-orange-500" />
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
             )}
-            <span className="text-sm font-semibold">
+            <span className="text-xs sm:text-sm font-semibold">
               Time to Save Your Streak
             </span>
           </div>
           
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <div className="flex items-baseline gap-0.5">
-              <span className={`text-2xl font-bold tabular-nums ${
+              <span className={`text-xl sm:text-2xl font-bold tabular-nums ${
                 isUrgent ? 'text-destructive' : 'text-orange-500'
               }`}>
                 {String(timeLeft.hours).padStart(2, '0')}
               </span>
-              <span className="text-xs text-muted-foreground font-medium">Hours</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">h</span>
             </div>
             
-            <span className="text-muted-foreground">:</span>
+            <span className="text-muted-foreground text-sm">:</span>
             
             <div className="flex items-baseline gap-0.5">
-              <span className={`text-2xl font-bold tabular-nums ${
+              <span className={`text-xl sm:text-2xl font-bold tabular-nums ${
                 isUrgent ? 'text-destructive' : 'text-orange-500'
               }`}>
                 {String(timeLeft.minutes).padStart(2, '0')}
               </span>
-              <span className="text-xs text-muted-foreground font-medium">Minutes</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">m</span>
             </div>
             
-            <span className="text-muted-foreground">:</span>
+            <span className="text-muted-foreground text-sm">:</span>
             
             <div className="flex items-baseline gap-0.5">
-              <span className={`text-2xl font-bold tabular-nums ${
+              <span className={`text-xl sm:text-2xl font-bold tabular-nums ${
                 isUrgent ? 'text-destructive' : 'text-orange-500'
               }`}>
                 {String(timeLeft.seconds).padStart(2, '0')}
               </span>
-              <span className="text-xs text-muted-foreground font-medium">Seconds</span>
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-medium">s</span>
             </div>
           </div>
-
-          <span className="text-sm text-muted-foreground hidden sm:inline">
-            Run at least 1 mile before midnight to keep your streak alive
-          </span>
         </div>
       </div>
     </div>
