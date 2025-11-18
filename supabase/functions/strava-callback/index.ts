@@ -462,18 +462,27 @@ Deno.serve(async (req) => {
     // Determine if this is a new user
     const isNewUser = !existingRunner;
     
-    // Create auth session for the user
+    // Get redirect base URL
+    const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
+    
+    // Create auth session for the user using admin API
+    // This creates a session directly without needing email confirmation
     const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email: userEmail,
+      options: {
+        redirectTo: isNewUser 
+          ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}`
+          : `${baseUrl}/runner/${savedRunner.id}`
+      }
     });
     
-    if (sessionError || !sessionData) {
+    if (sessionError || !sessionData?.properties) {
       console.error('Error generating session:', sessionError);
       throw new Error('Failed to create session');
     }
     
-    console.log('Session created successfully');
+    console.log('Session link generated successfully');
     
     // Start TWO-STAGE background sync for activity history:
     // Stage 1: Quick sync (first 200 activities) - completes in 5-10 seconds
@@ -510,19 +519,22 @@ Deno.serve(async (req) => {
       })
       .catch(err => console.error('Background sync error:', err));
     
-    // Get redirect URL
-    const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
-    
-    // Extract access and refresh tokens from the magiclink
+    // Extract the hashed token from the action_link for OTP verification
     const actionUrl = new URL(sessionData.properties.action_link);
-    const accessToken = actionUrl.searchParams.get('access_token');
-    const refreshToken = actionUrl.searchParams.get('refresh_token');
+    const token = actionUrl.searchParams.get('token');
+    const type = actionUrl.searchParams.get('type');
     
+    if (!token) {
+      console.error('No token in magic link');
+      throw new Error('Failed to extract session token');
+    }
+    
+    // Build redirect URL with token for OTP verification
     const redirectUrl = isNewUser 
-      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&access_token=${accessToken}&refresh_token=${refreshToken}&type=magiclink`
-      : `${baseUrl}/runner/${savedRunner.id}?access_token=${accessToken}&refresh_token=${refreshToken}&type=magiclink`;
+      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&token=${token}&type=${type}`
+      : `${baseUrl}/runner/${savedRunner.id}?token=${token}&type=${type}`;
     
-    console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user to:`, redirectUrl);
+    console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user`);
 
     return new Response(null, {
       status: 302,
@@ -535,11 +547,11 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in strava-callback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const appUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
+    const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': `${appUrl}/?strava=error&message=${encodeURIComponent(errorMessage)}`,
+        'Location': `${baseUrl}/?strava=error&message=${encodeURIComponent(errorMessage)}`,
       },
     });
   }
