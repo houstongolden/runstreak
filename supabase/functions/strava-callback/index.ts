@@ -81,6 +81,37 @@ Deno.serve(async (req) => {
     const athleteProfile = await athleteResponse.json();
     console.log('Fetched athlete profile:', { id: athleteProfile.id, email: athleteProfile.email });
 
+    // Create or get Supabase auth user
+    const userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreak.internal`;
+    let userId: string;
+    
+    // Check if user already exists
+    const { data: existingUser } = await supabase.auth.admin.listUsers();
+    const foundUser = existingUser.users.find(u => u.email === userEmail);
+    
+    if (foundUser) {
+      userId = foundUser.id;
+      console.log('Found existing user:', userId);
+    } else {
+      // Create new auth user
+      const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
+        email: userEmail,
+        email_confirm: true,
+        user_metadata: {
+          strava_user_id: athleteProfile.id,
+          display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
+        }
+      });
+      
+      if (createUserError || !newUser.user) {
+        console.error('Error creating user:', createUserError);
+        throw new Error('Failed to create user account');
+      }
+      
+      userId = newUser.user.id;
+      console.log('Created new user:', userId);
+    }
+
     // Download and store avatar in our own storage
     let storedAvatarUrl = athleteProfile.profile || athleteProfile.profile_medium;
     if (storedAvatarUrl) {
@@ -357,6 +388,7 @@ Deno.serve(async (req) => {
       : (existingRunner?.email || null);
     
     const runnerData: any = {
+      user_id: userId,
       strava_user_id: athleteProfile.id,
       strava_username: athleteProfile.username || `${athleteProfile.firstname} ${athleteProfile.lastname}`,
       display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
@@ -367,6 +399,7 @@ Deno.serve(async (req) => {
       city: athleteProfile.city,
       state: athleteProfile.state,
       country: athleteProfile.country,
+      timezone: timezone,
       created_at_strava: athleteProfile.created_at,
       updated_at_strava: athleteProfile.updated_at,
       follower_count: athleteProfile.follower_count,
@@ -425,6 +458,17 @@ Deno.serve(async (req) => {
     }
 
     console.log('Runner data saved successfully');
+    
+    // Create auth session for the user
+    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: userEmail,
+    });
+    
+    if (sessionError || !sessionData) {
+      console.error('Error generating session:', sessionError);
+      throw new Error('Failed to create session');
+    }
 
     // Save streak history
     if (allStreaks.length > 0) {
@@ -491,62 +535,36 @@ Deno.serve(async (req) => {
       console.log('User settings created');
     }
     
-    // Create Supabase Auth user ONLY if this is a returning user who already has a user_id
-    let userId: string | null = savedRunner.user_id;
-    
-    // Generate redirect URL
-    let redirectUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
-    const runnerId = savedRunner?.id || '';
+    // Determine redirect URL based on whether this is a new or returning user
     const isNewUser = !existingRunner;
+    const baseUrl = Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovableproject.com') || '';
     
-    console.log('Redirecting to appropriate page', { isNewUser, userId, runnerId });
+    // Extract access and refresh tokens from the magiclink
+    const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
+      type: 'magiclink',
+      email: userEmail,
+    });
     
-    // Determine redirect URL based on whether user is new
-    let finalRedirectUrl = redirectUrl;
-    
-    // New users go to onboarding step 1, existing users go to their profile
-    if (isNewUser) {
-      finalRedirectUrl = `${redirectUrl}/onboarding/step-1?runnerId=${runnerId}`;
-    } else {
-      finalRedirectUrl = `${redirectUrl}/runner/${runnerId}`;
+    if (sessionError || !sessionData) {
+      console.error('Error generating session:', sessionError);
+      throw new Error('Failed to create session');
     }
     
-    // For users with auth account, generate magic link for auto sign-in
-    if (userId) {
-      try {
-        // Get the auth user's email for magic link
-        const { data: authUser, error: authUserError } = await supabase.auth.admin.getUserById(userId);
-        
-        if (authUserError) {
-          console.error('Error fetching auth user:', authUserError);
-        } else if (authUser?.user?.email) {
-          // Generate a sign-in link for the user
-          const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-            type: 'magiclink',
-            email: authUser.user.email,
-            options: {
-              redirectTo: finalRedirectUrl
-            }
-          });
-          
-          if (linkError) {
-            console.error('Error generating magic link:', linkError);
-          } else if (linkData?.properties?.action_link) {
-            // Redirect to the magic link which will sign them in
-            console.log('Generated magic link for auto sign-in');
-            finalRedirectUrl = linkData.properties.action_link;
-          }
-        }
-      } catch (error) {
-        console.error('Failed to generate magic link:', error);
-      }
-    }
+    const url = new URL(sessionData.properties.action_link);
+    const accessToken = url.searchParams.get('access_token');
+    const refreshToken = url.searchParams.get('refresh_token');
     
-    // Redirect with authentication
+    const redirectUrl = isNewUser 
+      ? `${baseUrl}/onboarding/step-1?runnerId=${savedRunner.id}&access_token=${accessToken}&refresh_token=${refreshToken}&type=magiclink`
+      : `${baseUrl}/runner/${savedRunner.id}?access_token=${accessToken}&refresh_token=${refreshToken}&type=magiclink`;
+    
+    console.log(`Redirecting ${isNewUser ? 'new' : 'returning'} user to:`, redirectUrl);
+
     return new Response(null, {
       status: 302,
       headers: {
-        'Location': finalRedirectUrl,
+        ...corsHeaders,
+        'Location': redirectUrl,
       },
     });
 
