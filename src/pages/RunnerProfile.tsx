@@ -224,6 +224,13 @@ export default function RunnerProfile() {
           return;
         }
 
+        console.log('[RunnerProfile] Loaded runner:', { 
+          runnerId: data.id, 
+          userId: data.user_id,
+          currentRunnerId,
+          isOwnProfile: currentRunnerId === data.id 
+        });
+
         setRunner(data as Runner);
         const runnerId = data.id;
 
@@ -330,8 +337,8 @@ export default function RunnerProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 overflow-x-hidden">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         {/* Header with Back Button and Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <Button
@@ -401,7 +408,7 @@ export default function RunnerProfile() {
                   className="gap-2"
                 >
                   <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-                  <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
+                  <span>{isSyncing ? 'Syncing...' : 'Sync Strava'}</span>
                 </Button>
                 <Button 
                   variant="outline" 
@@ -409,7 +416,7 @@ export default function RunnerProfile() {
                   className="gap-2 border-dashed"
                 >
                   <Zap className="h-4 w-4" />
-                  <span className="hidden sm:inline">Test Onboarding</span>
+                  <span>Test Onboarding</span>
                 </Button>
               </>
             )}
