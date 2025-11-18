@@ -70,12 +70,12 @@ export default function AdPaymentSuccess() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-[100px]">
       <div className="container max-w-2xl mx-auto px-4 py-8">
         {/* Logo Header */}
         <Link to="/" className="flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
           <Flame className="h-6 w-6 text-primary" />
-          <span className="text-xl font-semibold">RunStreak</span>
+          <span className="text-xl font-instrument font-medium">RunStreak</span>
         </Link>
         
         <Card>
