@@ -492,32 +492,14 @@ Deno.serve(async (req) => {
     }
     
     // Create Supabase Auth user ONLY if this is a returning user who already has a user_id
-    // For new users, we'll redirect them to verify-account page first
     let userId: string | null = savedRunner.user_id;
-    let shouldRedirectToVerify = false;
-    
-    if (!userId) {
-      console.log('New user without user_id - will redirect to verification');
-      shouldRedirectToVerify = true;
-    } else {
-      console.log('Existing user with user_id, proceeding with magic link');
-    }
     
     // Generate redirect URL
     let redirectUrl = Deno.env.get('VITE_SUPABASE_URL')?.replace('https://pazxdeeuhlwwdxmpmplo.supabase.co', 'https://runstreak.lovable.app') || 'https://runstreak.lovable.app';
     const runnerId = savedRunner?.id || '';
     const isNewUser = !existingRunner;
     
-    // If user needs to verify, redirect to verify-account page
-    if (shouldRedirectToVerify) {
-      return new Response(null, {
-        status: 302,
-        headers: {
-          'Location': `${redirectUrl}/verify-account?runnerId=${runnerId}`,
-          ...corsHeaders,
-        },
-      });
-    }
+    console.log('Redirecting to homepage with onboarding trigger', { isNewUser, userId });
     
     // For existing users with auth account, generate magic link for auto sign-in
     if (userId) {
