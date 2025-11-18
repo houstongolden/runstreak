@@ -219,14 +219,12 @@ export default function RunnerProfile() {
           body: { runnerId: id }
         });
         if (error) throw error;
+        
+        // Wait a moment for the edge function to complete background work
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
 
-      toast({
-        title: "Sync Complete",
-        description: "Your streak data has been refreshed successfully.",
-      });
-
-      // Refresh runner data
+      // Refresh runner data after sync completes
       const { data: refreshedData, error: fetchError } = await (supabase as any)
         .from("runners")
         .select("*")
@@ -235,6 +233,12 @@ export default function RunnerProfile() {
 
       if (fetchError) throw fetchError;
       setRunner(refreshedData as Runner);
+      
+      // Show success toast AFTER data has been refreshed
+      toast({
+        title: "Sync Complete",
+        description: "Your streak data has been refreshed successfully.",
+      });
     } catch (error) {
       console.error("Error syncing data:", error);
       toast({
