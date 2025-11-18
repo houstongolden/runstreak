@@ -168,13 +168,13 @@ Deno.serve(async (req) => {
       console.log('Fetched athlete stats');
     }
 
-    // Fetch athlete activities with pagination to get full history
+    // Fetch ONLY first 1-2 pages for initial streak calculation (quick signup)
     let allActivities: any[] = [];
     let page = 1;
     const perPage = 200;
-    const maxPages = 10; // Fetch up to 2000 activities to capture full history
+    const maxPages = 2; // Only fetch 2 pages (400 activities) for quick signup
     
-    console.log('Starting to fetch activities...');
+    console.log('Starting quick activity fetch for signup (2 pages max)...');
     
     while (page <= maxPages) {
       const activitiesResponse = await fetch(
@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
     }
     
     const activities = allActivities;
-    console.log(`Total activities fetched: ${activities.length}`);
+    console.log(`Quick fetch complete: ${activities.length} activities for initial streak calculation`);
 
     // Get runner's timezone from Strava profile, fallback to America/Los_Angeles
     const timezone = athleteProfile.timezone || 'America/Los_Angeles';
@@ -508,42 +508,9 @@ Deno.serve(async (req) => {
     
     console.log('Session tokens generated successfully');
     
-    // Only sync activities for NEW users
-    // Returning users already have their data and just need to authenticate
-    if (isNewUser) {
-      console.log('Starting two-stage background sync for new user...');
-      fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ runnerId: savedRunner.id, quickSync: true, maxPages: 1 })
-      })
-        .then(async quickResponse => {
-          if (quickResponse.ok) {
-            console.log('Quick sync completed, starting full sync...');
-            return fetch(`${supabaseUrl}/functions/v1/sync-strava`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${supabaseKey}`,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ runnerId: savedRunner.id, skipFirstPage: true })
-            });
-          } else {
-            console.error('Quick sync failed:', quickResponse.status);
-          }
-        })
-        .then(fullResponse => {
-          if (fullResponse && fullResponse.ok) {
-            console.log('Full background sync triggered');
-          }
-        })
-        .catch(err => console.error('Background sync error:', err));
-    } else {
-      console.log('Skipping activity sync for returning user');
-    }
+    // NEW users: Full sync will be triggered AFTER email verification on Step 2
+    // This keeps OAuth callback fast and avoids rate limits during testing
+    console.log(isNewUser ? 'New user - full sync will trigger after email verification' : 'Returning user - no sync needed');
     
     // Build redirect URL with session tokens for client-side auth
     const redirectUrl = isNewUser 
