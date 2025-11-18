@@ -199,7 +199,22 @@ const Index = () => {
           <div className="mb-10 sm:mb-12">
             <div className="flex flex-col items-center gap-3">
               <Button
-                onClick={() => navigate('/auth')}
+                onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.functions.invoke('strava-auth');
+                    if (error) throw error;
+                    if (data?.authUrl) {
+                      window.location.href = data.authUrl;
+                    }
+                  } catch (error) {
+                    console.error('Error connecting to Strava:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to initiate Strava connection",
+                      variant: "destructive",
+                    });
+                  }
+                }}
                 size="lg"
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >
