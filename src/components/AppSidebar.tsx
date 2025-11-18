@@ -142,7 +142,35 @@ export function AppSidebar() {
                           const { data, error } = await supabase.functions.invoke('strava-auth');
                           if (error) throw error;
                           if (data?.authUrl) {
-                            window.location.href = data.authUrl;
+                            // Open Strava OAuth in popup window
+                            const width = 600;
+                            const height = 700;
+                            const left = window.screenX + (window.outerWidth - width) / 2;
+                            const top = window.screenY + (window.outerHeight - height) / 2;
+                            
+                            const popup = window.open(
+                              data.authUrl,
+                              'stravaAuth',
+                              `width=${width},height=${height},left=${left},top=${top},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
+                            );
+                            
+                            // Listen for message from popup
+                            const messageHandler = (event: MessageEvent) => {
+                              if (event.origin !== window.location.origin) return;
+                              
+                              if (event.data.type === 'strava-auth-success') {
+                                popup?.close();
+                                if (event.data.runnerId) {
+                                  window.location.href = `/runner/${event.data.runnerId}`;
+                                }
+                                window.removeEventListener('message', messageHandler);
+                              } else if (event.data.type === 'strava-auth-error') {
+                                popup?.close();
+                                window.removeEventListener('message', messageHandler);
+                              }
+                            };
+                            
+                            window.addEventListener('message', messageHandler);
                           }
                         } catch (error) {
                           console.error('Error connecting to Strava:', error);
