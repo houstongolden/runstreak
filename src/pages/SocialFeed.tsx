@@ -17,6 +17,9 @@ interface FeedActivity {
   current_streak: number;
   activity_date: string;
   average_temp?: number | null;
+  distance?: number;
+  moving_time?: number;
+  run_count?: number;
 }
 
 export default function SocialFeed() {
@@ -53,7 +56,7 @@ export default function SocialFeed() {
 
       const { data: recentActivities, error } = await supabase
         .from("daily_activities")
-        .select("runner_id, activity_date, average_temp")
+        .select("runner_id, activity_date, average_temp, distance, moving_time, run_count")
         .in("runner_id", allRunnerIds)
         .gte("activity_date", sevenDaysAgo.toISOString().split("T")[0])
         .order("activity_date", { ascending: false });
@@ -78,6 +81,9 @@ export default function SocialFeed() {
           current_streak: runner?.current_streak_days || 0,
           activity_date: activity.activity_date,
           average_temp: activity.average_temp,
+          distance: activity.distance,
+          moving_time: activity.moving_time,
+          run_count: activity.run_count,
         };
       });
 
@@ -195,12 +201,35 @@ export default function SocialFeed() {
                       </span>
                     </div>
                     
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                       <span>
                         {formatDistanceToNow(new Date(activity.activity_date), { addSuffix: true })}
                       </span>
                       <span>•</span>
                       <span>Day {activity.current_streak} of streak</span>
+                    </div>
+
+                    {/* Activity details */}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {activity.distance && (
+                        <>
+                          <span className="font-medium text-foreground">
+                            {(activity.distance * 0.000621371).toFixed(2)} mi
+                          </span>
+                          <span>•</span>
+                        </>
+                      )}
+                      {activity.run_count && activity.run_count > 1 && (
+                        <>
+                          <span>{activity.run_count} runs</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      {activity.moving_time && (
+                        <span>
+                          {Math.floor(activity.moving_time / 60)}:{String(activity.moving_time % 60).padStart(2, '0')}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -229,16 +258,20 @@ export default function SocialFeed() {
 
                 {/* Kudos and Comments - Fixed at bottom */}
                 <div className="pt-3 border-t">
-                  <div className="flex items-center gap-4">
-                    <ActivityKudos 
-                      runnerId={activity.runner_id} 
-                      activityDate={activity.activity_date}
-                    />
-                    <ActivityComments
-                      activityRunnerId={activity.runner_id}
-                      activityDate={activity.activity_date}
-                      currentRunnerId={currentRunnerId || undefined}
-                    />
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0">
+                      <ActivityKudos 
+                        runnerId={activity.runner_id} 
+                        activityDate={activity.activity_date}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <ActivityComments
+                        activityRunnerId={activity.runner_id}
+                        activityDate={activity.activity_date}
+                        currentRunnerId={currentRunnerId || undefined}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
