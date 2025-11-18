@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
 
 export function StreakCountdownBanner() {
   const { runnerId } = useAuth();
@@ -12,15 +13,46 @@ export function StreakCountdownBanner() {
     total: number;
   }>({ hours: 0, minutes: 0, seconds: 0, total: 0 });
   const [lastActivityDate, setLastActivityDate] = useState<string | null>(null);
+  const [runnerTimezone, setRunnerTimezone] = useState<string>('America/Los_Angeles');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchRunnerData = async () => {
+      if (!runnerId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('runners')
+          .select('last_activity_date, timezone')
+          .eq('id', runnerId)
+          .single();
+
+        if (error) throw error;
+        setLastActivityDate(data?.last_activity_date || null);
+        setRunnerTimezone(data?.timezone || 'America/Los_Angeles');
+      } catch (error) {
+        console.error('Error fetching runner data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRunnerData();
+  }, [runnerId]);
+
+  useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
+      // Get current time in runner's timezone
+      const nowInTimezone = toZonedTime(new Date(), runnerTimezone);
       
-      const difference = midnight.getTime() - now.getTime();
+      // Calculate midnight in runner's timezone
+      const midnightInTimezone = new Date(nowInTimezone);
+      midnightInTimezone.setHours(24, 0, 0, 0);
+      
+      const difference = midnightInTimezone.getTime() - nowInTimezone.getTime();
       
       if (difference > 0) {
         setTimeLeft({
@@ -36,41 +68,10 @@ export function StreakCountdownBanner() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [runnerTimezone]);
 
-  useEffect(() => {
-    const fetchLastActivity = async () => {
-      if (!runnerId) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('runners')
-          .select('last_activity_date')
-          .eq('id', runnerId)
-          .single();
-
-        if (error) throw error;
-        setLastActivityDate(data?.last_activity_date || null);
-      } catch (error) {
-        console.error('Error fetching last activity:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLastActivity();
-  }, [runnerId]);
-
-  // Check if user has run today in their local timezone
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const todayStr = `${year}-${month}-${day}`;
-  
+  // Check if user has run today in THEIR timezone
+  const todayStr = formatInTimeZone(new Date(), runnerTimezone, 'yyyy-MM-dd');
   const hasRunToday = lastActivityDate === todayStr;
   const isUrgent = timeLeft.total < 3 * 60 * 60 * 1000; // Less than 3 hours
 
