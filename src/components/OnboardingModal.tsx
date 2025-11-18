@@ -161,7 +161,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
                   <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '14px' }} formatter={(value) => [`${value}%`, 'Consistency']} />
                   <Bar dataKey="value" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]}>
                     {accountabilityData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? 'hsl(0 0% 100%)' : 'hsl(var(--primary))'} />
+                      <Cell key={`cell-${index}`} fill={index === 0 ? 'hsl(var(--muted))' : 'hsl(var(--primary))'} />
                     ))}
                   </Bar>
                 </BarChart>
