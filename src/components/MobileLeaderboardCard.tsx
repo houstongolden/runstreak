@@ -1,8 +1,6 @@
 import { Runner } from "@/types";
 import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Flame } from "lucide-react";
 import { RunnerStreakStatus } from "./RunnerStreakStatus";
 
@@ -20,8 +18,8 @@ export function MobileLeaderboardCard({ runner, rank }: MobileLeaderboardCardPro
   };
 
   return (
-    <Link to={`/runner/${runner.id}`}>
-      <Card className="p-4 hover:bg-muted/50 transition-colors">
+    <Link to={`/runner/${runner.id}`} className="block border-b border-border hover:bg-muted/30 transition-colors">
+      <div className="p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="flex-shrink-0 w-8 flex items-center justify-center">
             {getRankDisplay()}
@@ -77,7 +75,7 @@ export function MobileLeaderboardCard({ runner, rank }: MobileLeaderboardCardPro
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 }
