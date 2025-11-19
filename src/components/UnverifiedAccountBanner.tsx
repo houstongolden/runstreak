@@ -54,7 +54,7 @@ export default function UnverifiedAccountBanner() {
   }, [runnerId]);
 
   const handleVerify = () => {
-    navigate(`/verify-account?runnerId=${runnerId}`);
+    navigate('/settings');
   };
 
   const handleDismiss = () => {
