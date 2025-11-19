@@ -228,7 +228,7 @@ const Index = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen dark:bg-background">
         {/* Desktop Ad Sidebars */}
         {adsEnabled && (
           <>
