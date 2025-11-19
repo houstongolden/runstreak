@@ -151,22 +151,22 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-body antialiased;
-    background: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--background)) 50%, hsl(var(--background)));
-  }
-
-  .dark body {
-    background-image: url('/images/dark-bg-gradient.jpeg');
-    background-size: cover;
-    background-position: center top;
-    background-attachment: scroll;
-    background-repeat: no-repeat;
+    position: relative;
     min-height: 100vh;
   }
-  
-  @media (min-width: 768px) {
-    .dark body {
-      background-attachment: fixed;
-    }
+
+  .dark body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/dark-bg-gradient.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
   }
 
   /* Typography System - Consistent header fonts using Space Grotesk */
