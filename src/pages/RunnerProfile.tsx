@@ -19,8 +19,7 @@ import {
   RefreshCw, 
   Medal, 
   Share2,
-  Pencil,
-  Zap
+  Pencil
 } from "lucide-react";
 import { formatNumber } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
@@ -37,7 +36,6 @@ import { AccountabilityPartnersSection } from "@/components/AccountabilityPartne
 import { useAuth } from "@/contexts/AuthContext";
 import { RunnerActivities } from "@/components/RunnerActivities";
 import { TabsContent } from "@/components/ui/tabs";
-import { OnboardingModal } from "@/components/OnboardingModal";
 import { StreakCountdown } from "@/components/StreakCountdown";
 import { RunnerStreakStatus } from "@/components/RunnerStreakStatus";
 import { Footer } from "@/components/Footer";
@@ -101,8 +99,6 @@ export default function RunnerProfile() {
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("overview");
   
-  // Debug: Onboarding modal state
-  const [showDebugOnboarding, setShowDebugOnboarding] = useState(false);
   const [leaderboardRank, setLeaderboardRank] = useState(0);
   const [totalRunners, setTotalRunners] = useState(0);
 
@@ -169,22 +165,6 @@ export default function RunnerProfile() {
     }
   }, [searchParams, isOwnProfile]);
 
-  // Debug: Keyboard shortcut to trigger onboarding (Cmd/Ctrl + K)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setShowDebugOnboarding(true);
-        toast({
-          title: "Debug Mode",
-          description: "Onboarding modal triggered for testing",
-        });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toast]);
 
   useEffect(() => {
     const fetchRunnerAndStats = async () => {
@@ -460,14 +440,6 @@ export default function RunnerProfile() {
                     {isSyncing ? 'Syncing...' : isBackgroundSyncing ? 'Syncing...' : 'Sync Strava'}
                   </span>
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowDebugOnboarding(true)}
-                  className="gap-2 border-dashed"
-                >
-                  <Zap className="h-4 w-4" />
-                  <span>Test Onboarding</span>
-                </Button>
               </>
             )}
           </div>
@@ -588,14 +560,6 @@ export default function RunnerProfile() {
           </div>
         )}
 
-        {/* Debug: Onboarding Modal - Trigger with Cmd/Ctrl + K */}
-        <OnboardingModal
-          open={showDebugOnboarding}
-          onOpenChange={setShowDebugOnboarding}
-          runner={runner}
-          leaderboardRank={leaderboardRank}
-          totalRunners={totalRunners}
-        />
 
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
