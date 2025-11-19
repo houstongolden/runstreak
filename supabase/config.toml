@@ -35,3 +35,12 @@ verify_jwt = false
 
 [functions.admin-delete-user]
 verify_jwt = true
+
+[functions.recalculate-streak]
+verify_jwt = false
+
+[functions.calculate-best-efforts]
+verify_jwt = false
+
+[functions.calculate-streak-history]
+verify_jwt = false
