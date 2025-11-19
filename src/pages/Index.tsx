@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { AnimatedHeatmap } from "@/components/AnimatedHeatmap";
 import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
+import heroRunningBg from "@/assets/hero-running-bg.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -240,8 +241,20 @@ const Index = () => {
         {adsEnabled && <SponsorCarousel direction="left" onAdvertiseClick={() => setIsAdvertiseModalOpen(true)} />}
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24 py-6 sm:py-12">
+        {/* Light mode hero background with overlay and fade */}
+        <div className="absolute left-0 right-0 top-0 h-[600px] overflow-hidden light:block dark:hidden pointer-events-none -z-10">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroRunningBg})` }}
+          />
+          {/* White overlay */}
+          <div className="absolute inset-0 bg-white/40" />
+          {/* Bottom fade to white */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        </div>
+
         {/* Header */}
-        <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
+        <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4 relative z-10">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold flex items-center gap-2.5 sm:gap-3">
               <Flame 
