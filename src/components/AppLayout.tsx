@@ -27,15 +27,17 @@ export function AppLayout({ children }: AppLayoutProps) {
               <SidebarTrigger />
               
               <Link to="/" className="flex items-center gap-0.5 group">
-                <Flame 
-                  className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
-                  style={{
-                    stroke: 'url(#gradient-logo-header)',
-                    fill: 'none',
-                    strokeWidth: 2,
-                    filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
-                  }}
-                />
+                {!isHomepage && (
+                  <Flame 
+                    className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
+                    style={{
+                      stroke: 'url(#gradient-logo-header)',
+                      fill: 'none',
+                      strokeWidth: 2,
+                      filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
+                    }}
+                  />
+                )}
                 {!isHomepage && (
                   <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
                     <ShinyText text="RunStreaks" speed={5} />
