@@ -107,10 +107,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Large background text - Full width outside container */}
-        <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none w-full">
+        {/* Large background text - Full width breaking out of container */}
+        <div className="absolute left-0 right-0 -bottom-16 mt-12 overflow-hidden pointer-events-none">
           <div className="flex items-center justify-center relative">
-            <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
+            <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] 2xl:text-[240px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
               RUNSTREAKS
             </h2>
             {/* Gradient fade overlay */}
