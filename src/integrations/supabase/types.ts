@@ -730,6 +730,107 @@ export type Database = {
         }
         Relationships: []
       }
+      strava_activities: {
+        Row: {
+          achievement_count: number | null
+          activity_date: string
+          average_cadence: number | null
+          average_heartrate: number | null
+          average_speed: number | null
+          average_temp: number | null
+          calories: number | null
+          comment_count: number | null
+          commute: boolean | null
+          created_at: string
+          device_name: string | null
+          distance: number
+          elapsed_time: number
+          elevation_gain: number
+          gear_id: string | null
+          id: string
+          kudos_count: number | null
+          max_heartrate: number | null
+          max_speed: number | null
+          moving_time: number
+          name: string | null
+          photo_count: number | null
+          runner_id: string
+          strava_activity_id: number
+          suffer_score: number | null
+          trainer: boolean | null
+          updated_at: string
+          workout_type: string | null
+        }
+        Insert: {
+          achievement_count?: number | null
+          activity_date: string
+          average_cadence?: number | null
+          average_heartrate?: number | null
+          average_speed?: number | null
+          average_temp?: number | null
+          calories?: number | null
+          comment_count?: number | null
+          commute?: boolean | null
+          created_at?: string
+          device_name?: string | null
+          distance?: number
+          elapsed_time?: number
+          elevation_gain?: number
+          gear_id?: string | null
+          id?: string
+          kudos_count?: number | null
+          max_heartrate?: number | null
+          max_speed?: number | null
+          moving_time?: number
+          name?: string | null
+          photo_count?: number | null
+          runner_id: string
+          strava_activity_id: number
+          suffer_score?: number | null
+          trainer?: boolean | null
+          updated_at?: string
+          workout_type?: string | null
+        }
+        Update: {
+          achievement_count?: number | null
+          activity_date?: string
+          average_cadence?: number | null
+          average_heartrate?: number | null
+          average_speed?: number | null
+          average_temp?: number | null
+          calories?: number | null
+          comment_count?: number | null
+          commute?: boolean | null
+          created_at?: string
+          device_name?: string | null
+          distance?: number
+          elapsed_time?: number
+          elevation_gain?: number
+          gear_id?: string | null
+          id?: string
+          kudos_count?: number | null
+          max_heartrate?: number | null
+          max_speed?: number | null
+          moving_time?: number
+          name?: string | null
+          photo_count?: number | null
+          runner_id?: string
+          strava_activity_id?: number
+          suffer_score?: number | null
+          trainer?: boolean | null
+          updated_at?: string
+          workout_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_runner"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streak_history: {
         Row: {
           average_miles_per_day: number

@@ -59,6 +59,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
   const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
+  const [individualActivities, setIndividualActivities] = useState<Map<string, any[]>>(new Map());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -211,7 +212,52 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                     {isExpanded && (
                       <TableRow key={`${activity.id}-expanded`}>
                         <TableCell colSpan={6} className="bg-muted/30 p-4">
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                          {individualActivities.has(activity.activity_date) && individualActivities.get(activity.activity_date)!.length > 0 ? (
+                            // Show individual activities for this date
+                            <div className="space-y-4">
+                              {individualActivities.get(activity.activity_date)!.map((indivActivity, idx) => (
+                                <div key={indivActivity.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
+                                  {indivActivity.name && (
+                                    <div className="font-semibold text-sm mb-2 text-foreground">{indivActivity.name}</div>
+                                  )}
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                                    <div>
+                                      <span className="text-muted-foreground">Distance:</span>{' '}
+                                      <span className="font-medium">{formatNumber(indivActivity.distance)} mi</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Time:</span>{' '}
+                                      <span className="font-medium">{Math.floor(indivActivity.moving_time / 60)}m</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Elevation:</span>{' '}
+                                      <span className="font-medium">{Math.round(indivActivity.elevation_gain)}ft</span>
+                                    </div>
+                                    {indivActivity.average_speed && (
+                                      <div>
+                                        <span className="text-muted-foreground">Avg Speed:</span>{' '}
+                                        <span className="font-medium">{(indivActivity.average_speed * 2.237).toFixed(2)} mph</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.average_heartrate && (
+                                      <div>
+                                        <span className="text-muted-foreground">Avg HR:</span>{' '}
+                                        <span className="font-medium">{Math.round(indivActivity.average_heartrate)} bpm</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.average_cadence && (
+                                      <div>
+                                        <span className="text-muted-foreground">Avg Cadence:</span>{' '}
+                                        <span className="font-medium">{Math.round(indivActivity.average_cadence * 2)} spm</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            // Show aggregate data when individual activities not available
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                             {activity.average_speed && (
                               <div>
                                 <span className="text-muted-foreground">Avg Speed:</span>{' '}
@@ -315,7 +361,10 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                               </div>
                             )}
                           </div>
-                          <div className="mt-4 flex justify-end">
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
