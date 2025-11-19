@@ -404,88 +404,7 @@ Deno.serve(async (req) => {
         });
     }
 
-    // Get existing best efforts from database
-    console.log('Checking for personal bests across all activities...');
-    const { data: existingBestEfforts } = await supabase
-      .from('best_efforts')
-      .select('*')
-      .eq('runner_id', runnerId);
-    
-    const existingEffortsMap = new Map<number, any>();
-    if (existingBestEfforts) {
-      for (const effort of existingBestEfforts) {
-        existingEffortsMap.set(effort.distance, effort);
-      }
-    }
-    
-    // ALWAYS do a full historical check to ensure PRs are accurate
-    // This is critical because true PRs may be from years ago, not recent activities
-    console.log('Performing comprehensive best efforts check across ALL historical activities');
-    const activitiesToCheck = allActivities;
-    
-    console.log(`Checking ${activitiesToCheck.length} activities for personal bests (${allActivities.length} total activities)`);
-    
-    const newBestEfforts = [];
-    
-    for (const activity of activitiesToCheck) {
-      try {
-        const detailResponse = await fetch(
-          `https://www.strava.com/api/v3/activities/${activity.id}`,
-          { headers: { 'Authorization': `Bearer ${accessToken}` } }
-        );
-        
-        if (!detailResponse.ok) {
-          console.log(`Failed to fetch details for activity ${activity.id}`);
-          continue;
-        }
-        
-        const detailedActivity = await detailResponse.json();
-        
-        if (detailedActivity.best_efforts && Array.isArray(detailedActivity.best_efforts)) {
-          for (const effort of detailedActivity.best_efforts) {
-            const distance = Math.round(effort.distance);
-            const existing = existingEffortsMap.get(distance);
-            
-            // Only update if this is a new PR (faster than existing or no existing record)
-            if (!existing || effort.elapsed_time < existing.elapsed_time) {
-              newBestEfforts.push({
-                runner_id: runnerId,
-                distance: distance,
-                elapsed_time: effort.elapsed_time,
-                moving_time: effort.moving_time,
-                start_date: effort.start_date,
-                activity_id: activity.id,
-              });
-              
-              // Update the map so we keep track of the best for this sync
-              existingEffortsMap.set(distance, {
-                elapsed_time: effort.elapsed_time
-              });
-              
-              console.log(`New PR at ${distance}m: ${effort.elapsed_time}s (previous: ${existing?.elapsed_time || 'none'})`);
-            }
-          }
-        }
-        
-        // Add small delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 200));
-      } catch (error) {
-        console.error(`Error fetching activity ${activity.id}:`, error);
-      }
-    }
-
-    console.log(`Found ${newBestEfforts.length} new personal bests to update`);
-
-    // Upsert only the new PRs
-    if (newBestEfforts.length > 0) {
-      for (const effort of newBestEfforts) {
-        await supabase
-          .from('best_efforts')
-          .upsert(effort, {
-            onConflict: 'runner_id,distance'
-          });
-      }
-    }
+    // Best efforts will be calculated by separate calculate-best-efforts function after sync completes
 
     // Calculate days on streak metrics
     const allActivityDates = Array.from(activityDates);
@@ -790,8 +709,49 @@ Provide exactly 3 insights with titles and descriptions.`
       // Don't fail the sync if AI generation fails
     }
 
+    // After syncing all data, calculate streaks, best efforts, and streak history
+    console.log('Calling calculation functions...');
+    
+    try {
+      // Call recalculate-streak
+      const streakResponse = await supabase.functions.invoke('recalculate-streak', {
+        headers: { Authorization: req.headers.get('Authorization')! }
+      });
+      
+      if (streakResponse.error) {
+        console.error('Error calculating streak:', streakResponse.error);
+      } else {
+        console.log('Streak calculated:', streakResponse.data);
+      }
+
+      // Call calculate-best-efforts
+      const bestEffortsResponse = await supabase.functions.invoke('calculate-best-efforts', {
+        headers: { Authorization: req.headers.get('Authorization')! }
+      });
+      
+      if (bestEffortsResponse.error) {
+        console.error('Error calculating best efforts:', bestEffortsResponse.error);
+      } else {
+        console.log('Best efforts calculated:', bestEffortsResponse.data);
+      }
+
+      // Call calculate-streak-history
+      const historyResponse = await supabase.functions.invoke('calculate-streak-history', {
+        headers: { Authorization: req.headers.get('Authorization')! }
+      });
+      
+      if (historyResponse.error) {
+        console.error('Error calculating streak history:', historyResponse.error);
+      } else {
+        console.log('Streak history calculated:', historyResponse.data);
+      }
+    } catch (calcError) {
+      console.error('Error in calculation functions:', calcError);
+      // Don't fail the sync if calculations fail
+    }
+
     return new Response(
-      JSON.stringify({ success: true, message: 'Strava data synced successfully' }),
+      JSON.stringify({ success: true, message: 'Strava data synced and calculations completed' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
