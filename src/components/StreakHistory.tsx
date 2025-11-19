@@ -47,7 +47,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="border-0 bg-card/60 backdrop-blur-[40px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5 text-base">
           <Flame className="h-4 w-4 text-primary" />
@@ -67,7 +67,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
 
   if (streaks.length === 0) {
     return (
-      <Card>
+      <Card className="border-0 bg-card/60 backdrop-blur-[40px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5 text-base">
           <Flame className="h-4 w-4 text-primary" />
@@ -87,7 +87,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
   const longestMileStreak = [...streaks].sort((a, b) => b.total_miles - a.total_miles)[0];
 
   return (
-    <Card>
+    <Card className="border-0 bg-card/60 backdrop-blur-[40px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-1.5 text-base">
           <Flame className="h-4 w-4 text-primary" />

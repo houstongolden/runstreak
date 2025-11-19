@@ -45,7 +45,7 @@ export function CurrentStreakCard({
   const dateRange = formatDateRange();
 
   return (
-    <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20 overflow-hidden">
+    <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background/20 border-0 backdrop-blur-[40px] overflow-hidden">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-1.5 text-primary text-base">
           <Flame className="h-4 w-4" />
