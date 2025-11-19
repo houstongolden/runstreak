@@ -304,22 +304,22 @@ const Index = () => {
 
         {/* Leaderboard Section */}
         <div className="mb-6 px-4 sm:px-6">
-          <div className="rounded-xl border border-border/40 bg-card/5 backdrop-blur-[40px] p-4 sm:p-6 shadow-xl">
+          <div className="rounded-xl border border-border/10 bg-card backdrop-blur-[40px] p-4 sm:p-6 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-4 sm:mb-5">
               <Select defaultValue="streak">
-                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border-border/40 bg-muted/20 backdrop-blur-[32px] hover:bg-muted/30">
+                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border-border/10 bg-muted/20 backdrop-blur-[32px] hover:bg-muted/30">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
-                <SelectContent className="bg-popover backdrop-blur-[32px] border-border/40 z-50">
+                <SelectContent className="bg-popover backdrop-blur-[32px] border-border/10 z-50">
                   <SelectItem value="streak">Longest streak</SelectItem>
                   <SelectItem value="miles">Most miles</SelectItem>
                 </SelectContent>
               </Select>
               <Select defaultValue="all">
-                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border-border/40 bg-muted/20 backdrop-blur-[32px] hover:bg-muted/30">
+                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border-border/10 bg-muted/20 backdrop-blur-[32px] hover:bg-muted/30">
                   <SelectValue placeholder="Time period" />
                 </SelectTrigger>
-                <SelectContent className="bg-popover backdrop-blur-[32px] border-border/40 z-50">
+                <SelectContent className="bg-popover backdrop-blur-[32px] border-border/10 z-50">
                   <SelectItem value="all">All time</SelectItem>
                   <SelectItem value="year">This year</SelectItem>
                   <SelectItem value="month">This month</SelectItem>
