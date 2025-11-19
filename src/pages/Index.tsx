@@ -424,10 +424,10 @@ const Index = () => {
       <AggregateStatsCard />
 
       {/* How It Works Section */}
-      <section className="py-16 bg-muted/30">
+      <section className="py-24 bg-muted/30 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-instrument font-bold text-foreground mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-instrument font-bold text-foreground mb-4">
               How It Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -435,49 +435,64 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 mb-16">
             {/* Step 1 */}
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
-                1
+            <div className="group relative">
+              <div className="h-full p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 animate-fade-in hover-scale">
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow duration-300">
+                    1
+                  </div>
+                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
+                  Connect with Strava
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Sign in with your Strava account. We'll automatically sync your running activities and calculate your current streak.
+                </p>
               </div>
-              <h3 className="text-xl font-instrument font-semibold text-foreground">
-                Connect with Strava
-              </h3>
-              <p className="text-muted-foreground">
-                Sign in with your Strava account. We'll automatically sync your running activities and calculate your current streak.
-              </p>
             </div>
 
             {/* Step 2 */}
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
-                2
+            <div className="group relative" style={{ animationDelay: '150ms' }}>
+              <div className="h-full p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 animate-fade-in hover-scale">
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow duration-300">
+                    2
+                  </div>
+                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
+                  Track Your Progress
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  View your activity heatmap, best efforts, and compete on the leaderboard. Run at least 1 mile per day to maintain your streak.
+                </p>
               </div>
-              <h3 className="text-xl font-instrument font-semibold text-foreground">
-                Track Your Progress
-              </h3>
-              <p className="text-muted-foreground">
-                View your activity heatmap, best efforts, and compete on the leaderboard. Run at least 1 mile per day to maintain your streak.
-              </p>
             </div>
 
             {/* Step 3 */}
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
-                3
+            <div className="group relative" style={{ animationDelay: '300ms' }}>
+              <div className="h-full p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 animate-fade-in hover-scale">
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow duration-300">
+                    3
+                  </div>
+                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
+                  Stay Accountable
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Follow other runners, celebrate milestones together, and watch your streak grow day by day.
+                </p>
               </div>
-              <h3 className="text-xl font-instrument font-semibold text-foreground">
-                Stay Accountable
-              </h3>
-              <p className="text-muted-foreground">
-                Follow other runners, celebrate milestones together, and watch your streak grow day by day.
-              </p>
             </div>
           </div>
 
           {/* Animated Demo */}
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '450ms' }}>
             <ScanningAnimation 
               messages={[
                 "Syncing your Strava activities...",
