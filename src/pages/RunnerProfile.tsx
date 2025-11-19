@@ -19,8 +19,10 @@ import {
   RefreshCw, 
   Medal, 
   Share2,
-  Pencil
+  Pencil,
+  Trophy
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatNumber } from "@/lib/formatters";
 import { useToast } from "@/hooks/use-toast";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
@@ -91,6 +93,7 @@ export default function RunnerProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isBackgroundSyncing, setIsBackgroundSyncing] = useState(false);
+  const [isCalculatingBestEfforts, setIsCalculatingBestEfforts] = useState(false);
   
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -337,6 +340,48 @@ export default function RunnerProfile() {
     }
   };
 
+  const handleCalculateBestEfforts = async () => {
+    if (!runner) return;
+    
+    setIsCalculatingBestEfforts(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to calculate best efforts",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke('calculate-best-efforts', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Best efforts calculated!",
+        description: "Your estimated best efforts have been updated. Check individual activities for more precise times.",
+      });
+
+      // Refresh the page to show updated best efforts
+      window.location.reload();
+    } catch (error) {
+      console.error('Calculate best efforts error:', error);
+      toast({
+        title: "Calculation failed",
+        description: error.message || "Failed to calculate best efforts",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCalculatingBestEfforts(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -428,19 +473,35 @@ export default function RunnerProfile() {
               </Button>
             )}
             {isOwnProfile && (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={handleSync}
-                  disabled={isSyncing || isBackgroundSyncing}
-                  className="gap-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${(isSyncing || isBackgroundSyncing) ? 'animate-spin' : ''}`} />
-                  <span>
-                    {isSyncing ? 'Syncing...' : isBackgroundSyncing ? 'Syncing...' : 'Sync Strava'}
-                  </span>
-                </Button>
-              </>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={handleCalculateBestEfforts}
+                      disabled={isCalculatingBestEfforts}
+                      className="gap-2"
+                    >
+                      <Trophy className={`h-4 w-4 ${isCalculatingBestEfforts ? 'animate-pulse' : ''}`} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-sm p-4">
+                    <div className="space-y-2">
+                      <p className="font-semibold text-sm">Find Best Efforts (Estimates)</p>
+                      <p className="text-xs text-muted-foreground">
+                        We analyze your top 20-30 fastest activities to estimate your best times for standard distances (1 mile, 5K, 10K, half marathon, marathon).
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        For more accurate times, find the specific activity in your Activities table below and click the stopwatch icon to fetch your actual Strava best efforts.
+                      </p>
+                      <p className="text-xs text-primary font-medium">
+                        Limited to 20-30 activities to protect API rate limits.
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </div>
         </div>
