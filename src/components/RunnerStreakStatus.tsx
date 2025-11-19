@@ -43,11 +43,11 @@ export function RunnerStreakStatus({ lastActivityDate, timezone }: RunnerStreakS
 
   // Calculate color based on time remaining
   const totalHours = timeLeft.hours + (timeLeft.minutes / 60);
-  let statusColor = 'text-green-600';
+  let statusColor = 'text-green-600 font-semibold';
   if (totalHours < 1) {
-    statusColor = 'text-red-600';
+    statusColor = 'text-red-600 font-semibold';
   } else if (totalHours < 6) {
-    statusColor = 'text-yellow-600';
+    statusColor = 'text-yellow-500 font-semibold';
   }
 
   return (
