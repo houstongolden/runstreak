@@ -75,7 +75,7 @@ export default function AIAnalysisCards({ runner }: AIAnalysisCardsProps) {
       {insights.slice(0, 3).map((insight, index) => {
         const Icon = icons[index % icons.length];
         return (
-          <Card key={index} className="border-primary/20 min-h-[140px]">
+          <Card key={index} className="border-0 bg-card/60 backdrop-blur-[40px] min-h-[140px]">
             <CardHeader className="flex flex-row items-center gap-1.5 pb-3">
               <Icon className="h-4 w-4 text-primary" />
               <CardTitle className="text-base break-words">{insight.title}</CardTitle>

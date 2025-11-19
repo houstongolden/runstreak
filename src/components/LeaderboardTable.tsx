@@ -45,7 +45,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
     }
 
     return (
-      <div className="rounded-lg border border-border/10 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
+      <div className="rounded-lg border-0 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
@@ -128,7 +128,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
 
   // Desktop table view
   return (
-    <div className="rounded-lg border border-border/10 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
+    <div className="rounded-lg border-0 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">

@@ -84,7 +84,7 @@ export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCal
 
   if (isLoading) {
     return (
-      <Card className="bg-card/50 backdrop-blur border-border/50">
+      <Card className="bg-card/60 backdrop-blur-[40px] border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-foreground">
             <Trophy className="h-5 w-5 text-primary" />
@@ -100,7 +100,7 @@ export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCal
 
   if (efforts.length === 0) {
     return (
-      <Card className="bg-card/50 backdrop-blur border-border/50">
+      <Card className="bg-card/60 backdrop-blur-[40px] border-0">
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-foreground">
           <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCal
   }
 
   return (
-    <Card className="bg-card/50 backdrop-blur border-border/50">
+    <Card className="bg-card/60 backdrop-blur-[40px] border-0">
         <CardHeader>
           <CardTitle className="flex items-center justify-between text-foreground">
             <div className="flex items-center gap-1.5">
