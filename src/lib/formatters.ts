@@ -7,8 +7,8 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-export const formatNumber = (num: number): string => {
-  return num.toFixed(1);
+export const formatNumber = (num: number | null | undefined): string => {
+  return (num ?? 0).toFixed(1);
 };
 
 export const getRankEmoji = (rank: number): string => {
