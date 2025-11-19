@@ -44,7 +44,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   />
                 )}
                 {!isHomepage && (
-                  <span className="text-xl font-heading font-bold bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-300 dark:to-orange-400 bg-clip-text text-transparent">
+                  <span className="text-xl font-heading font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
                     RunStreaks
                   </span>
                 )}
