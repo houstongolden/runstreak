@@ -103,7 +103,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Longest Streak</p>
                   <p className="text-2xl font-bold text-primary">{topStreak.days_count} days</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-[10px] text-muted-foreground mt-1">
                     {format(new Date(topStreak.start_date), "MMM d, yyyy")} - {format(new Date(topStreak.end_date), "MMM d, yyyy")}
                   </p>
                 </div>
@@ -118,7 +118,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Most Miles in a Streak</p>
                   <p className="text-2xl font-bold text-foreground">{longestMileStreak.total_miles.toFixed(1)} mi</p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-[10px] text-muted-foreground mt-1">
                     {longestMileStreak.days_count} days ({longestMileStreak.average_miles_per_day.toFixed(1)} mi/day)
                   </p>
                 </div>
