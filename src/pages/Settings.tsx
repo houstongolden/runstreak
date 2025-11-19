@@ -396,7 +396,11 @@ export default function Settings() {
     setSendingTestMessage(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-coach-message", {
-        body: { runner_id: settings.runner_id },
+        body: { 
+          runner_id: settings.runner_id,
+          message: "Test message from RunStreaks! Reply to start a conversation with your AI coach.",
+          source: 'sms'
+        },
       });
 
       if (error) throw error;
@@ -523,9 +527,9 @@ export default function Settings() {
                       setEmailOtp("");
                     }}
                     placeholder="your@email.com"
-                    disabled={settings.email_verified}
+                    disabled={settings.email_verified && !!settings.user_email}
                   />
-                  {settings.email_verified ? (
+                  {settings.email_verified && settings.user_email ? (
                     <Badge variant="secondary" className="flex items-center gap-1 whitespace-nowrap">
                       <CheckCircle className="h-3 w-3" />
                       Verified
@@ -580,10 +584,7 @@ export default function Settings() {
               )}
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Badge variant="outline" className="text-xs">Coming soon...</Badge>
-                </div>
+                <Label htmlFor="phone">Phone Number</Label>
                 <div className="flex gap-2">
                   <Input
                     id="phone"
@@ -736,13 +737,10 @@ export default function Settings() {
           {/* AI Coach Settings */}
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
-                  AI SMS Coach
-                </CardTitle>
-                <Badge variant="outline" className="text-xs">Coming soon...</Badge>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                AI SMS Coach
+              </CardTitle>
               <CardDescription>
                 Get personalized daily reminders to stay on track with your streak goals
               </CardDescription>
