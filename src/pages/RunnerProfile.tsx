@@ -472,37 +472,6 @@ export default function RunnerProfile() {
                 <span className="hidden sm:inline">Get Badge</span>
               </Button>
             )}
-            {isOwnProfile && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={handleCalculateBestEfforts}
-                      disabled={isCalculatingBestEfforts}
-                      className="gap-2"
-                    >
-                      <Trophy className={`h-4 w-4 ${isCalculatingBestEfforts ? 'animate-pulse' : ''}`} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-sm p-4">
-                    <div className="space-y-2">
-                      <p className="font-semibold text-sm">Find Best Efforts (Estimates)</p>
-                      <p className="text-xs text-muted-foreground">
-                        We analyze your top 20-30 fastest activities to estimate your best times for standard distances (1 mile, 5K, 10K, half marathon, marathon).
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        For more accurate times, find the specific activity in your Activities table below and click the stopwatch icon to fetch your actual Strava best efforts.
-                      </p>
-                      <p className="text-xs text-primary font-medium">
-                        Limited to 20-30 activities to protect API rate limits.
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
           </div>
         </div>
 
@@ -664,7 +633,12 @@ export default function RunnerProfile() {
             )}
 
             {/* Best Efforts Section */}
-            <BestEfforts runnerId={runner.id} />
+            <BestEfforts 
+              runnerId={runner.id} 
+              isOwnProfile={isOwnProfile}
+              onCalculate={handleCalculateBestEfforts}
+              isCalculating={isCalculatingBestEfforts}
+            />
 
             {/* AI Analysis Section */}
             <div>

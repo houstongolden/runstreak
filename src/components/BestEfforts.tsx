@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Info } from "lucide-react";
+import { Trophy, Info, RefreshCw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BestEffort {
   distance: number;
@@ -22,6 +23,9 @@ interface BestEffort {
 
 interface BestEffortsProps {
   runnerId: string;
+  isOwnProfile?: boolean;
+  onCalculate?: () => void;
+  isCalculating?: boolean;
 }
 
 const DISTANCE_LABELS: Record<number, string> = {
@@ -34,7 +38,7 @@ const DISTANCE_LABELS: Record<number, string> = {
   42195: "Marathon",
 };
 
-export default function BestEfforts({ runnerId }: BestEffortsProps) {
+export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCalculating }: BestEffortsProps) {
   const [efforts, setEfforts] = useState<BestEffort[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -152,36 +156,63 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
               <Trophy className="h-4 w-4 text-primary" />
               <span className="text-base">Personal Bests</span>
             </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>About Personal Best Efforts</DialogTitle>
-                <DialogDescription className="space-y-3 pt-2">
-                  <p>
-                    Your personal best efforts show estimated times for standard running distances (1 mile, 5K, 10K, half marathon, and marathon) based on your activity data.
-                  </p>
-                  <p className="font-semibold text-foreground">How to get accurate best efforts:</p>
-                  <p>
-                    To respect Strava's usage policies and maintain our integration in good standing, we calculate initial estimates from your synced activity data. For more precision:
-                  </p>
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li>Initial estimates are calculated from your existing activity data</li>
-                    <li>If you know which activities contain your PRs, expand them in the Activities table above</li>
-                    <li>Click the <span className="font-semibold">"Find Best Efforts"</span> button (stopwatch icon) to fetch full details from Strava</li>
-                    <li>You can extract accurate best efforts from up to <span className="font-semibold">10 activities per week</span></li>
-                  </ol>
-                  <p className="text-xs text-muted-foreground italic">
-                    This approach keeps us in good standing with Strava while letting you manually discover your true personal records.
-                  </p>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
+            <div className="flex items-center gap-1">
+              {isOwnProfile && onCalculate && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={onCalculate}
+                        disabled={isCalculating}
+                        className="h-8 w-8"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-sm p-3">
+                      <div className="space-y-1.5">
+                        <p className="font-semibold text-xs">Find Best Efforts (Estimates)</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          Analyzes your top 20-30 fastest activities to estimate best times. Makes Strava API calls for detailed performance data.
+                        </p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Info className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>About Personal Best Efforts</DialogTitle>
+                    <DialogDescription className="space-y-3 pt-2">
+                      <p>
+                        Your personal best efforts show estimated times for standard running distances (1 mile, 5K, 10K, half marathon, and marathon) based on your activity data.
+                      </p>
+                      <p className="font-semibold text-foreground">How to get accurate best efforts:</p>
+                      <p>
+                        To respect Strava's usage policies and maintain our integration in good standing, we calculate initial estimates from your synced activity data. For more precision:
+                      </p>
+                      <ol className="list-decimal list-inside space-y-1 text-sm">
+                        <li>Initial estimates are calculated from your existing activity data</li>
+                        <li>If you know which activities contain your PRs, expand them in the Activities table above</li>
+                        <li>Click the <span className="font-semibold">"Find Best Efforts"</span> button (stopwatch icon) to fetch full details from Strava</li>
+                        <li>You can extract accurate best efforts from up to <span className="font-semibold">10 activities per week</span></li>
+                      </ol>
+                      <p className="text-xs text-muted-foreground italic">
+                        This approach keeps us in good standing with Strava while letting you manually discover your true personal records.
+                      </p>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
