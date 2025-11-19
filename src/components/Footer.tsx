@@ -12,11 +12,11 @@ export function Footer() {
 
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:px-[240px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Explore */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">Explore</h3>
+              <h3 className="text-sm font-medium mb-3 text-foreground">Explore</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/" className="hover:text-foreground transition-colors">
@@ -43,7 +43,7 @@ export function Footer() {
 
             {/* Community */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">Community</h3>
+              <h3 className="text-sm font-medium mb-3 text-foreground">Community</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/" className="hover:text-foreground transition-colors">
@@ -55,7 +55,7 @@ export function Footer() {
 
             {/* About */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">About RunStreaks</h3>
+              <h3 className="text-sm font-medium mb-3 text-foreground">About RunStreaks</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/story" className="hover:text-foreground transition-colors">
@@ -77,7 +77,7 @@ export function Footer() {
 
             {/* Partner With Us */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">Partner With Us</h3>
+              <h3 className="text-sm font-medium mb-3 text-foreground">Partner With Us</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <button
@@ -108,9 +108,9 @@ export function Footer() {
         </div>
 
         {/* Large background text - Full width breaking out of container */}
-        <div className="absolute left-0 right-0 -bottom-16 mt-12 overflow-hidden pointer-events-none">
+        <div className="absolute left-0 right-0 -bottom-12 overflow-hidden pointer-events-none z-0">
           <div className="flex items-center justify-center relative">
-            <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] 2xl:text-[240px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
+            <h2 className="text-[50px] sm:text-[80px] md:text-[100px] lg:text-[130px] xl:text-[160px] 2xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/10 via-orange-600/15 to-orange-500/10 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
               RUNSTREAKS
             </h2>
             {/* Gradient fade overlay */}
