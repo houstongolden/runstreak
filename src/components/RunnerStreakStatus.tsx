@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { Clock, CheckCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { formatInTimeZone } from 'date-fns-tz';
 
 interface RunnerStreakStatusProps {
@@ -43,21 +41,24 @@ export function RunnerStreakStatus({ lastActivityDate, timezone }: RunnerStreakS
   const todayStr = formatInTimeZone(new Date(), timezone, 'yyyy-MM-dd');
   const hasRunToday = lastActivityDate === todayStr;
 
-  if (hasRunToday) {
-    return (
-      <Badge variant="secondary" className="gap-1.5 bg-green-500/10 text-green-600 border-green-500/20">
-        <CheckCircle className="h-3 w-3" />
-        <span className="text-xs">Streak Safe</span>
-      </Badge>
-    );
+  // Calculate color based on time remaining
+  const totalHours = timeLeft.hours + (timeLeft.minutes / 60);
+  let statusColor = 'text-green-600';
+  if (totalHours < 1) {
+    statusColor = 'text-red-600';
+  } else if (totalHours < 6) {
+    statusColor = 'text-yellow-600';
   }
 
   return (
-    <Badge variant="secondary" className="gap-1.5 bg-orange-500/10 text-orange-600 border-orange-500/20">
-      <Clock className="h-3 w-3" />
-      <span className="text-xs font-mono">
-        {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}
-      </span>
-    </Badge>
+    <div className={`text-xs font-mono ${statusColor}`}>
+      {hasRunToday ? (
+        <span>Completed today</span>
+      ) : (
+        <span>
+          {String(timeLeft.hours).padStart(2, '0')}h {String(timeLeft.minutes).padStart(2, '0')}m left today
+        </span>
+      )}
+    </div>
   );
 }

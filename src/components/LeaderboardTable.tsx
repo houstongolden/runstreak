@@ -143,7 +143,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
           {sortedRunners.map((runner, index) => (
             <TableRow
               key={runner.id}
-              className="hover:bg-muted/50 transition-colors cursor-pointer border-b border-border/40"
+              className="hover:bg-orange-500/5 hover:border-orange-500/20 transition-all duration-200 cursor-pointer border-b border-border/40"
             >
               <TableCell className="font-medium">
                 <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
@@ -171,10 +171,10 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
               </TableCell>
               <TableCell className="text-right">
                 <Link to={`/runner/${runner.id}`}>
-                  <Badge variant="secondary" className="gap-1.5 font-semibold">
-                    <Flame className="h-4 w-4 text-orange-500" />
-                    {runner.current_streak_days} days
-                  </Badge>
+                  <div className="flex items-center justify-end gap-2">
+                    <Flame className="h-5 w-5 text-orange-500" />
+                    <span className="text-2xl font-bold">{runner.current_streak_days}</span>
+                  </div>
                 </Link>
               </TableCell>
               <TableCell className="text-right">

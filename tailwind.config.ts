@@ -14,6 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
+        sans: ['Inter', 'sans-serif'],
         'pixelify': ['Pixelify Sans', 'sans-serif'],
         'instrument': ['Instrument Sans', 'sans-serif'],
         'instrument-serif': ['Instrument Serif', 'serif'],

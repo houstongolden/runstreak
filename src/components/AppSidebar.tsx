@@ -113,7 +113,7 @@ export function AppSidebar() {
                 filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
               }}
             />
-            <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
+            <span className="text-xl font-normal transition-all duration-300 group-hover:scale-105">
               <ShinyText text="RunStreaks" speed={5} />
             </span>
             <svg width="0" height="0" style={{ position: 'absolute' }}>
