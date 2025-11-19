@@ -56,7 +56,7 @@ export function CurrentStreakCard({
         </p>
       </CardHeader>
       <CardContent className="overflow-hidden pt-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {/* Streak Days - Most Prominent */}
           <div className="space-y-1 p-2.5 rounded-lg bg-background/50 border border-primary/10 min-w-0">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
