@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
         throw new Error('Failed to generate session');
       }
 
-      const redirectUrl = new URL('https://runstreak.to');
+      const redirectUrl = new URL('https://runstreaks.io');
       redirectUrl.searchParams.set('access_token', sessionData.properties.action_link.split('#access_token=')[1].split('&')[0]);
       redirectUrl.searchParams.set('refresh_token', sessionData.properties.action_link.split('&refresh_token=')[1].split('&')[0]);
 
@@ -664,7 +664,7 @@ Deno.serve(async (req) => {
     const isNewUser = !existingRunner;
     
     // Get redirect base URL - use production domain
-    const baseUrl = 'https://runstreak.to';
+    const baseUrl = 'https://runstreaks.io';
     
     // Create session tokens for the user
     const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
@@ -726,7 +726,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error in strava-callback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const baseUrl = 'https://runstreak.to';
+    const baseUrl = 'https://runstreaks.io';
     return new Response(null, {
       status: 302,
       headers: {
