@@ -16,10 +16,10 @@ export default function Step4({ runner }: Step4Props) {
         <div className="space-y-3">
           <Users className="h-20 w-20 text-primary mx-auto" />
           <p className="text-3xl sm:text-4xl font-instrument font-medium text-foreground">
-            Stay Accountable
+            Let's Go! 🔥
           </p>
           <p className="text-lg text-muted-foreground font-instrument">
-            Join a community that shows up every day
+            You're all set! Time to build your streak.
           </p>
         </div>
 
@@ -66,8 +66,15 @@ export default function Step4({ runner }: Step4Props) {
         </Card>
 
         <p className="text-base text-muted-foreground font-instrument">
-          RunStreak keeps you accountable to your running goals
+          RunStreak keeps you accountable to your running goals. Day 1 starts now!
         </p>
+        
+        <div className="bg-muted/50 p-6 rounded-lg">
+          <p className="text-sm text-muted-foreground font-instrument leading-relaxed">
+            <strong className="text-foreground">Pro tip:</strong> Set a daily reminder on your phone 
+            to check your streak status. Consistency is everything!
+          </p>
+        </div>
       </div>
 
       <div className="flex justify-between gap-3">
@@ -79,11 +86,11 @@ export default function Step4({ runner }: Step4Props) {
           Back
         </Button>
         <Button
-          onClick={() => navigate('../step-5')}
+          onClick={() => navigate(`/runner/${runner.id}?onboarding=complete`)}
           size="lg"
           className="text-base px-8"
         >
-          Next
+          View My Profile
         </Button>
       </div>
     </div>

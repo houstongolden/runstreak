@@ -8,8 +8,6 @@ import Step1 from "./onboarding/Step1";
 import Step2 from "./onboarding/Step2";
 import Step3 from "./onboarding/Step3";
 import Step4 from "./onboarding/Step4";
-import Step5 from "./onboarding/Step5";
-import Step6 from "./onboarding/Step6";
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -112,8 +110,6 @@ export default function Onboarding() {
           <Route path="step-2" element={<Step2 runner={runner} leaderboardRank={leaderboardRank} totalRunners={totalRunners} />} />
           <Route path="step-3" element={<Step3 runner={runner} />} />
           <Route path="step-4" element={<Step4 runner={runner} />} />
-          <Route path="step-5" element={<Step5 runner={runner} />} />
-          <Route path="step-6" element={<Step6 runner={runner} />} />
         </Routes>
       </div>
     </div>
