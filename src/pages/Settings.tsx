@@ -40,6 +40,9 @@ export default function Settings() {
   const { runnerId: currentRunnerId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showEmailOtpInput, setShowEmailOtpInput] = useState(false);
+  const [emailOtp, setEmailOtp] = useState("");
+  const [verifyingEmailOtp, setVerifyingEmailOtp] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -170,10 +173,97 @@ export default function Settings() {
       return;
     }
 
-    toast({
-      title: "Verification email sent",
-      description: "Check your inbox to verify your email address.",
-    });
+    // Validate email format
+    try {
+      emailSchema.parse(settings.user_email);
+    } catch (error) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      // Use Supabase's built-in email OTP
+      const { error } = await supabase.auth.signInWithOtp({
+        email: settings.user_email,
+        options: {
+          shouldCreateUser: false, // Don't create new user, just send OTP
+        }
+      });
+
+      if (error) throw error;
+
+      setShowEmailOtpInput(true);
+      toast({
+        title: "Verification code sent",
+        description: "Check your email for a 6-digit code to verify your email address.",
+      });
+    } catch (error: any) {
+      console.error("Email verification error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send verification code",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyEmailOtp = async () => {
+    if (!emailOtp || emailOtp.length !== 6) {
+      toast({
+        title: "Error",
+        description: "Please enter the 6-digit code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVerifyingEmailOtp(true);
+    try {
+      // Verify the OTP
+      const { error } = await supabase.auth.verifyOtp({
+        email: settings.user_email,
+        token: emailOtp,
+        type: 'email'
+      });
+
+      if (error) throw error;
+
+      // Update user_settings to mark email as verified
+      const { error: updateError } = await supabase
+        .from('user_settings')
+        .update({ 
+          email_verified: true,
+          user_email: settings.user_email 
+        })
+        .eq('runner_id', currentRunnerId);
+
+      if (updateError) throw updateError;
+
+      setSettings({ ...settings, email_verified: true });
+      setShowEmailOtpInput(false);
+      setEmailOtp("");
+      
+      toast({
+        title: "Email verified",
+        description: "Your email has been successfully verified!",
+      });
+    } catch (error: any) {
+      console.error("Email OTP verification error:", error);
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired code. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifyingEmailOtp(false);
+    }
   };
 
   const formatPhoneNumber = (phone: string): string => {
@@ -410,28 +500,19 @@ export default function Settings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="strava-email">Strava Email (Read-only)</Label>
-                <Input
-                  id="strava-email"
-                  type="email"
-                  value={settings.email || "Not connected"}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This email is from your Strava account and cannot be edited here
-                </p>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="user-email">Your Email Address</Label>
                 <div className="flex gap-2">
                   <Input
                     id="user-email"
                     type="email"
                     value={settings.user_email || ""}
-                    onChange={(e) => setSettings({ ...settings, user_email: e.target.value })}
+                    onChange={(e) => {
+                      setSettings({ ...settings, user_email: e.target.value });
+                      setShowEmailOtpInput(false);
+                      setEmailOtp("");
+                    }}
                     placeholder="your@email.com"
+                    disabled={settings.email_verified}
                   />
                   {settings.email_verified ? (
                     <Badge variant="secondary" className="flex items-center gap-1 whitespace-nowrap">
@@ -439,8 +520,13 @@ export default function Settings() {
                       Verified
                     </Badge>
                   ) : (
-                    <Button onClick={handleVerifyEmail} variant="outline" size="sm" disabled={!settings.user_email}>
-                      Verify
+                    <Button 
+                      onClick={handleVerifyEmail} 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={!settings.user_email || sendingCode}
+                    >
+                      {sendingCode ? "Sending..." : "Verify"}
                     </Button>
                   )}
                 </div>
@@ -448,6 +534,39 @@ export default function Settings() {
                   Used for email/password login and notifications
                 </p>
               </div>
+
+              {showEmailOtpInput && !settings.email_verified && (
+                <div className="space-y-2">
+                  <Label htmlFor="email-otp">Enter 6-Digit Code</Label>
+                  <div className="flex gap-2">
+                    <InputOTP
+                      maxLength={6}
+                      value={emailOtp}
+                      onChange={setEmailOtp}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                    <Button 
+                      onClick={handleVerifyEmailOtp} 
+                      variant="default" 
+                      size="sm"
+                      disabled={verifyingEmailOtp || emailOtp.length !== 6}
+                    >
+                      {verifyingEmailOtp ? "Verifying..." : "Verify"}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter the code sent to {settings.user_email}
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
