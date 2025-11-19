@@ -674,9 +674,10 @@ Deno.serve(async (req) => {
     
     console.log('Session tokens generated successfully');
     
-    // NEW users: Full sync will be triggered AFTER email verification on Step 2
-    // This keeps OAuth callback fast and avoids rate limits during testing
-    console.log(isNewUser ? 'New user - full sync will trigger after email verification' : 'Returning user - no sync needed');
+    // NEW users: Full activity sync completed during OAuth callback
+    // RETURNING users: No sync needed, only authentication
+    // All future activity updates will come through webhooks
+    console.log(isNewUser ? 'New user - full sync completed, future updates via webhook only' : 'Returning user - no sync needed');
     
     // Build redirect URL with session tokens for client-side auth
     const redirectUrl = isNewUser 
