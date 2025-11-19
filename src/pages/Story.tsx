@@ -26,7 +26,7 @@ export default function Story() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl sm:text-5xl font-instrument font-medium text-center mb-10 tracking-tight">
-            Why RunStreak Exists
+            Why RunStreaks Exists
           </h1>
 
           {/* Founder Story - Moved to Top */}
@@ -41,13 +41,13 @@ export default function Story() {
               </div>
               <div className="text-center sm:text-left">
                 <h3 className="text-xl font-semibold mb-1">Houston Golden</h3>
-                <p className="text-sm text-muted-foreground">Founder, RunStreak</p>
+                <p className="text-sm text-muted-foreground">Founder, RunStreaks</p>
               </div>
             </div>
             
             <div className="text-sm sm:text-base text-foreground/90 leading-relaxed space-y-3">
               <p>
-                "I built RunStreak because I struggled with running consistency. Like many runners, I'd get on a roll, feel great for a few weeks, then break my streak and feel completely discouraged—sometimes taking weeks off before getting back to it."
+                "I built RunStreaks because I struggled with running consistency. Like many runners, I'd get on a roll, feel great for a few weeks, then break my streak and feel completely discouraged—sometimes taking weeks off before getting back to it."
               </p>
               
               <p>
@@ -55,7 +55,7 @@ export default function Story() {
               </p>
               
               <p>
-                All my running data is public on RunStreak—you can <a href="/runner/houston" className="text-primary hover:underline font-medium">check my profile</a> and see exactly where I'm at. Some days I nail it, some days I don't. But I keep showing up, and that's what RunStreak is all about.
+                All my running data is public on RunStreaks—you can <a href="/runner/houston" className="text-primary hover:underline font-medium">check my profile</a> and see exactly where I'm at. Some days I nail it, some days I don't. But I keep showing up, and that's what RunStreaks is all about.
               </p>
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function Story() {
             </p>
             
             <p className="text-xl font-semibold text-foreground">
-              RunStreak fixes this.
+              RunStreaks fixes this.
             </p>
             
             <p>
@@ -123,7 +123,7 @@ export default function Story() {
             {/* Equals Symbol */}
             <span className="text-2xl sm:text-3xl font-bold text-muted-foreground">=</span>
 
-            {/* RunStreak Logo */}
+            {/* RunStreaks Logo */}
             <div className="flex flex-col items-center gap-2">
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 flex items-center justify-center">
                 <Flame 
@@ -143,7 +143,7 @@ export default function Story() {
                   </defs>
                 </svg>
               </div>
-              <span className="text-xs text-muted-foreground font-semibold">RunStreak</span>
+              <span className="text-xs text-muted-foreground font-semibold">RunStreaks</span>
             </div>
           </div>
         </div>

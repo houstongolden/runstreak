@@ -57,7 +57,7 @@ export default function StravaConnect() {
             Connect to Strava
           </h1>
           <p className="text-muted-foreground">
-            Join the RunStreak leaderboard by connecting your Strava account
+            Join the RunStreaks leaderboard by connecting your Strava account
           </p>
         </div>
 

@@ -94,7 +94,7 @@ export function AggregateStatsCard() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl sm:text-3xl font-instrument font-medium mb-2">
-            RunStreak Impact
+            RunStreaks Impact
           </h2>
           <p className="text-muted-foreground">
             Real results from our running community

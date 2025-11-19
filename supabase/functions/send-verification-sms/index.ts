@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
       api_secret: vonageApiSecret,
       to: phoneNumber.replace('+', ''),
       from: vonagePhoneNumber,
-      text: `Your RunStreak verification code is: ${code}. This code expires in 10 minutes.`,
+      text: `Your RunStreaks verification code is: ${code}. This code expires in 10 minutes.`,
     };
 
     console.log("Vonage request body:", { ...vonageBody, api_key: "***", api_secret: "***" });

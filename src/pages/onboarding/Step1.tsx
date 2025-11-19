@@ -122,7 +122,7 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
             You've joined the leaderboard! 🎉
           </p>
           <p className="text-lg text-muted-foreground font-instrument">
-            Welcome to the RunStreak community
+            Welcome to the RunStreaks community
           </p>
         </div>
 

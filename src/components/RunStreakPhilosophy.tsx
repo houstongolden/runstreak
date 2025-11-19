@@ -1,13 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, TrendingUp, Award } from "lucide-react";
 
-export function RunStreakPhilosophy() {
+export function RunStreaksPhilosophy() {
   return (
     <section className="py-16 px-4 bg-muted/30">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-instrument font-medium mb-4">
-            Why RunStreak Is Different
+            Why RunStreaks Is Different
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             We believe consistency beats perfection. Life happens, and missing a day shouldn't derail your progress.
@@ -37,7 +37,7 @@ export function RunStreakPhilosophy() {
                 </div>
                 <h3 className="font-semibold text-lg">Measure Improvement</h3>
                 <p className="text-sm text-muted-foreground">
-                  We compare your activity rate after joining RunStreak to before. Our goal: help you run more consistently than ever.
+                  We compare your activity rate after joining RunStreaks to before. Our goal: help you run more consistently than ever.
                 </p>
               </div>
             </CardContent>
@@ -66,7 +66,7 @@ export function RunStreakPhilosophy() {
                 It means you keep going, because those 58 out of 60 days still count."
               </p>
               <p className="text-sm font-semibold">
-                – The RunStreak Philosophy
+                – The RunStreaks Philosophy
               </p>
             </blockquote>
           </CardContent>

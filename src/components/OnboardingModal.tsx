@@ -153,7 +153,7 @@ export function OnboardingModal({ open, onOpenChange, runner, leaderboardRank, t
 
   const accountabilityData = [
     { category: 'Without', value: 35 },
-    { category: 'With RunStreak', value: 88 }
+    { category: 'With RunStreaks', value: 88 }
   ];
 
   return (

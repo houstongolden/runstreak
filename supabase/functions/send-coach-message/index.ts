@@ -514,7 +514,7 @@ IMPORTANT INSTRUCTIONS FOR CALCULATIONS:
 - ALWAYS show your calculation method when answering numerical questions
 
 CONSISTENCY METRICS:
-- Since joining RunStreak: ${runner.days_on_streak_since_joining || 0} days out of ${runner.total_days_since_joining || 0} total days
+- Since joining RunStreaks: ${runner.days_on_streak_since_joining || 0} days out of ${runner.total_days_since_joining || 0} total days
 
 BEST EFFORTS:
 ${bestEffortsText || 'No best efforts recorded yet'}

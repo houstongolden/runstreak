@@ -63,7 +63,7 @@ export default function AdPaymentSuccess() {
         {/* Logo Header */}
         <Link to="/" className="flex items-center gap-2 mb-6 hover:opacity-80 transition-opacity">
           <Flame className="h-6 w-6 text-primary" />
-          <span className="text-xl font-instrument font-medium">RunStreak</span>
+          <span className="text-xl font-instrument font-medium">RunStreaks</span>
         </Link>
         
         <Card>

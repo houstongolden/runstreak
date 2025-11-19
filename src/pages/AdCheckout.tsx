@@ -77,7 +77,7 @@ export default function AdCheckout() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Advertise on RunStreak</CardTitle>
+            <CardTitle className="text-2xl">Advertise on RunStreaks</CardTitle>
             <CardDescription>
               Reach thousands of dedicated runners maintaining daily streaks
             </CardDescription>

@@ -18,7 +18,7 @@ export const AdvertiseModal = ({ open, onOpenChange }: AdvertiseModalProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl sm:text-2xl font-semibold">Advertise on RunStreak</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-semibold">Advertise on RunStreaks</DialogTitle>
           <DialogDescription className="text-sm sm:text-base text-muted-foreground">
             Reach thousands of dedicated runners maintaining daily streaks
           </DialogDescription>
@@ -36,14 +36,14 @@ export const AdvertiseModal = ({ open, onOpenChange }: AdvertiseModalProps) => {
           <div>
             <h3 className="text-lg font-semibold mb-2">How it works</h3>
             <p className="text-sm text-muted-foreground">
-              Your brand appears in rotating sponsor slots across all RunStreak pages, rotating every 10 seconds for maximum visibility.
+              Your brand appears in rotating sponsor slots across all RunStreaks pages, rotating every 10 seconds for maximum visibility.
             </p>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold mb-2">Reach committed athletes</h3>
             <p className="text-sm text-muted-foreground">
-              RunStreak users run every single day, invest in quality gear, and obsessively track their performance.
+              RunStreaks users run every single day, invest in quality gear, and obsessively track their performance.
             </p>
           </div>
 

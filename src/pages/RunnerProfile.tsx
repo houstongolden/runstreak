@@ -559,7 +559,7 @@ export default function RunnerProfile() {
                     
                     {runner.joined_runstreak_at && (
                       <div className="text-xs text-muted-foreground text-center">
-                        RunStreak member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                        RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                       </div>
                     )}
                   </div>

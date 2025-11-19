@@ -17,7 +17,7 @@ const BadgeDocs = () => {
               Back to Home
             </Button>
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-instrument font-medium mb-2">RunStreak Badges</h1>
+          <h1 className="text-3xl sm:text-4xl font-instrument font-medium mb-2">RunStreaks Badges</h1>
           <p className="text-muted-foreground text-lg">
             Showcase your running dedication with embeddable badges
           </p>
@@ -28,12 +28,12 @@ const BadgeDocs = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              What are RunStreak Badges?
+              What are RunStreaks Badges?
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground leading-relaxed">
-              RunStreak Badges are dynamic, embeddable images that display your running statistics in real-time. 
+              RunStreaks Badges are dynamic, embeddable images that display your running statistics in real-time. 
               Perfect for GitHub profiles, personal websites, or anywhere you want to show off your running consistency.
             </p>
             <div className="bg-muted/50 p-4 rounded-lg">
@@ -65,7 +65,7 @@ const BadgeDocs = () => {
                 <div className="flex-1 pt-1">
                   <p className="font-medium mb-1">Connect Your Strava</p>
                   <p className="text-sm text-muted-foreground">
-                    First, connect your Strava account to create your RunStreak profile.
+                    First, connect your Strava account to create your RunStreaks profile.
                   </p>
                 </div>
               </li>
@@ -159,7 +159,7 @@ const BadgeDocs = () => {
                 Add your badge to your GitHub profile README using Markdown:
               </p>
               <pre className="p-4 bg-muted rounded-lg text-sm overflow-x-auto">
-                <code>![RunStreak Badge](badge-url-here)</code>
+                <code>![RunStreaks Badge](badge-url-here)</code>
               </pre>
             </div>
 
@@ -171,7 +171,7 @@ const BadgeDocs = () => {
                 Embed in any HTML page using an img tag:
               </p>
               <pre className="p-4 bg-muted rounded-lg text-sm overflow-x-auto">
-                <code>{`<img src="badge-url-here" alt="RunStreak Badge" />`}</code>
+                <code>{`<img src="badge-url-here" alt="RunStreaks Badge" />`}</code>
               </pre>
             </div>
 
@@ -209,7 +209,7 @@ const BadgeDocs = () => {
             <div>
               <h4 className="font-semibold mb-1">Is it free to use?</h4>
               <p className="text-sm text-muted-foreground">
-                Yes! Badges are completely free for all RunStreak users.
+                Yes! Badges are completely free for all RunStreaks users.
               </p>
             </div>
             <Separator />
@@ -226,7 +226,7 @@ const BadgeDocs = () => {
         <div className="mt-8 text-center">
           <Link to="/">
             <Button size="lg" className="gap-2">
-              Get Started with RunStreak
+              Get Started with RunStreaks
             </Button>
           </Link>
         </div>

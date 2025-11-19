@@ -24,7 +24,7 @@ export function AppDownloadSection() {
               Download the App Today
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Add RunStreak to your phone's home screen for quick access to your streak stats
+              Add RunStreaks to your phone's home screen for quick access to your streak stats
             </p>
             <Button
               size="lg"
@@ -41,7 +41,7 @@ export function AppDownloadSection() {
       <Dialog open={showInstructions} onOpenChange={setShowInstructions}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl">Add RunStreak to Your Home Screen</DialogTitle>
+            <DialogTitle className="text-xl sm:text-2xl">Add RunStreaks to Your Home Screen</DialogTitle>
             <DialogDescription className="text-sm sm:text-base">
               Quick access to your streak stats anytime
             </DialogDescription>

@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
     console.log('Fetched athlete profile:', { id: athleteProfile.id, email: athleteProfile.email });
 
     // Create or get Supabase auth user
-    const userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreak.internal`;
+    const userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreaks.internal`;
     let userId: string;
     
     // Check if user already exists

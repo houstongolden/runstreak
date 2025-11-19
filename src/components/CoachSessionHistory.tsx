@@ -96,7 +96,7 @@ export default function CoachSessionHistory({
         {/* Logo at top */}
         <div className="p-4 flex items-center gap-2 border-b">
           <Flame className="h-6 w-6 text-orange-500" />
-          <span className="font-semibold">RunStreak</span>
+          <span className="font-semibold">RunStreaks</span>
         </div>
 
         {/* AI Coach section */}
