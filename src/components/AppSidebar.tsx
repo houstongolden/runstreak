@@ -103,7 +103,7 @@ export function AppSidebar() {
     >
       <SidebarContent className="flex flex-col h-full p-0">
         {/* Logo - Fixed at Top */}
-        <div className="px-4 pt-4 pb-4 border-b border-border/50 flex-shrink-0 bg-sidebar">
+        <div className="px-4 pt-4 pb-4 flex-shrink-0 bg-sidebar">
           <div className="flex items-center gap-0.5">
             <Flame 
               className="h-7 w-7 animate-shiny-text"
@@ -222,7 +222,7 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <div className="px-3 py-2 mt-2 border-t border-border/50 pt-4">
+                    <div className="px-3 py-2 mt-2 pt-4">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">Theme</span>
                         <ThemeToggle />
@@ -321,8 +321,6 @@ export function AppSidebar() {
                 </SidebarGroupContent>
               </SidebarGroup>
 
-              <Separator className="my-2" />
-
               {/* AI Coach Section */}
               <SidebarGroup>
                 <div className="px-2 mb-2">
@@ -373,7 +371,6 @@ export function AppSidebar() {
               {/* Admin Dashboard */}
               {isAdmin && (
                 <>
-                  <Separator className="my-2" />
                   <SidebarGroup>
                     <SidebarGroupContent>
                       <SidebarMenu>
@@ -402,7 +399,7 @@ export function AppSidebar() {
 
         {/* Fixed User Profile at Bottom - Only for authenticated users */}
         {user && (
-          <div className="flex-shrink-0 border-t border-border bg-sidebar">
+          <div className="flex-shrink-0 bg-sidebar">
             <div className="p-3">
               <UserProfileDropdown />
             </div>
