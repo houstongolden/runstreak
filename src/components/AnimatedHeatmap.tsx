@@ -2,56 +2,81 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export function AnimatedHeatmap() {
-  const [activeSquares, setActiveSquares] = useState<Set<number>>(new Set());
+  const [activeSquares, setActiveSquares] = useState<Map<number, number>>(new Map());
   
-  // Generate 12 months × 7 days = 84 squares
-  const totalSquares = 84;
+  // Generate 12 columns (weeks) × 7 rows (days) = 84 squares
+  const totalColumns = 12;
+  const totalRows = 7;
   
   useEffect(() => {
-    let currentIndex = 0;
+    let currentColumn = 0;
+    let currentRow = 0;
+    
     const interval = setInterval(() => {
       setActiveSquares(prev => {
-        const next = new Set(prev);
-        next.add(currentIndex);
-        currentIndex++;
+        const next = new Map(prev);
+        const squareIndex = currentColumn * totalRows + currentRow;
         
-        // Reset animation after all squares are lit
-        if (currentIndex >= totalSquares) {
-          setTimeout(() => {
-            setActiveSquares(new Set());
-            currentIndex = 0;
-          }, 1000);
+        // Randomly assign distance (0 = missed, 1-2 = light orange, 3-5 = medium, 6+ = dark)
+        const distances = [0, 0, 1.5, 2.5, 4, 5.5, 7]; // Some missed days, some runs
+        const randomDistance = distances[currentRow];
+        next.set(squareIndex, randomDistance);
+        
+        currentRow++;
+        
+        // Move to next column after completing 7 rows
+        if (currentRow >= totalRows) {
+          currentRow = 0;
+          currentColumn++;
+          
+          // Reset animation after all columns are filled
+          if (currentColumn >= totalColumns) {
+            setTimeout(() => {
+              setActiveSquares(new Map());
+              currentColumn = 0;
+              currentRow = 0;
+            }, 1000);
+          }
         }
         
         return next;
       });
-    }, 50); // Light up a square every 50ms
+    }, 80); // Light up a square every 80ms (column by column)
     
     return () => clearInterval(interval);
   }, []);
   
+  const getIntensityClass = (distance: number) => {
+    if (distance === 0) return "bg-muted/20"; // Missed day - gray
+    if (distance < 2) return "bg-[hsl(25_80%_85%)]"; // Very light orange (1 mile)
+    if (distance < 4) return "bg-[hsl(25_90%_70%)]"; // Light orange (2-3 miles)
+    if (distance < 6) return "bg-[hsl(22_95%_60%)]"; // Medium orange (4-5 miles)
+    return "bg-[hsl(15_100%_45%)]"; // Dark orange (6+ miles)
+  };
+  
   return (
-    <div className="w-full bg-card/60 backdrop-blur-[40px] border-0 rounded-lg p-6">
-      <h4 className="text-sm font-semibold mb-4 text-foreground">Activity Heatmap</h4>
-      <div className="grid grid-cols-12 gap-1.5">
-        {Array.from({ length: totalSquares }).map((_, i) => {
-          const isActive = activeSquares.has(i);
+    <div className="w-full">
+      <div className="grid gap-1.5" style={{ 
+        gridTemplateColumns: `repeat(${totalColumns}, minmax(0, 1fr))`,
+        gridTemplateRows: `repeat(${totalRows}, minmax(0, 1fr))`
+      }}>
+        {Array.from({ length: totalColumns * totalRows }).map((_, i) => {
+          const distance = activeSquares.get(i);
+          const isActive = distance !== undefined;
+          
           return (
             <div
               key={i}
               className={cn(
                 "aspect-square rounded-sm transition-all duration-300",
                 isActive 
-                  ? "bg-gradient-to-br from-primary to-orange-500 shadow-sm shadow-primary/30 scale-100" 
+                  ? `${getIntensityClass(distance)} shadow-sm scale-100` 
                   : "bg-muted/30 scale-90"
               )}
             />
           );
         })}
       </div>
-      <p className="text-xs text-muted-foreground mt-4 text-center">
-        Visual tracking of your daily running consistency
-      </p>
     </div>
   );
 }
