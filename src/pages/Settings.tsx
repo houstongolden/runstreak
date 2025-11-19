@@ -353,6 +353,17 @@ export default function Settings() {
 
       if (error) throw error;
 
+      // Update user_settings to mark phone as verified
+      const { error: updateError } = await supabase
+        .from('user_settings')
+        .update({ 
+          phone_verified: true,
+          phone_number: settings.phone_number 
+        })
+        .eq('runner_id', currentRunnerId);
+
+      if (updateError) throw updateError;
+
       setSettings({ ...settings, phone_verified: true });
       setShowCodeInput(false);
       setVerificationCode("");
