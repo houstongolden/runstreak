@@ -271,6 +271,7 @@ Deno.serve(async (req) => {
     let streakStartDate = null;
     let lastActivityDate = null;
     let tempStreak = 0;
+    let streakStatus = 'active';
 
     const todayStr = getTodayInTimezone(timezone);
     
@@ -296,42 +297,46 @@ Deno.serve(async (req) => {
       timezone: timezone
     });
     
-    // Check if most recent activity is within the last 2 days (today or yesterday)
-    const mostRecentDate = sortedDates[0];
-    const daysSinceLastActivity = Math.floor((new Date(todayStr).getTime() - new Date(mostRecentDate).getTime()) / (1000 * 60 * 60 * 24));
+    // Calculate current streak by counting consecutive days backwards from most recent activity
+    // Streak is only broken if there's a gap of 2+ days BETWEEN activities
+    let previousDateStr = sortedDates[0]; // Start with most recent
     
-    console.log(`Days since last activity: ${daysSinceLastActivity}`);
-    
-    if (daysSinceLastActivity >= 2) {
-      console.log('Streak is broken - no activity in the last 2 days');
-    } else {
-      // Streak is active - count backwards from most recent activity
-      console.log('Streak is active - counting from most recent activity date');
+    for (let i = 0; i < sortedDates.length; i++) {
+      const currentDateStr = sortedDates[i];
+      const milesForDay = activityDates.get(currentDateStr) || 0;
       
-      // Calculate current streak - must have 1+ miles per day, counting backwards from most recent activity
-      for (let i = 0; i < sortedDates.length; i++) {
-        const currentDateStr = sortedDates[i];
-        const milesForDay = activityDates.get(currentDateStr) || 0;
+      // Check for 1+ mile requirement
+      if (milesForDay < 1.0) {
+        console.log(`Day ${currentDateStr} has insufficient miles: ${milesForDay.toFixed(2)}`);
+        break;
+      }
+      
+      // Check for gaps between activities (only after first activity)
+      if (i > 0) {
+        const daysBetween = Math.floor((new Date(previousDateStr).getTime() - new Date(currentDateStr).getTime()) / (1000 * 60 * 60 * 24));
+        console.log(`Gap between ${previousDateStr} and ${currentDateStr}: ${daysBetween} days`);
         
-        // Calculate expected date string starting from most recent activity
-        const expectedDate = new Date(mostRecentDate);
-        expectedDate.setDate(expectedDate.getDate() - i);
-        const expectedDateStr = expectedDate.toISOString().split('T')[0];
-        
-        console.log(`Streak day ${i}: checking ${currentDateStr} vs ${expectedDateStr}, miles: ${milesForDay.toFixed(2)}`);
-        
-        // Check if this day matches expected date AND has at least 1 mile
-        if (currentDateStr === expectedDateStr && milesForDay >= 1.0) {
-          currentStreakDays++;
-          currentStreakMiles += milesForDay;
-          if (!streakStartDate) streakStartDate = currentDateStr;
-          lastActivityDate = currentDateStr;
-        } else {
-          console.log('Streak broken:', { reason: currentDateStr !== expectedDateStr ? 'date mismatch' : 'insufficient miles' });
+        if (daysBetween > 1) {
+          console.log('Streak broken - gap of more than 1 day between activities');
           break;
         }
       }
+      
+      // This day is part of the streak
+      currentStreakDays++;
+      currentStreakMiles += milesForDay;
+      if (!streakStartDate) streakStartDate = currentDateStr;
+      lastActivityDate = currentDateStr;
+      previousDateStr = currentDateStr;
+      
+      console.log(`Streak day ${i + 1}: ${currentDateStr}, miles: ${milesForDay.toFixed(2)}, total streak: ${currentStreakDays} days`);
     }
+    
+    // Determine streak status based on last activity date
+    const daysSinceLastActivity = Math.floor((new Date(todayStr).getTime() - new Date(sortedDates[0]).getTime()) / (1000 * 60 * 60 * 24));
+    streakStatus = daysSinceLastActivity >= 2 ? 'broken' : 'active';
+    console.log(`Streak status: ${streakStatus} (${daysSinceLastActivity} days since last activity)`);
+
     
     console.log('Streak calculation complete:', {
       currentStreakDays,
