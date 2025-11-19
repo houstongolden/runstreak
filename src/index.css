@@ -80,20 +80,20 @@ All colors MUST be HSL.
     --background: 0 0% 0% / 0;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 100% / 0.03;
+    --card: 0 0% 100% / 0.02;
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100% / 0.05;
+    --popover: 0 0% 100% / 0.04;
     --popover-foreground: 0 0% 98%;
 
     --primary: 16 100% 50%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 16 100% 60%;
 
-    --secondary: 0 0% 100% / 0.03;
+    --secondary: 0 0% 100% / 0.02;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 100% / 0.03;
+    --muted: 0 0% 100% / 0.02;
     --muted-foreground: 0 0% 63%;
 
     --accent: 16 100% 60%;
@@ -111,8 +111,8 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 100% / 0.08;
-    --input: 0 0% 100% / 0.04;
+    --border: 0 0% 100% / 0.06;
+    --input: 0 0% 100% / 0.03;
     --ring: 16 100% 50%;
 
     --radius: 0.75rem;
@@ -133,13 +133,13 @@ All colors MUST be HSL.
     --shadow-glow-accent: 0 0 30px hsl(16 100% 60% / 0.4), 0 0 60px hsl(16 100% 60% / 0.2);
 
     /* Sidebar */
-    --sidebar-background: 0 0% 100% / 0.03;
+    --sidebar-background: 0 0% 100% / 0.02;
     --sidebar-foreground: 0 0% 90%;
     --sidebar-primary: 16 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 100% / 0.05;
+    --sidebar-accent: 0 0% 100% / 0.03;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 100% / 0.08;
+    --sidebar-border: 0 0% 100% / 0.06;
     --sidebar-ring: 16 100% 50%;
   }
 }
@@ -282,17 +282,17 @@ All colors MUST be HSL.
 
   /* Glass morphism */
   .glass {
-    background: hsl(0 0% 100% / 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(0 0% 100% / 0.1);
+    background: hsl(0 0% 100% / 0.04);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid hsl(0 0% 100% / 0.08);
   }
   
   .dark .glass {
-    background: hsl(0 0% 100% / 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(0 0% 100% / 0.08);
+    background: hsl(0 0% 100% / 0.02);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid hsl(0 0% 100% / 0.06);
   }
 
   /* Smooth hover transitions */

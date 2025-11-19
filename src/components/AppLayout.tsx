@@ -21,7 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       
       <div className="w-full min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/80 backdrop-blur-[32px] supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-14 items-center justify-between px-4 gap-4">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
@@ -40,14 +40,14 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
                 {!isHomepage && (
                   <span className="text-xl font-heading font-bold">
-                    <ShinyText text="RunStreaks" speed={5} />
+                    <ShinyText text="RunStreaks" speed={5} className="dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-orange-300 dark:to-orange-500" />
                   </span>
                 )}
                 <svg width="0" height="0" style={{ position: 'absolute' }}>
                   <defs>
                     <linearGradient id="gradient-logo-header" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="hsl(16 100% 50%)" />
-                      <stop offset="100%" stopColor="hsl(14 100% 59%)" />
+                      <stop offset="0%" stopColor="hsl(16 100% 55%)" className="dark:[stop-color:hsl(16_100%_65%)]" />
+                      <stop offset="100%" stopColor="hsl(14 100% 64%)" className="dark:[stop-color:hsl(14_100%_70%)]" />
                     </linearGradient>
                   </defs>
                 </svg>
