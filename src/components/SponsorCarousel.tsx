@@ -65,7 +65,7 @@ export const SponsorCarousel = ({ direction = "left", onAdvertiseClick }: Sponso
   const allSponsors = [...sponsors, ...sponsors, ...sponsors];
 
   return (
-    <div className="w-full overflow-hidden py-4 bg-background border-y border-border lg:hidden">
+    <div className="w-full overflow-hidden py-4 bg-background border-y border-border hidden">
       <div
         ref={scrollRef}
         className="flex gap-3 overflow-x-scroll scrollbar-hide"

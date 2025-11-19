@@ -79,13 +79,13 @@ export function StreakCountdown({ lastActivityDate, variant = "profile", timezon
 
   if (hasRunToday && variant === "profile") {
     return (
-      <Card className="p-6 border border-green-500/20 bg-green-500/5">
-        <div className="text-center space-y-4">
+      <Card className="p-4 border border-green-500/20 bg-green-500/5">
+        <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
-            <CheckCircle className="h-8 w-8 text-green-500" />
-            <h3 className="text-2xl font-bold text-green-500">Streak Safe!</h3>
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            <h3 className="text-base font-bold text-green-500">Streak Safe!</h3>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             You've completed your run for today. Your streak is safe until tomorrow.
           </p>
         </div>
