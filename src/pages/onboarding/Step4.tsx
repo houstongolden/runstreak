@@ -80,7 +80,7 @@ export default function Step4({ runner }: Step4Props) {
       <div className="flex justify-between gap-3">
         <Button
           variant="outline"
-          onClick={() => navigate('../step-3')}
+          onClick={() => navigate('/onboarding/step-3')}
           size="lg"
         >
           Back
