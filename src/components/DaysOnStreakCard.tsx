@@ -42,52 +42,52 @@ export function DaysOnStreakCard({
 
   return (
     <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-primary">
-          <Flame className="h-5 w-5" />
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-1.5 text-primary text-base">
+          <Flame className="h-4 w-4" />
           Days on Streak
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Your consistency matters more than perfection. We celebrate every day you show up.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Since Joining - Most Prominent */}
         {totalDaysSinceJoining > 0 && (
-          <div className="space-y-3 p-4 rounded-lg bg-background/50 border border-primary/10">
+          <div className="space-y-2 p-2.5 rounded-lg bg-background/50 border border-primary/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Since Joining RunStreaks</p>
+                <p className="text-xs text-muted-foreground">Since Joining RunStreaks</p>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-4xl font-bold text-primary">
+                  <span className="text-2xl font-bold text-primary">
                     {daysOnStreakSinceJoining}
                   </span>
-                  <span className="text-lg text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     / {totalDaysSinceJoining} days
                   </span>
                 </div>
               </div>
-              <Badge variant="default" className="text-lg px-4 py-2">
+              <Badge variant="default" className="text-xs px-2 py-1">
                 {percentageSinceJoining}%
               </Badge>
             </div>
-            <Progress value={parseFloat(percentageSinceJoining)} className="h-3" />
+            <Progress value={parseFloat(percentageSinceJoining)} className="h-2" />
             
             {improvement !== null && (
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-1.5 pt-1">
                 {parseFloat(improvement) > 0 ? (
                   <>
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                    <span className="text-sm text-green-500 font-semibold">
+                    <TrendingUp className="h-3 w-3 text-green-500" />
+                    <span className="text-[10px] text-green-500 font-semibold">
                       +{improvement}% improvement since joining
                     </span>
                   </>
                 ) : parseFloat(improvement) < 0 ? (
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground">
                     Keep going! You're building consistency.
                   </span>
                 ) : (
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground">
                     Maintaining your baseline consistency
                   </span>
                 )}
@@ -97,17 +97,17 @@ export function DaysOnStreakCard({
         )}
 
         {/* Recent Periods */}
-        <div className="space-y-3">
-          <p className="text-sm font-semibold">Recent Activity</p>
+        <div className="space-y-2">
+          <p className="text-xs font-semibold">Recent Activity</p>
           
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Last 30 Days</span>
+              <span className="text-xs text-muted-foreground">Last 30 Days</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
+                <span className="text-xs font-semibold">
                   {daysOnStreak30}/30
                 </span>
-                <Badge variant="outline" className="min-w-[60px]">
+                <Badge variant="outline" className="min-w-[50px] text-[10px]">
                   {percentage30}%
                 </Badge>
               </div>
@@ -115,14 +115,14 @@ export function DaysOnStreakCard({
             <Progress value={parseFloat(percentage30)} className="h-2" />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Last 60 Days</span>
+              <span className="text-xs text-muted-foreground">Last 60 Days</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
+                <span className="text-xs font-semibold">
                   {daysOnStreak60}/60
                 </span>
-                <Badge variant="outline" className="min-w-[60px]">
+                <Badge variant="outline" className="min-w-[50px] text-[10px]">
                   {percentage60}%
                 </Badge>
               </div>
@@ -130,14 +130,14 @@ export function DaysOnStreakCard({
             <Progress value={parseFloat(percentage60)} className="h-2" />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Last 90 Days</span>
+              <span className="text-xs text-muted-foreground">Last 90 Days</span>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
+                <span className="text-xs font-semibold">
                   {daysOnStreak90}/90
                 </span>
-                <Badge variant="outline" className="min-w-[60px]">
+                <Badge variant="outline" className="min-w-[50px] text-[10px]">
                   {percentage90}%
                 </Badge>
               </div>
@@ -147,7 +147,7 @@ export function DaysOnStreakCard({
         </div>
 
         {joinedAt && (
-          <div className="text-xs text-muted-foreground flex items-center gap-1 pt-2 border-t">
+          <div className="text-[10px] text-muted-foreground flex items-center gap-1 pt-2 border-t">
             <Calendar className="h-3 w-3" />
             Joined RunStreaks on {new Date(joinedAt).toLocaleDateString('en-US', { 
               month: 'long', 

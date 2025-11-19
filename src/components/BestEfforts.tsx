@@ -146,12 +146,12 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
 
   return (
     <Card className="bg-card/50 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between text-foreground">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" />
-            Personal Bests
-          </div>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between text-foreground">
+            <div className="flex items-center gap-1.5">
+              <Trophy className="h-4 w-4 text-primary" />
+              <span className="text-base">Personal Bests</span>
+            </div>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -189,10 +189,10 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border/50">
-                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Distance</th>
-                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Time</th>
-                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Pace</th>
-                <th className="text-left py-3 px-2 sm:px-4 text-sm font-semibold text-foreground whitespace-nowrap">Date</th>
+                <th className="text-left py-2 px-2 sm:px-4 text-xs font-semibold text-foreground whitespace-nowrap">Distance</th>
+                <th className="text-left py-2 px-2 sm:px-4 text-xs font-semibold text-foreground whitespace-nowrap">Time</th>
+                <th className="text-left py-2 px-2 sm:px-4 text-xs font-semibold text-foreground whitespace-nowrap">Pace</th>
+                <th className="text-left py-2 px-2 sm:px-4 text-xs font-semibold text-foreground whitespace-nowrap">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -203,31 +203,31 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
                     index === 0 ? 'border-t border-border/50' : ''
                   }`}
                 >
-                  <td className="py-3 px-2 sm:px-4">
+                  <td className="py-2 px-2 sm:px-4">
                     <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
-                        <span className="font-semibold text-foreground whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <Trophy className="h-3 w-3 text-primary flex-shrink-0" />
+                        <span className="font-semibold text-foreground whitespace-nowrap text-xs">
                           {DISTANCE_LABELS[effort.distance] || `${(effort.distance / 1000).toFixed(1)}km`}
                         </span>
                       </div>
-                      <span className="text-xs text-muted-foreground ml-6">
+                      <span className="text-[10px] text-muted-foreground ml-5">
                         {effort.is_estimated ? 'Estimated' : 'Actual'}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 px-2 sm:px-4">
-                    <span className="font-mono text-sm sm:text-base text-foreground whitespace-nowrap">
+                  <td className="py-2 px-2 sm:px-4">
+                    <span className="font-mono text-xs text-foreground whitespace-nowrap">
                       {formatTime(effort.elapsed_time)}
                     </span>
                   </td>
-                  <td className="py-3 px-2 sm:px-4">
-                    <span className="text-xs sm:text-sm text-primary font-medium whitespace-nowrap">
+                  <td className="py-2 px-2 sm:px-4">
+                    <span className="text-xs text-primary font-medium whitespace-nowrap">
                       {formatPace(effort.distance, effort.moving_time)}
                     </span>
                   </td>
-                  <td className="py-3 px-2 sm:px-4">
-                    <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                  <td className="py-2 px-2 sm:px-4">
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                       {new Date(effort.start_date).toLocaleDateString('en-US', { 
                         month: 'short',
                         day: 'numeric',

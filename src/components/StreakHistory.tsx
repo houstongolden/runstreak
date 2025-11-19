@@ -48,12 +48,12 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Flame className="h-5 w-5 text-primary" />
-            Streak History
-          </CardTitle>
-        </CardHeader>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-1.5 text-base">
+          <Flame className="h-4 w-4 text-primary" />
+          Streak History
+        </CardTitle>
+      </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -68,12 +68,12 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
   if (streaks.length === 0) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Flame className="h-5 w-5 text-primary" />
-            Streak History
-          </CardTitle>
-        </CardHeader>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-1.5 text-base">
+          <Flame className="h-4 w-4 text-primary" />
+          Streak History
+        </CardTitle>
+      </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center py-8">
             No streaks recorded yet. Keep running for 5+ consecutive days to start building your streak history!
@@ -89,8 +89,8 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Flame className="h-5 w-5 text-primary" />
+        <CardTitle className="flex items-center gap-1.5 text-base">
+          <Flame className="h-4 w-4 text-primary" />
           Streak History
         </CardTitle>
       </CardHeader>
@@ -129,39 +129,39 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
         </div>
 
         {/* All Streaks */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase">All Streaks</h3>
+        <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase">All Streaks</h3>
           {streaks.map((streak, index) => (
             <Card key={streak.id} className="hover:bg-muted/50 transition-colors">
-              <CardContent className="pt-4">
+              <CardContent className="pt-3">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant={index === 0 ? "default" : "secondary"}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Badge variant={index === 0 ? "default" : "secondary"} className="text-[10px]">
                         <Flame className="h-3 w-3 mr-1" />
                         {streak.days_count} days
                       </Badge>
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="text-[10px]">
                         {streak.total_runs} runs
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-1">
+                    <p className="text-xs text-muted-foreground mb-1">
                       <Calendar className="h-3 w-3 inline mr-1" />
                       {format(new Date(streak.start_date), "MMM d, yyyy")} - {format(new Date(streak.end_date), "MMM d, yyyy")}
                     </p>
-                    <div className="flex gap-4 mt-2">
+                    <div className="flex gap-4 mt-1.5">
                       <div>
-                        <p className="text-xs text-muted-foreground">Total Distance</p>
-                        <p className="text-sm font-semibold">{streak.total_miles.toFixed(1)} miles</p>
+                        <p className="text-[10px] text-muted-foreground">Total Distance</p>
+                        <p className="text-xs font-semibold">{streak.total_miles.toFixed(1)} miles</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Avg per Day</p>
-                        <p className="text-sm font-semibold">{streak.average_miles_per_day.toFixed(1)} mi/day</p>
+                        <p className="text-[10px] text-muted-foreground">Avg per Day</p>
+                        <p className="text-xs font-semibold">{streak.average_miles_per_day.toFixed(1)} mi/day</p>
                       </div>
                     </div>
                   </div>
                   {index === 0 && (
-                    <Trophy className="h-6 w-6 text-primary" />
+                    <Trophy className="h-5 w-5 text-primary" />
                   )}
                 </div>
               </CardContent>
