@@ -289,24 +289,43 @@ Deno.serve(async (req) => {
 
     const sortedDates = Array.from(activityDates.keys()).sort().reverse();
     
-    // Calculate current streak
+    console.log('Calculating streak:', {
+      totalActivityDays: sortedDates.length,
+      mostRecentDate: sortedDates[0],
+      todayInTimezone: todayStr,
+      timezone: timezone
+    });
+    
+    // Calculate current streak - must have 1+ miles per day
     for (let i = 0; i < sortedDates.length; i++) {
       const currentDateStr = sortedDates[i];
-      const currentDate = new Date(currentDateStr);
-      const todayDate = new Date(todayStr);
-      const expectedDate = new Date(todayDate);
-      expectedDate.setDate(expectedDate.getDate() - i);
-      expectedDate.setHours(0, 0, 0, 0);
+      const milesForDay = activityDates.get(currentDateStr) || 0;
       
-      if (currentDate.getTime() === expectedDate.getTime()) {
+      // Calculate expected date string (YYYY-MM-DD format)
+      const expectedDate = new Date(todayStr);
+      expectedDate.setDate(expectedDate.getDate() - i);
+      const expectedDateStr = expectedDate.toISOString().split('T')[0];
+      
+      console.log(`Streak day ${i}: checking ${currentDateStr} vs ${expectedDateStr}, miles: ${milesForDay.toFixed(2)}`);
+      
+      // Check if this day matches expected date AND has at least 1 mile
+      if (currentDateStr === expectedDateStr && milesForDay >= 1.0) {
         currentStreakDays++;
-        currentStreakMiles += activityDates.get(sortedDates[i]);
-        if (!streakStartDate) streakStartDate = sortedDates[i];
-        lastActivityDate = sortedDates[i];
+        currentStreakMiles += milesForDay;
+        if (!streakStartDate) streakStartDate = currentDateStr;
+        lastActivityDate = currentDateStr;
       } else {
+        console.log('Streak broken:', { reason: currentDateStr !== expectedDateStr ? 'date mismatch' : 'insufficient miles' });
         break;
       }
     }
+    
+    console.log('Streak calculation complete:', {
+      currentStreakDays,
+      currentStreakMiles: currentStreakMiles.toFixed(2),
+      streakStartDate,
+      lastActivityDate
+    });
 
     // Calculate longest streak
     for (let i = 0; i < sortedDates.length; i++) {
