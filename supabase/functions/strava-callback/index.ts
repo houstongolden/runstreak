@@ -214,19 +214,43 @@ Deno.serve(async (req) => {
       }
 
       // Generate session for returning user and redirect immediately
-      const { data: sessionData, error: sessionError } = await supabase.auth.admin.generateLink({
+      console.log('Creating session for returning user:', userEmail);
+      
+      // Create a signed URL that will automatically log the user in
+      const { data: signInData, error: signInError } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email: userEmail,
       });
 
-      if (sessionError || !sessionData) {
-        console.error('Session generation error:', sessionError);
-        throw new Error('Failed to generate session');
+      if (signInError || !signInData) {
+        console.error('Sign-in link generation error:', signInError);
+        throw new Error('Failed to generate sign-in link');
       }
 
-      const redirectUrl = new URL('https://runstreaks.io');
-      redirectUrl.searchParams.set('access_token', sessionData.properties.action_link.split('#access_token=')[1].split('&')[0]);
-      redirectUrl.searchParams.set('refresh_token', sessionData.properties.action_link.split('&refresh_token=')[1].split('&')[0]);
+      // The properties object contains the action_link with embedded tokens
+      // Redirect to the action_link which will set up the session
+      const actionLink = signInData.properties?.action_link;
+      
+      if (!actionLink) {
+        console.error('No action link in response:', JSON.stringify(signInData, null, 2));
+        throw new Error('Failed to generate authentication link');
+      }
+
+      // Parse the action link to extract token and redirect params
+      // The action link format: https://[project].supabase.co/auth/v1/verify?token=...&type=magiclink&redirect_to=...
+      const actionUrl = new URL(actionLink);
+      const token = actionUrl.searchParams.get('token');
+      const type = actionUrl.searchParams.get('type');
+      
+      if (!token) {
+        console.error('No token in action link');
+        throw new Error('Failed to extract authentication token');
+      }
+
+      // Redirect to our domain with the verification token
+      const redirectUrl = new URL('https://runstreaks.io/auth/callback');
+      redirectUrl.searchParams.set('token_hash', token);
+      redirectUrl.searchParams.set('type', type || 'magiclink');
 
       return new Response(null, {
         status: 302,
