@@ -332,10 +332,20 @@ Deno.serve(async (req) => {
       console.log(`Streak day ${i + 1}: ${currentDateStr}, miles: ${milesForDay.toFixed(2)}, total streak: ${currentStreakDays} days`);
     }
     
-    // Determine streak status based on last activity date
-    const daysSinceLastActivity = Math.floor((new Date(todayStr).getTime() - new Date(sortedDates[0]).getTime()) / (1000 * 60 * 60 * 24));
-    streakStatus = daysSinceLastActivity >= 2 ? 'broken' : 'active';
-    console.log(`Streak status: ${streakStatus} (${daysSinceLastActivity} days since last activity)`);
+    // Determine streak status: only broken if 2+ days have passed since last activity
+    // Using same logic as StreakCountdown component
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = formatInTimeZone(yesterday, timezone, 'yyyy-MM-dd');
+    
+    const lastActivityDateStr = sortedDates[0];
+    const hasRunToday = lastActivityDateStr === todayStr;
+    const hasRunYesterday = lastActivityDateStr === yesterdayStr;
+    
+    // Streak is only broken if last activity was 2+ days ago
+    streakStatus = (hasRunToday || hasRunYesterday) ? 'active' : 'broken';
+    console.log(`Streak status: ${streakStatus} (last activity: ${lastActivityDateStr}, today: ${todayStr}, yesterday: ${yesterdayStr})`);
+
 
     
     console.log('Streak calculation complete:', {
