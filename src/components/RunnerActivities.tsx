@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, Timer } from "lucide-react";
+import { ChevronDown, ChevronUp, Timer, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -43,6 +44,9 @@ interface DailyActivity {
   achievement_count: number | null;
   kudos_count: number | null;
   comment_count: number | null;
+  device_names: any | null;
+  workout_types: any | null;
+  gear_ids: any | null;
 }
 
 interface RunnerActivitiesProps {
@@ -54,28 +58,45 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
+  const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const fetchActivities = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
+        // Fetch activities
+        const { data: activitiesData, error: activitiesError } = await supabase
           .from('daily_activities')
           .select('*')
           .eq('runner_id', runnerId)
           .order('activity_date', { ascending: false })
           .limit(100);
 
-        if (error) throw error;
-        setActivities(data || []);
+        if (activitiesError) throw activitiesError;
+        setActivities(activitiesData || []);
+
+        // Fetch best efforts to identify which activities have PRs
+        const { data: bestEffortsData, error: bestEffortsError } = await supabase
+          .from('best_efforts')
+          .select('start_date')
+          .eq('runner_id', runnerId);
+
+        if (!bestEffortsError && bestEffortsData) {
+          const dates = new Set(
+            bestEffortsData
+              .map(effort => effort.start_date?.split('T')[0])
+              .filter(Boolean) as string[]
+          );
+          setBestEffortDates(dates);
+        }
       } catch (error) {
-        console.error('Error fetching activities:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchActivities();
+    fetchData();
   }, [runnerId]);
 
   const toggleRow = (activityId: string) => {
@@ -143,6 +164,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
             <TableBody>
               {activities.map((activity) => {
                 const isExpanded = expandedRows.has(activity.id);
+                const hasBestEffort = bestEffortDates.has(activity.activity_date);
+                const isDetailed = !!(
+                  activity.average_heartrate ||
+                  activity.average_cadence ||
+                  activity.calories ||
+                  activity.suffer_score
+                );
+                
                 return (
                   <>
                     <TableRow key={activity.id} className="cursor-pointer hover:bg-muted/50">
@@ -154,11 +183,21 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                         )}
                       </TableCell>
                       <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
-                        {(() => {
-                          const [year, month, day] = activity.activity_date.split('-');
-                          const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                          return format(localDate, "MMM d, yy");
-                        })()}
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const [year, month, day] = activity.activity_date.split('-');
+                            const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                            return format(localDate, "MMM d, yy");
+                          })()}
+                          {hasBestEffort && (
+                            <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                          )}
+                          {isDetailed && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                              Detailed
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm py-2" onClick={() => toggleRow(activity.id)}>
                         {activity.run_count}
@@ -259,6 +298,24 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                               <div>
                                 <span className="text-muted-foreground">Type:</span>{' '}
                                 <span className="font-medium">Commute</span>
+                              </div>
+                            )}
+                            {activity.device_names && Array.isArray(activity.device_names) && activity.device_names.length > 0 && (
+                              <div>
+                                <span className="text-muted-foreground">Device:</span>{' '}
+                                <span className="font-medium">{activity.device_names.join(', ')}</span>
+                              </div>
+                            )}
+                            {activity.workout_types && Array.isArray(activity.workout_types) && activity.workout_types.length > 0 && (
+                              <div>
+                                <span className="text-muted-foreground">Workout:</span>{' '}
+                                <span className="font-medium">{activity.workout_types.join(', ')}</span>
+                              </div>
+                            )}
+                            {activity.gear_ids && Array.isArray(activity.gear_ids) && activity.gear_ids.length > 0 && (
+                              <div>
+                                <span className="text-muted-foreground">Gear IDs:</span>{' '}
+                                <span className="font-medium text-[10px]">{activity.gear_ids.join(', ')}</span>
                               </div>
                             )}
                           </div>

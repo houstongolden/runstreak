@@ -175,7 +175,7 @@ export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCal
                       <div className="space-y-1.5">
                         <p className="font-semibold text-xs">Find Best Efforts (Estimates)</p>
                         <p className="text-[10px] text-muted-foreground">
-                          Analyzes your top 20-30 fastest activities to estimate best times. Makes Strava API calls for detailed performance data.
+                          Analyzes your top 20 fastest activities to estimate best times. Makes Strava API calls for detailed performance data.
                         </p>
                       </div>
                     </TooltipContent>
@@ -192,22 +192,23 @@ export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCal
                   <DialogHeader>
                     <DialogTitle>About Personal Best Efforts</DialogTitle>
                     <DialogDescription className="space-y-3 pt-2">
-                      <p>
-                        Your personal best efforts show estimated times for standard running distances (1 mile, 5K, 10K, half marathon, and marathon) based on your activity data.
-                      </p>
-                      <p className="font-semibold text-foreground">How to get accurate best efforts:</p>
-                      <p>
-                        To respect Strava's usage policies and maintain our integration in good standing, we calculate initial estimates from your synced activity data. For more precision:
-                      </p>
-                      <ol className="list-decimal list-inside space-y-1 text-sm">
-                        <li>Initial estimates are calculated from your existing activity data</li>
-                        <li>If you know which activities contain your PRs, expand them in the Activities table above</li>
-                        <li>Click the <span className="font-semibold">"Find Best Efforts"</span> button (stopwatch icon) to fetch full details from Strava</li>
-                        <li>You can extract accurate best efforts from up to <span className="font-semibold">10 activities per week</span></li>
-                      </ol>
-                      <p className="text-xs text-muted-foreground italic">
-                        This approach keeps us in good standing with Strava while letting you manually discover your true personal records.
-                      </p>
+                  <p>
+                    Your personal best efforts show estimated times for standard running distances (1 mile, 5K, 10K, half marathon, and marathon) based on your activity data.
+                  </p>
+                  <p className="font-semibold text-foreground">How to get accurate best efforts:</p>
+                  <p>
+                    To respect Strava's guidelines and maintain our integration in good standing, we calculate initial estimates from your synced data. For more precision:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-sm">
+                    <li>Initial estimates are calculated from your existing activity data</li>
+                    <li>Click the refresh button above to analyze your top 20 fastest activities for better estimates</li>
+                    <li>If you know which activities contain your PRs, expand them in the Activities table above</li>
+                    <li>Click the <span className="font-semibold">"Find Best Efforts"</span> button (stopwatch icon) to fetch full details from Strava</li>
+                    <li>You can extract accurate best efforts from up to <span className="font-semibold">10 activities per week</span></li>
+                  </ol>
+                  <p className="text-xs text-muted-foreground italic">
+                    This approach keeps us in good standing with Strava while letting you manually discover your true personal records.
+                  </p>
                     </DialogDescription>
                   </DialogHeader>
                 </DialogContent>
