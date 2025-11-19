@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserProfileDropdown } from "@/components/UserProfileDropdown";
 import { StreakCountdown } from "@/components/StreakCountdown";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { format } from "date-fns";
 import { Runner } from "@/types";
 
@@ -219,6 +220,14 @@ export function AppSidebar() {
                         </div>
                       </NavLink>
                     </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <div className="px-3 py-2 mt-2 border-t border-border/50 pt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Theme</span>
+                        <ThemeToggle />
+                      </div>
+                    </div>
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
