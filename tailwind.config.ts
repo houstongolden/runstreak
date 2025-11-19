@@ -15,12 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        'pixelify': ['Pixelify Sans', 'sans-serif'],
-        'instrument': ['Instrument Sans', 'sans-serif'],
-        'instrument-serif': ['Instrument Serif', 'serif'],
-        'inter': ['Inter', 'sans-serif'],
-        'mondwest': ['Mondwest', 'serif'],
-        'neubit': ['Neue Bit', 'serif'],
+        heading: ['Space Grotesk', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

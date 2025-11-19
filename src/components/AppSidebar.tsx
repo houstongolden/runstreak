@@ -105,22 +105,22 @@ export function AppSidebar() {
         <div className="px-4 pt-4 pb-4 border-b border-border/50 flex-shrink-0 bg-sidebar">
           <div className="flex items-center gap-0.5 group">
             <Flame 
-              className="h-6 w-6 animate-shiny-text transition-all duration-300 group-hover:scale-110"
+              className="h-7 w-7 animate-shiny-text transition-all duration-300 group-hover:scale-110"
               style={{
                 stroke: 'url(#gradient-logo-sidebar)',
                 fill: 'none',
                 strokeWidth: 2,
-                filter: 'drop-shadow(0 0 8px hsl(22 93% 55% / 0.3))'
+                filter: 'drop-shadow(0 0 12px hsl(16 100% 50% / 0.5)) drop-shadow(0 0 20px hsl(16 100% 50% / 0.3))'
               }}
             />
-            <span className="text-xl font-normal transition-all duration-300 group-hover:scale-105">
+            <span className="text-xl font-heading font-bold transition-all duration-300 group-hover:scale-105">
               <ShinyText text="RunStreaks" speed={5} />
             </span>
             <svg width="0" height="0" style={{ position: 'absolute' }}>
               <defs>
                 <linearGradient id="gradient-logo-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="hsl(16 100% 50%)" />
-                  <stop offset="100%" stopColor="hsl(14 100% 48%)" />
+                  <stop offset="100%" stopColor="hsl(14 100% 59%)" />
                 </linearGradient>
               </defs>
             </svg>

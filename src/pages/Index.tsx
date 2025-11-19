@@ -220,14 +220,14 @@ const Index = () => {
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal flex items-center gap-2.5 sm:gap-3">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold flex items-center gap-2.5 sm:gap-3">
               <Flame 
-                className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 animate-shiny-text"
+                className="h-14 w-14 sm:h-16 sm:w-16 lg:h-18 lg:w-18 animate-shiny-text"
                 style={{
                   stroke: 'url(#gradient-logo)',
                   fill: 'none',
                   strokeWidth: 2,
-                  filter: 'drop-shadow(0 0 12px hsl(22 93% 55% / 0.6)) drop-shadow(0 0 20px hsl(22 93% 55% / 0.3))'
+                  filter: 'drop-shadow(0 0 15px hsl(16 100% 50% / 0.6)) drop-shadow(0 0 25px hsl(16 100% 50% / 0.4))'
                 }}
               />
               <span style={{ marginLeft: '-12px' }}>
@@ -236,8 +236,8 @@ const Index = () => {
               <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
                   <linearGradient id="gradient-logo" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="hsl(25 100% 60%)" />
-                    <stop offset="100%" stopColor="hsl(15 100% 50%)" />
+                    <stop offset="0%" stopColor="hsl(16 100% 50%)" />
+                    <stop offset="100%" stopColor="hsl(14 100% 59%)" />
                   </linearGradient>
                 </defs>
               </svg>
