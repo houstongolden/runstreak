@@ -344,7 +344,7 @@ export default function Admin() {
                   {analytics ? formatNumber(analytics.active_streaks) : '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Avg: {analytics?.avg_streak_days?.toFixed(1) || '0'} days
+                  Avg: {(analytics?.avg_streak_days ?? 0).toFixed(1)} days
                 </p>
               </CardContent>
             </Card>
@@ -420,7 +420,7 @@ export default function Admin() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Avg Streak Length</span>
                   <span className="font-semibold">
-                    {analytics?.avg_streak_days?.toFixed(1) || '0'} days
+                    {(analytics?.avg_streak_days ?? 0).toFixed(1)} days
                   </span>
                 </div>
               </CardContent>
