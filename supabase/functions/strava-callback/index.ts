@@ -248,7 +248,7 @@ Deno.serve(async (req) => {
       }
 
       // Redirect to our domain with the verification token
-      const redirectUrl = new URL('https://runstreaks.io/auth/callback');
+      const redirectUrl = new URL('https://runstreaks.io/');
       redirectUrl.searchParams.set('token_hash', token);
       redirectUrl.searchParams.set('type', type || 'magiclink');
 
