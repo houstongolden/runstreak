@@ -6,6 +6,7 @@ import { StreakCountdownBanner } from "@/components/StreakCountdownBanner";
 import { Flame } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
+import { useTheme } from "next-themes";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,8 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const isHomepage = location.pathname === '/';
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -31,23 +34,29 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <Flame 
                     className="h-7 w-7 animate-shiny-text"
                     style={{
-                      stroke: 'url(#gradient-logo-header)',
+                      stroke: isDark ? 'url(#gradient-logo-dark)' : 'url(#gradient-logo-light)',
                       fill: 'none',
                       strokeWidth: 2,
-                      filter: 'drop-shadow(0 0 12px hsl(16 100% 50% / 0.5)) drop-shadow(0 0 20px hsl(16 100% 50% / 0.3))'
+                      filter: isDark 
+                        ? 'drop-shadow(0 0 12px hsl(16 100% 65% / 0.6)) drop-shadow(0 0 20px hsl(16 100% 65% / 0.4))' 
+                        : 'drop-shadow(0 0 12px hsl(16 100% 50% / 0.5)) drop-shadow(0 0 20px hsl(16 100% 50% / 0.3))'
                     }}
                   />
                 )}
                 {!isHomepage && (
-                  <span className="text-xl font-heading font-bold">
-                    <ShinyText text="RunStreaks" speed={5} className="dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-orange-300 dark:to-orange-500" />
+                  <span className="text-xl font-heading font-bold bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-300 dark:to-orange-400 bg-clip-text text-transparent">
+                    RunStreaks
                   </span>
                 )}
                 <svg width="0" height="0" style={{ position: 'absolute' }}>
                   <defs>
-                    <linearGradient id="gradient-logo-header" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="hsl(16 100% 55%)" className="dark:[stop-color:hsl(16_100%_65%)]" />
-                      <stop offset="100%" stopColor="hsl(14 100% 64%)" className="dark:[stop-color:hsl(14_100%_70%)]" />
+                    <linearGradient id="gradient-logo-light" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="hsl(16 100% 50%)" />
+                      <stop offset="100%" stopColor="hsl(14 100% 59%)" />
+                    </linearGradient>
+                    <linearGradient id="gradient-logo-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="hsl(16 100% 70%)" />
+                      <stop offset="100%" stopColor="hsl(14 100% 75%)" />
                     </linearGradient>
                   </defs>
                 </svg>
