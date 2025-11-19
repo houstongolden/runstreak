@@ -468,12 +468,12 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 mb-16">
-            {/* Step 1 */}
-            <div className="group relative">
-              <div className="h-full p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 animate-fade-in hover-scale">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Step 1: Connect with Strava */}
+            <div className="group relative" style={{ animationDelay: '0ms' }}>
+              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow duration-300">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
                     1
                   </div>
                   <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -487,47 +487,96 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Step 2 */}
+            {/* Step 2: Compete on the Leaderboard */}
             <div className="group relative" style={{ animationDelay: '150ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 animate-fade-in hover-scale">
+              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow duration-300">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
                     2
+                  </div>
+                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
+                  Compete on the Leaderboard
+                </h3>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Watch your rank climb as you maintain your streak and compete with runners worldwide.
+                </p>
+                <AnimatedLeaderboard />
+              </div>
+            </div>
+
+            {/* Step 3: Track Your Progress */}
+            <div className="group relative" style={{ animationDelay: '300ms' }}>
+              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
+                    3
                   </div>
                   <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
                   Track Your Progress
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  View your activity heatmap, best efforts, and compete on the leaderboard. Run at least 1 mile per day to maintain your streak.
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  View your activity heatmap and best efforts. Run at least 1 mile per day to maintain your streak.
                 </p>
+                <AnimatedHeatmap />
               </div>
             </div>
 
-            {/* Step 3 */}
-            <div className="group relative" style={{ animationDelay: '300ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all duration-300 animate-fade-in hover-scale">
+            {/* Step 4: Stay Accountable */}
+            <div className="group relative" style={{ animationDelay: '450ms' }}>
+              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow duration-300">
-                    3
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
+                    4
                   </div>
                   <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
                   Stay Accountable
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Follow other runners, celebrate milestones together, and watch your streak grow day by day.
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Never miss a day with our accountability tools designed to keep your streak alive.
                 </p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Countdown Clock</p>
+                      <p className="text-xs text-muted-foreground">Real-time timer showing hours until your streak breaks</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">SMS Reminders</p>
+                      <p className="text-xs text-muted-foreground">Daily text messages to remind you to complete your mile</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Accountability Partners</p>
+                      <p className="text-xs text-muted-foreground">Get notified when your partner completes their daily run</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Animated Demos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: '450ms' }}>
-            <AnimatedHeatmap />
-            <AnimatedLeaderboard />
           </div>
         </div>
       </section>

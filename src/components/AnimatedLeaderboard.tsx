@@ -50,7 +50,7 @@ export function AnimatedLeaderboard() {
   }, []);
   
   return (
-    <div className="w-full bg-card/60 backdrop-blur-[40px] border-0 rounded-lg p-6">
+    <div className="w-full">
       <h4 className="text-sm font-semibold mb-4 text-foreground flex items-center gap-2">
         <Trophy className="h-4 w-4 text-primary" />
         Live Leaderboard
