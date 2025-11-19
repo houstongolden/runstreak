@@ -157,10 +157,16 @@ All colors MUST be HSL.
   .dark body {
     background-image: url('/images/dark-bg-gradient.jpeg');
     background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-position: center top;
+    background-attachment: scroll;
     background-repeat: no-repeat;
-    opacity: 1;
+    min-height: 100vh;
+  }
+  
+  @media (min-width: 768px) {
+    .dark body {
+      background-attachment: fixed;
+    }
   }
 
   /* Typography System - Consistent header fonts using Space Grotesk */
