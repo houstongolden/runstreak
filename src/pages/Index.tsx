@@ -88,13 +88,43 @@ const Index = () => {
       
       // Check if user is returning from Strava OAuth with session tokens
       const searchParams = new URLSearchParams(window.location.search);
+      const tokenHash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
       const accessToken = searchParams.get('access_token');
       const refreshToken = searchParams.get('refresh_token');
       const stravaStatus = searchParams.get('strava');
       const urlRunnerId = searchParams.get('runnerId');
       const showWelcome = searchParams.get('welcome');
 
-      // Handle returning user authentication
+      // Handle magiclink authentication (from Strava OAuth callback)
+      if (tokenHash && type) {
+        console.log('[Index] Verifying magiclink token...');
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type as any,
+        });
+        
+        if (error) {
+          console.error('[Index] Magiclink verification error:', error);
+          toast({
+            title: "Authentication Failed",
+            description: "Failed to sign in. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          console.log('[Index] Magiclink verified, session established');
+          toast({
+            title: "Welcome Back!",
+            description: "Successfully signed in to your account.",
+          });
+        }
+        
+        // Clean up URL
+        window.history.replaceState({}, '', '/');
+        return;
+      }
+
+      // Handle returning user authentication (legacy method)
       if (accessToken && refreshToken) {
         console.log('[Index] Setting up session for returning user...');
         const { data, error } = await supabase.auth.setSession({
