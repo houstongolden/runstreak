@@ -57,16 +57,16 @@ Deno.serve(async (req) => {
 
     const timezone = runner.timezone || 'America/New_York';
     
-    const getDateInTimezone = (date: Date, tz: string): Date => {
-      const dateStr = date.toLocaleString('en-US', { timeZone: tz });
-      return new Date(dateStr);
-    };
-
-    const getTodayInTimezone = (tz: string): Date => {
+    const getTodayInTimezone = (tz: string): string => {
       const now = new Date();
-      const todayStr = now.toLocaleString('en-US', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
+      const todayStr = now.toLocaleString('en-US', { 
+        timeZone: tz, 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+      });
       const [month, day, year] = todayStr.split('/');
-      return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0));
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     };
 
     if (!activities || activities.length === 0) {
@@ -92,20 +92,26 @@ Deno.serve(async (req) => {
 
     // Calculate streak
     let currentStreakDays = 0;
-    let streakStartDate: Date | null = null;
+    let streakStartDate: string | null = null;
     let currentStreakMiles = 0;
 
-    const todayInTZ = getTodayInTimezone(timezone);
-    todayInTZ.setHours(0, 0, 0, 0);
+    const today = getTodayInTimezone(timezone);
+    
+    // Helper to calculate days difference between two date strings
+    const getDaysDiff = (date1: string, date2: string): number => {
+      const d1 = new Date(date1);
+      const d2 = new Date(date2);
+      return Math.floor((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24));
+    };
 
     // Count consecutive days backwards from most recent activity
     for (let i = 0; i < activities.length; i++) {
       const activity = activities[i];
-      const activityDate = new Date(activity.activity_date + 'T00:00:00Z');
+      const activityDate = activity.activity_date;
       
       if (i === 0) {
         // Check if most recent activity is today or yesterday
-        const daysDiff = Math.floor((todayInTZ.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24));
+        const daysDiff = getDaysDiff(today, activityDate);
         
         if (daysDiff >= 2) {
           // Streak is broken - last activity was 2+ days ago
@@ -117,8 +123,8 @@ Deno.serve(async (req) => {
         currentStreakMiles = activity.distance;
       } else {
         const prevActivity = activities[i - 1];
-        const prevDate = new Date(prevActivity.activity_date + 'T00:00:00Z');
-        const daysDiff = Math.floor((prevDate.getTime() - activityDate.getTime()) / (1000 * 60 * 60 * 24));
+        const prevDate = prevActivity.activity_date;
+        const daysDiff = getDaysDiff(prevDate, activityDate);
         
         if (daysDiff === 1) {
           // Consecutive day found
@@ -143,7 +149,7 @@ Deno.serve(async (req) => {
       .update({
         current_streak_days: currentStreakDays,
         current_streak_miles: currentStreakMiles,
-        streak_start_date: streakStartDate?.toISOString().split('T')[0],
+        streak_start_date: streakStartDate,
         streak_status: streakStatus,
         longest_streak_ever: longestStreak,
         average_miles_per_day: avgMilesPerDay,
@@ -160,7 +166,7 @@ Deno.serve(async (req) => {
       success: true,
       current_streak_days: currentStreakDays,
       current_streak_miles: currentStreakMiles,
-      streak_start_date: streakStartDate?.toISOString().split('T')[0],
+      streak_start_date: streakStartDate,
       message: 'Streak recalculated successfully'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

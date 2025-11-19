@@ -76,13 +76,13 @@ export default function Step3({ runner }: Step3Props) {
       <div className="flex justify-between gap-3">
         <Button
           variant="outline"
-          onClick={() => navigate('../step-2')}
+          onClick={() => navigate('/onboarding/step-2')}
           size="lg"
         >
           Back
         </Button>
         <Button
-          onClick={() => navigate('../step-4')}
+          onClick={() => navigate('/onboarding/step-4')}
           size="lg"
           className="text-base px-8"
         >

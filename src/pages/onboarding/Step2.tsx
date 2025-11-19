@@ -41,7 +41,7 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
       toast.success('Email saved!');
       
       // Navigate to next step immediately
-      setTimeout(() => navigate('../step-3'), 500);
+      setTimeout(() => navigate('/onboarding/step-3'), 500);
     } catch (error) {
       console.error('[Step2] Error saving email:', error);
       toast.error('Failed to save email. Please try again.');
@@ -119,7 +119,7 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
             </Button>
             <Button
               variant="ghost"
-              onClick={() => navigate('../step-3')}
+              onClick={() => navigate('/onboarding/step-3')}
               disabled={isSubmitting}
               size="lg"
             >
@@ -135,7 +135,7 @@ export default function Step2({ runner, leaderboardRank, totalRunners }: Step2Pr
       <div className="flex justify-start gap-3">
         <Button
           variant="outline"
-          onClick={() => navigate('../step-1')}
+          onClick={() => navigate('/onboarding/step-1')}
           size="lg"
           disabled={isSubmitting}
         >
