@@ -38,6 +38,28 @@ const Index = () => {
   const [leaderboardRank, setLeaderboardRank] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [adsEnabled, setAdsEnabled] = useState(false);
+  const [isStravaConnecting, setIsStravaConnecting] = useState(false);
+
+  const handleStravaConnect = async () => {
+    try {
+      setIsStravaConnecting(true);
+      const { data, error } = await supabase.functions.invoke('strava-auth');
+      
+      if (error) throw error;
+      
+      if (data?.authUrl) {
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error('Error connecting to Strava:', error);
+      toast({
+        title: "Error",
+        description: "Failed to connect to Strava. Please try again.",
+        variant: "destructive",
+      });
+      setIsStravaConnecting(false);
+    }
+  };
 
   const fetchRunners = async () => {
     try {
@@ -276,7 +298,11 @@ const Index = () => {
                 size="lg"
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >
-                <Flame className="h-5 w-5 sm:h-6 sm:w-6" />
+                <img 
+                  src="https://www.google.com/s2/favicons?domain=strava.com&sz=32" 
+                  alt="Strava" 
+                  className="h-5 w-5 sm:h-6 sm:w-6" 
+                />
                 Connect with Strava
               </Button>
               <button
@@ -476,14 +502,26 @@ const Index = () => {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
                     1
                   </div>
-                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
                   Connect with Strava
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Sign in with your Strava account. We'll automatically sync your running activities and calculate your current streak.
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Connect with Strava and it will automatically sync your running activities, calculate your current streak, and show you on the leaderboard.
                 </p>
+                <Button
+                  onClick={handleStravaConnect}
+                  disabled={isStravaConnecting}
+                  size="lg"
+                  className="w-full"
+                >
+                  <img 
+                    src="https://www.google.com/s2/favicons?domain=strava.com&sz=32" 
+                    alt="Strava" 
+                    className="mr-2 h-5 w-5" 
+                  />
+                  {isStravaConnecting ? 'Connecting...' : 'Connect with Strava'}
+                </Button>
               </div>
             </div>
 
@@ -494,7 +532,6 @@ const Index = () => {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
                     2
                   </div>
-                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
                   Compete on the Leaderboard
@@ -513,7 +550,6 @@ const Index = () => {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
                     3
                   </div>
-                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
                   Track Your Progress
@@ -532,7 +568,6 @@ const Index = () => {
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-background font-bold text-2xl shadow-lg shadow-primary/20">
                     4
                   </div>
-                  <Flame className="absolute -top-2 -right-2 w-8 h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
                 <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
                   Stay Accountable
