@@ -663,14 +663,14 @@ export default function RunnerProfile() {
               <AccountabilityPartnersSection runnerId={runner.id} />
             )}
 
+            {/* Best Efforts Section */}
+            <BestEfforts runnerId={runner.id} />
+
             {/* AI Analysis Section */}
             <div>
               <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
               <AIAnalysisCards runner={runner} />
             </div>
-
-            {/* Best Efforts Section */}
-            <BestEfforts runnerId={runner.id} />
           </TabsContent>
 
           <TabsContent value="activities" className="mt-6">
