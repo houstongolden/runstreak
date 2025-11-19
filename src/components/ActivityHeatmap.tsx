@@ -18,6 +18,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [clickedDay, setClickedDay] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -168,7 +169,7 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
   const monthLabelPositions = getMonthLabelPositions();
 
   return (
-    <div className="w-full min-w-0 max-w-[350px]">
+    <div className="w-full min-w-0 max-w-[350px]" onClick={() => setClickedDay(null)}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold">Activity Heatmap</h3>
         <div className="flex gap-1">
@@ -228,13 +229,20 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                         return <div key={dayIndex} className="w-3 sm:w-3.5 h-3 sm:h-3.5" />;
                       }
 
+                      const dayKey = `${weekIndex}-${dayIndex}`;
+                      const isOpen = clickedDay === dayKey;
+                      
                       return (
-                        <Tooltip key={dayIndex}>
+                        <Tooltip key={dayIndex} open={isOpen ? true : undefined}>
                           <TooltipTrigger asChild>
                             <div
                               className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm transition-colors hover:ring-2 hover:ring-primary cursor-pointer ${getIntensityClass(
                                 day.distance
                               )}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setClickedDay(isOpen ? null : dayKey);
+                              }}
                             />
                           </TooltipTrigger>
                           <TooltipContent>
