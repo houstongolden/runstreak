@@ -143,8 +143,8 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="h-5 w-5 text-primary" />
+          <CardTitle className="flex items-center gap-1.5 text-base">
+            <Heart className="h-4 w-4 text-primary" />
             Accountability Partners
           </CardTitle>
         </CardHeader>
@@ -160,8 +160,8 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Heart className="h-5 w-5 text-primary" />
+        <CardTitle className="flex items-center gap-1.5 text-base">
+          <Heart className="h-4 w-4 text-primary" />
           Accountability Partners
         </CardTitle>
       </CardHeader>
@@ -169,7 +169,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
         {/* Pending Requests Received */}
         {pendingReceived.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">
+            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase">
               Pending Requests
             </h3>
             <div className="space-y-2">
@@ -180,7 +180,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
                 >
                   <div className="flex items-center gap-3">
                     <Avatar 
-                      className="h-10 w-10 cursor-pointer"
+                      className="h-8 w-8 cursor-pointer"
                       onClick={() => navigate(`/runner/${request.partner_info?.id}`)}
                     >
                       <AvatarImage src={request.partner_info?.avatar_url || undefined} />
@@ -190,7 +190,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
                     </Avatar>
                     <div>
                       <p 
-                        className="font-medium cursor-pointer hover:text-primary"
+                        className="text-sm font-medium cursor-pointer hover:text-primary"
                         onClick={() => navigate(`/runner/${request.partner_info?.id}`)}
                       >
                         {request.partner_info?.display_name}
@@ -234,7 +234,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
         {/* Active Partners */}
         {partners.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">
+            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase">
               Active Partners
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -244,14 +244,14 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
                   className="flex items-center gap-3 p-3 rounded-lg border bg-gradient-to-br from-primary/5 to-background hover:border-primary/50 transition-all cursor-pointer"
                   onClick={() => navigate(`/runner/${partner.partner_info?.id}`)}
                 >
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-10 w-10">
                     <AvatarImage src={partner.partner_info?.avatar_url || undefined} />
                     <AvatarFallback>
                       {partner.partner_info?.display_name?.charAt(0) || "?"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <p className="font-medium">{partner.partner_info?.display_name}</p>
+                    <p className="text-sm font-medium">{partner.partner_info?.display_name}</p>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Flame className="h-3 w-3 text-primary" />
                       {partner.partner_info?.current_streak_days || 0} days
@@ -266,7 +266,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
         {/* Pending Sent */}
         {pendingSent.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase">
+            <h3 className="text-xs font-semibold mb-3 text-muted-foreground uppercase">
               Requests Sent
             </h3>
             <div className="space-y-2">
@@ -276,7 +276,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
                   className="flex items-center gap-3 p-3 rounded-lg border bg-muted/20"
                 >
                   <Avatar 
-                    className="h-10 w-10 cursor-pointer"
+                    className="h-8 w-8 cursor-pointer"
                     onClick={() => navigate(`/runner/${request.partner_info?.id}`)}
                   >
                     <AvatarImage src={request.partner_info?.avatar_url || undefined} />
@@ -286,7 +286,7 @@ export function AccountabilityPartnersSection({ runnerId }: AccountabilityPartne
                   </Avatar>
                   <div className="flex-1">
                     <p 
-                      className="font-medium cursor-pointer hover:text-primary"
+                      className="text-sm font-medium cursor-pointer hover:text-primary"
                       onClick={() => navigate(`/runner/${request.partner_info?.id}`)}
                     >
                       {request.partner_info?.display_name}
