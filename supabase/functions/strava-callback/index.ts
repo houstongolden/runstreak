@@ -558,6 +558,34 @@ Deno.serve(async (req) => {
     }
 
     console.log('Runner data saved successfully');
+
+    // Insert streak history now that we have runner_id
+    if (allStreaks.length > 0) {
+      await supabase
+        .from('streak_history')
+        .delete()
+        .eq('runner_id', savedRunner.id);
+
+      const streakHistoryRecords = allStreaks.map(streak => ({
+        runner_id: savedRunner.id,
+        start_date: streak.start_date,
+        end_date: streak.end_date,
+        days_count: streak.days_count,
+        total_miles: streak.total_miles,
+        average_miles_per_day: streak.average_miles_per_day,
+        total_runs: streak.total_runs,
+      }));
+
+      const { error: streakHistoryError } = await supabase
+        .from('streak_history')
+        .insert(streakHistoryRecords);
+
+      if (streakHistoryError) {
+        console.error('Error inserting streak history:', streakHistoryError);
+      } else {
+        console.log(`Inserted ${allStreaks.length} historical streaks into database`);
+      }
+    }
     
     // Start background sync for full activity data
     const backgroundSync = async () => {
