@@ -96,33 +96,33 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Top Achievements */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-2 mb-6">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Longest Streak</p>
-                  <p className="text-3xl font-bold text-primary">{topStreak.days_count} days</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Longest Streak</p>
+                  <p className="text-2xl font-bold text-primary">{topStreak.days_count} days</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {format(new Date(topStreak.start_date), "MMM d, yyyy")} - {format(new Date(topStreak.end_date), "MMM d, yyyy")}
                   </p>
                 </div>
-                <Trophy className="h-8 w-8 text-primary" />
+                <Trophy className="h-6 w-6 text-primary" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
-            <CardContent className="pt-6">
+            <CardContent className="pt-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Most Miles in a Streak</p>
-                  <p className="text-3xl font-bold text-foreground">{longestMileStreak.total_miles.toFixed(1)} mi</p>
-                  <p className="text-sm text-muted-foreground mt-2">
+                  <p className="text-xs text-muted-foreground mb-1">Most Miles in a Streak</p>
+                  <p className="text-2xl font-bold text-foreground">{longestMileStreak.total_miles.toFixed(1)} mi</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {longestMileStreak.days_count} days ({longestMileStreak.average_miles_per_day.toFixed(1)} mi/day)
                   </p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-secondary" />
+                <TrendingUp className="h-6 w-6 text-secondary" />
               </div>
             </CardContent>
           </Card>
