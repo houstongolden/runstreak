@@ -95,7 +95,7 @@ export default function Step1({ runner, leaderboardRank, totalRunners }: Step1Pr
         .eq('id', runner.id)
         .single();
 
-      if (updatedRunner && updatedRunner.current_streak_days > 0) {
+      if (updatedRunner && updatedRunner.current_streak_days !== null && updatedRunner.current_streak_days !== undefined) {
         // Data is ready! Update state and trigger confetti
         setCurrentRunner(updatedRunner);
         
