@@ -45,10 +45,10 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
     }
 
     return (
-      <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
+      <div className="rounded-lg border border-border/10 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent border-b border-border/30 bg-muted/5">
+            <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
               <TableHead className="w-[80px]">Rank</TableHead>
               <TableHead>Runner</TableHead>
               <TableHead className="text-right">5-Day Weeks</TableHead>
@@ -62,7 +62,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
               return (
                 <TableRow
                   key={runner.id}
-                  className="hover:bg-orange-500/5 hover:backdrop-blur-md transition-all duration-200 cursor-pointer border-b border-border/20 bg-muted/0"
+                  className="hover:bg-orange-500/5 hover:backdrop-blur-md transition-all duration-200 cursor-pointer border-b border-border/10 bg-muted/0"
                 >
                   <TableCell className="font-medium">
                     <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
@@ -128,10 +128,10 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
 
   // Desktop table view
   return (
-    <div className="rounded-lg border border-border/40 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
+    <div className="rounded-lg border border-border/10 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
       <Table>
         <TableHeader>
-          <TableRow className="hover:bg-transparent border-b border-border/30 bg-muted/5">
+          <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
             <TableHead className="w-[80px]">Rank</TableHead>
             <TableHead>Runner</TableHead>
             <TableHead className="text-right">Streak Days</TableHead>
@@ -143,7 +143,7 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
           {sortedRunners.map((runner, index) => (
             <TableRow
               key={runner.id}
-              className="hover:bg-orange-500/5 hover:backdrop-blur-md transition-all duration-200 cursor-pointer border-b border-border/20 bg-muted/0"
+              className="hover:bg-orange-500/5 hover:backdrop-blur-md transition-all duration-200 cursor-pointer border-b border-border/10 bg-muted/0"
             >
               <TableCell className="font-medium">
                 <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
