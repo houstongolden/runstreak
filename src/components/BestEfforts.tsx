@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy } from "lucide-react";
+import { Trophy, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface BestEffort {
   distance: number;
@@ -88,12 +97,44 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
   if (efforts.length === 0) {
     return (
       <Card className="bg-card/50 backdrop-blur border-border/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-foreground">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between text-foreground">
+          <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-primary" />
             Personal Bests
-          </CardTitle>
-        </CardHeader>
+          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>About Personal Best Efforts</DialogTitle>
+                <DialogDescription className="space-y-3 pt-2">
+                  <p>
+                    Your personal best efforts show estimated times for standard running distances (1 mile, 5K, 10K, half marathon, and marathon) based on your activity data.
+                  </p>
+                  <p className="font-semibold text-foreground">How to get accurate best efforts:</p>
+                  <p>
+                    Due to Strava API rate limits (1,000 requests per day for all users), we can't automatically fetch detailed data for every activity. Instead:
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-sm">
+                    <li>Initial estimates are calculated from your existing activity data</li>
+                    <li>If you know which activities contain your PRs, expand them in the Activities table below</li>
+                    <li>Click the <span className="font-semibold">"Find Best Efforts"</span> button (stopwatch icon) to fetch full details from Strava</li>
+                    <li>You can extract accurate best efforts from up to <span className="font-semibold">10 activities per week</span></li>
+                  </ol>
+                  <p className="text-xs text-muted-foreground italic">
+                    This approach ensures we stay within API limits while letting you manually discover your true personal records.
+                  </p>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        </CardTitle>
+      </CardHeader>
         <CardContent>
           <div className="text-muted-foreground">
             No best efforts recorded yet. Sync your Strava data to see your personal records.

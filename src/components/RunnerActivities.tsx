@@ -8,6 +8,12 @@ import { format } from "date-fns";
 import { ChevronDown, ChevronUp, Timer } from "lucide-react";
 import { toast } from "sonner";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Table,
   TableBody,
   TableCell,
@@ -257,16 +263,27 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                             )}
                           </div>
                           <div className="mt-4 flex justify-end">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => extractBestEffort(activity.activity_date)}
-                              disabled={extractingBestEffort === activity.activity_date}
-                              className="gap-2"
-                            >
-                              <Timer className="h-4 w-4" />
-                              {extractingBestEffort === activity.activity_date ? 'Extracting...' : 'Find Best Efforts'}
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => extractBestEffort(activity.activity_date)}
+                                    disabled={extractingBestEffort === activity.activity_date}
+                                    className="gap-2"
+                                  >
+                                    <Timer className="h-4 w-4" />
+                                    {extractingBestEffort === activity.activity_date ? 'Extracting...' : 'Find Best Efforts'}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs">
+                                  <p className="text-xs">
+                                    Click to fetch detailed best effort times from Strava for this activity. Limited to 10 activities per week to protect API rate limits.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                       </TableRow>
