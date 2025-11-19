@@ -24,7 +24,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       
       <div className="w-full min-h-screen">
         {/* Header */}
-        <header className="sticky top-0 z-40 w-full border-b border-border/20 bg-background/40 backdrop-blur-[40px]">
+        <header className="sticky top-0 z-40 w-full bg-background/60 backdrop-blur-[40px]">
           <div className="flex h-14 items-center justify-between px-4 gap-4">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
