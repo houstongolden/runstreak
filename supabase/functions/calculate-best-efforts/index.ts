@@ -119,8 +119,8 @@ Deno.serve(async (req) => {
           is_estimated: true,
         });
         
-        // Track top candidates for detailed fetching (max 10)
-        if (topCandidates.length < 10) {
+        // Track top candidates for detailed fetching (max 30)
+        if (topCandidates.length < 30) {
           topCandidates.push({
             distance: distance,
             activity: bestActivity,
@@ -131,14 +131,14 @@ Deno.serve(async (req) => {
 
     console.log(`Calculated ${estimatedEfforts.length} estimated best efforts`);
 
-    // Step 2: Fetch detailed activity data for top 10 candidates (max 10 API calls)
+    // Step 2: Fetch detailed activity data for top 30 candidates (max 30 API calls)
     const accessToken = runner.strava_access_token;
     let actualEffortsCount = 0;
 
     if (accessToken && topCandidates.length > 0) {
       console.log(`Fetching detailed data for ${topCandidates.length} top candidate activities`);
       
-      for (let i = 0; i < Math.min(topCandidates.length, 10); i++) {
+      for (let i = 0; i < Math.min(topCandidates.length, 30); i++) {
         const candidate = topCandidates[i];
         
         // Need to find the Strava activity ID - look for it in the activity data
