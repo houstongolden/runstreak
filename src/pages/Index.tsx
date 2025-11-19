@@ -220,7 +220,7 @@ const Index = () => {
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-instrument-serif font-normal flex items-center gap-2.5 sm:gap-3">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal flex items-center gap-2.5 sm:gap-3">
               <Flame 
                 className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 animate-shiny-text"
                 style={{
@@ -243,11 +243,11 @@ const Index = () => {
               </svg>
             </h1>
           </div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-instrument font-semibold mb-4 sm:mb-5 tracking-tight leading-tight px-1 sm:px-0">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-semibold mb-4 sm:mb-5 tracking-tight leading-tight px-1 sm:px-0">
             The verified leaderboard for runners<br className="hidden sm:block" /> keeping their streak alive
           </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-inter leading-relaxed">
-            Connect your Strava. Run at least 1 mile per day. Keep your streak alive. <span className="font-semibold text-foreground">100% Free.</span>
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Connect your Strava. Run at least 1 mile per day. Keep your streak alive.
           </p>
         </header>
 

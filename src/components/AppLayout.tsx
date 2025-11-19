@@ -39,7 +39,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   />
                 )}
                 {!isHomepage && (
-                  <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
+                  <span className="text-xl font-normal transition-all duration-300 group-hover:scale-105">
                     <ShinyText text="RunStreaks" speed={5} />
                   </span>
                 )}
