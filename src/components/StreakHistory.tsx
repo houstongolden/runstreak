@@ -96,7 +96,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Top Achievements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-6">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
             <CardContent className="pt-6">
               <div className="flex items-start justify-between">
