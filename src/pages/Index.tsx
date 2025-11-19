@@ -347,7 +347,7 @@ const Index = () => {
           <div className="rounded-xl border-0 bg-card/80 backdrop-blur-[40px] p-4 sm:p-6 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-4 sm:mb-5">
               <Select defaultValue="streak">
-                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border-0 bg-muted/10 backdrop-blur-[32px] hover:bg-muted/20">
+                <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border border-border/40 bg-muted/30 backdrop-blur-[32px] hover:bg-muted/40">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
@@ -356,7 +356,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
               <Select defaultValue="all">
-                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border-0 bg-muted/10 backdrop-blur-[32px] hover:bg-muted/20">
+                <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border border-border/40 bg-muted/30 backdrop-blur-[32px] hover:bg-muted/40">
                   <SelectValue placeholder="Time period" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
