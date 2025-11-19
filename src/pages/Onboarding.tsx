@@ -53,14 +53,32 @@ export default function Onboarding() {
 
   const fetchRunner = async (runnerId: string) => {
     try {
+      console.log('[Onboarding] Fetching runner data for ID:', runnerId);
+      
       // Fetch runner data
       const { data: runnerData, error: runnerError } = await supabase
         .from('runners')
         .select('*')
         .eq('id', runnerId)
-        .single();
+        .maybeSingle();
 
-      if (runnerError) throw runnerError;
+      if (runnerError) {
+        console.error('[Onboarding] Runner fetch error:', runnerError);
+        throw runnerError;
+      }
+      
+      if (!runnerData) {
+        console.error('[Onboarding] No runner found with ID:', runnerId);
+        toast.error('Runner profile not found. Please try connecting Strava again.');
+        setTimeout(() => navigate('/connect'), 2000);
+        return;
+      }
+      
+      console.log('[Onboarding] Runner data loaded:', {
+        id: runnerData.id,
+        display_name: runnerData.display_name,
+        current_streak_days: runnerData.current_streak_days
+      });
 
       // Fetch leaderboard stats
       const { count: totalCount } = await supabase
@@ -73,14 +91,16 @@ export default function Onboarding() {
         .gt('current_streak_days', runnerData.current_streak_days || 0);
 
       const rank = (betterRunners || 0) + 1;
+      
+      console.log('[Onboarding] Leaderboard stats:', { rank, totalRunners: totalCount });
 
       setRunner(runnerData);
       setLeaderboardRank(rank);
       setTotalRunners(totalCount || 0);
     } catch (error) {
-      console.error('Error fetching runner:', error);
+      console.error('[Onboarding] Fatal error fetching runner:', error);
       toast.error('Failed to load runner data');
-      navigate('/');
+      setTimeout(() => navigate('/'), 2000);
     } finally {
       setIsLoading(false);
     }
