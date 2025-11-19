@@ -8,6 +8,7 @@ interface BestEffort {
   elapsed_time: number;
   moving_time: number;
   start_date: string;
+  is_estimated: boolean;
 }
 
 interface BestEffortsProps {
@@ -130,10 +131,15 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
                   }`}
                 >
                   <td className="py-3 px-2 sm:px-4">
-                    <div className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="font-semibold text-foreground whitespace-nowrap">
-                        {DISTANCE_LABELS[effort.distance] || `${(effort.distance / 1000).toFixed(1)}km`}
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-primary flex-shrink-0" />
+                        <span className="font-semibold text-foreground whitespace-nowrap">
+                          {DISTANCE_LABELS[effort.distance] || `${(effort.distance / 1000).toFixed(1)}km`}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-6">
+                        {effort.is_estimated ? 'Estimated' : 'Actual'}
                       </span>
                     </div>
                   </td>

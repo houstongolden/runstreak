@@ -275,6 +275,7 @@ export type Database = {
           distance: number
           elapsed_time: number
           id: string
+          is_estimated: boolean
           moving_time: number
           runner_id: string
           start_date: string | null
@@ -286,6 +287,7 @@ export type Database = {
           distance: number
           elapsed_time: number
           id?: string
+          is_estimated?: boolean
           moving_time: number
           runner_id: string
           start_date?: string | null
@@ -297,6 +299,7 @@ export type Database = {
           distance?: number
           elapsed_time?: number
           id?: string
+          is_estimated?: boolean
           moving_time?: number
           runner_id?: string
           start_date?: string | null
