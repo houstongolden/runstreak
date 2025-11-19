@@ -296,27 +296,40 @@ Deno.serve(async (req) => {
       timezone: timezone
     });
     
-    // Calculate current streak - must have 1+ miles per day
-    for (let i = 0; i < sortedDates.length; i++) {
-      const currentDateStr = sortedDates[i];
-      const milesForDay = activityDates.get(currentDateStr) || 0;
+    // Check if most recent activity is within the last 2 days (today or yesterday)
+    const mostRecentDate = sortedDates[0];
+    const daysSinceLastActivity = Math.floor((new Date(todayStr).getTime() - new Date(mostRecentDate).getTime()) / (1000 * 60 * 60 * 24));
+    
+    console.log(`Days since last activity: ${daysSinceLastActivity}`);
+    
+    if (daysSinceLastActivity >= 2) {
+      console.log('Streak is broken - no activity in the last 2 days');
+    } else {
+      // Streak is active - count backwards from most recent activity
+      console.log('Streak is active - counting from most recent activity date');
       
-      // Calculate expected date string (YYYY-MM-DD format)
-      const expectedDate = new Date(todayStr);
-      expectedDate.setDate(expectedDate.getDate() - i);
-      const expectedDateStr = expectedDate.toISOString().split('T')[0];
-      
-      console.log(`Streak day ${i}: checking ${currentDateStr} vs ${expectedDateStr}, miles: ${milesForDay.toFixed(2)}`);
-      
-      // Check if this day matches expected date AND has at least 1 mile
-      if (currentDateStr === expectedDateStr && milesForDay >= 1.0) {
-        currentStreakDays++;
-        currentStreakMiles += milesForDay;
-        if (!streakStartDate) streakStartDate = currentDateStr;
-        lastActivityDate = currentDateStr;
-      } else {
-        console.log('Streak broken:', { reason: currentDateStr !== expectedDateStr ? 'date mismatch' : 'insufficient miles' });
-        break;
+      // Calculate current streak - must have 1+ miles per day, counting backwards from most recent activity
+      for (let i = 0; i < sortedDates.length; i++) {
+        const currentDateStr = sortedDates[i];
+        const milesForDay = activityDates.get(currentDateStr) || 0;
+        
+        // Calculate expected date string starting from most recent activity
+        const expectedDate = new Date(mostRecentDate);
+        expectedDate.setDate(expectedDate.getDate() - i);
+        const expectedDateStr = expectedDate.toISOString().split('T')[0];
+        
+        console.log(`Streak day ${i}: checking ${currentDateStr} vs ${expectedDateStr}, miles: ${milesForDay.toFixed(2)}`);
+        
+        // Check if this day matches expected date AND has at least 1 mile
+        if (currentDateStr === expectedDateStr && milesForDay >= 1.0) {
+          currentStreakDays++;
+          currentStreakMiles += milesForDay;
+          if (!streakStartDate) streakStartDate = currentDateStr;
+          lastActivityDate = currentDateStr;
+        } else {
+          console.log('Streak broken:', { reason: currentDateStr !== expectedDateStr ? 'date mismatch' : 'insufficient miles' });
+          break;
+        }
       }
     }
     
