@@ -76,9 +76,14 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Pure dark theme - True black background */
+    /* Pure dark theme - True black background with gradient overlay */
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
+    background-image: url('/images/dark-bg-gradient.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
 
     --card: 0 0% 5%;
     --card-foreground: 0 0% 98%;
