@@ -23,6 +23,7 @@ import { AppDownloadSection } from "@/components/AppDownloadSection";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
+import { ScanningAnimation } from "@/components/ScanningAnimation";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -421,6 +422,73 @@ const Index = () => {
 
       {/* Aggregate Stats */}
       <AggregateStatsCard />
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-instrument font-bold text-foreground mb-4">
+              How It Works
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Join the community, track your streak, and stay accountable—automatically synced with Strava.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {/* Step 1 */}
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                1
+              </div>
+              <h3 className="text-xl font-instrument font-semibold text-foreground">
+                Connect with Strava
+              </h3>
+              <p className="text-muted-foreground">
+                Sign in with your Strava account. We'll automatically sync your running activities and calculate your current streak.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                2
+              </div>
+              <h3 className="text-xl font-instrument font-semibold text-foreground">
+                Track Your Progress
+              </h3>
+              <p className="text-muted-foreground">
+                View your activity heatmap, best efforts, and compete on the leaderboard. Run at least 1 mile per day to maintain your streak.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                3
+              </div>
+              <h3 className="text-xl font-instrument font-semibold text-foreground">
+                Stay Accountable
+              </h3>
+              <p className="text-muted-foreground">
+                Follow other runners, celebrate milestones together, and watch your streak grow day by day.
+              </p>
+            </div>
+          </div>
+
+          {/* Animated Demo */}
+          <div className="max-w-2xl mx-auto">
+            <ScanningAnimation 
+              messages={[
+                "Syncing your Strava activities...",
+                "Calculating your current streak...",
+                "Analyzing your running patterns...",
+                "Finding your position on the leaderboard...",
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
       {/* App Download Section */}
       <AppDownloadSection />
