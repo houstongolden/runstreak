@@ -190,9 +190,9 @@ const Index = () => {
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-instrument-serif font-normal flex items-center gap-3 sm:gap-4">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-instrument-serif font-normal flex items-center gap-2.5 sm:gap-3">
               <Flame 
-                className="h-20 w-20 sm:h-24 sm:w-24 lg:h-28 lg:w-28 animate-shiny-text"
+                className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 animate-shiny-text"
                 style={{
                   stroke: 'url(#gradient-logo)',
                   fill: 'none',
