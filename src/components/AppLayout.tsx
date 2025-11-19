@@ -26,10 +26,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               
-              <Link to="/" className="flex items-center gap-0.5 group">
+              <Link to="/" className="flex items-center gap-0.5">
                 {!isHomepage && (
                   <Flame 
-                    className="h-7 w-7 animate-shiny-text transition-all duration-300 group-hover:scale-110"
+                    className="h-7 w-7 animate-shiny-text"
                     style={{
                       stroke: 'url(#gradient-logo-header)',
                       fill: 'none',
@@ -39,7 +39,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   />
                 )}
                 {!isHomepage && (
-                  <span className="text-xl font-heading font-bold transition-all duration-300 group-hover:scale-105">
+                  <span className="text-xl font-heading font-bold">
                     <ShinyText text="RunStreaks" speed={5} />
                   </span>
                 )}
