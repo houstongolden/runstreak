@@ -248,7 +248,7 @@ const Index = () => {
             style={{ backgroundImage: `url(${heroRunningBg})` }}
           />
           {/* White overlay */}
-          <div className="absolute inset-0 bg-white/40" />
+          <div className="absolute inset-0 bg-white/70" />
           {/* Bottom fade to white */}
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </div>
