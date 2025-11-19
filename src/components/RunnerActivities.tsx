@@ -165,11 +165,13 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               {activities.map((activity) => {
                 const isExpanded = expandedRows.has(activity.id);
                 const hasBestEffort = bestEffortDates.has(activity.activity_date);
+                // Only show "Detailed" badge for activities that have been explicitly enriched
+                // with full Strava details (device_names, workout_types, gear_ids are only
+                // available from the detailed activity endpoint, not the summary list)
                 const isDetailed = !!(
-                  activity.average_heartrate ||
-                  activity.average_cadence ||
-                  activity.calories ||
-                  activity.suffer_score
+                  (activity.device_names && Array.isArray(activity.device_names) && activity.device_names.length > 0) ||
+                  (activity.workout_types && Array.isArray(activity.workout_types) && activity.workout_types.length > 0) ||
+                  (activity.gear_ids && Array.isArray(activity.gear_ids) && activity.gear_ids.length > 0)
                 );
                 
                 return (
