@@ -23,7 +23,8 @@ import { AppDownloadSection } from "@/components/AppDownloadSection";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
-import { ScanningAnimation } from "@/components/ScanningAnimation";
+import { AnimatedHeatmap } from "@/components/AnimatedHeatmap";
+import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -523,16 +524,10 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Animated Demo */}
-          <div className="max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '450ms' }}>
-            <ScanningAnimation 
-              messages={[
-                "Syncing your Strava activities...",
-                "Calculating your current streak...",
-                "Analyzing your running patterns...",
-                "Finding your position on the leaderboard...",
-              ]}
-            />
+          {/* Animated Demos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in" style={{ animationDelay: '450ms' }}>
+            <AnimatedHeatmap />
+            <AnimatedLeaderboard />
           </div>
         </div>
       </section>
