@@ -22,6 +22,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Declare EdgeRuntime global for background tasks
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<any>): void;
+};
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -232,49 +237,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    // NEW USER - proceed with activity sync
-    console.log('New user detected - fetching activities for initial sync');
+    // NEW USER - Quick initial setup, then background sync
+    console.log('New user detected - starting quick setup with background sync');
     
-    // MVP: Fetch ALL activities (no page limit)
-    let allActivities: any[] = [];
-    let page = 1;
-    const perPage = 200;
-    
-    console.log('Starting full activity fetch for signup (all pages)...');
-    
-    while (true) {
-      const activitiesResponse = await fetch(
-        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}`,
-        {
-          headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
-        }
-      );
+    // Quick fetch: Just get first page of activities for initial streak calculation
+    const quickActivitiesResponse = await fetch(
+      `https://www.strava.com/api/v3/athlete/activities?per_page=200&page=1`,
+      {
+        headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+      }
+    );
 
-      if (!activitiesResponse.ok) {
-        throw new Error('Failed to fetch activities');
-      }
-
-      const activities = await activitiesResponse.json();
-      
-      if (activities.length === 0) {
-        console.log(`No more activities found at page ${page}`);
-        break;
-      }
-      
-      allActivities = allActivities.concat(activities);
-      console.log(`Fetched page ${page}: ${activities.length} activities (total: ${allActivities.length})`);
-      
-      // Stop if we got fewer than perPage results (no more pages)
-      if (activities.length < perPage) {
-        console.log('Last page reached');
-        break;
-      }
-      
-      page++;
+    if (!quickActivitiesResponse.ok) {
+      throw new Error('Failed to fetch activities');
     }
-    
-    const activities = allActivities;
-    console.log(`Full fetch complete: ${activities.length} total activities for initial sync`);
+
+    const quickActivities = await quickActivitiesResponse.json();
+    console.log(`Quick fetch complete: ${quickActivities.length} activities`);
+    const activities = quickActivities;
 
     // Get runner's timezone from Strava profile, fallback to America/Los_Angeles
     const timezone = athleteProfile.timezone || 'America/Los_Angeles';
@@ -453,64 +433,6 @@ Deno.serve(async (req) => {
 
     console.log(`Identified ${allStreaks.length} historical streaks (5+ days)`);
 
-    // Store daily activities to database
-    console.log('Persisting daily activities to database...');
-    const dailyActivitiesMap = new Map<string, any>();
-
-    for (const activity of runActivities) {
-      const dateStr = convertToLocalDateStr(activity.start_date, timezone);
-      const existing = dailyActivitiesMap.get(dateStr) || { 
-        distance: 0, movingTime: 0, elevationGain: 0, runCount: 0,
-        averageTemp: null, tempCount: 0,
-        heartrates: [], cadences: [], speeds: [],
-        calories: 0, sufferScore: 0, achievements: 0, kudos: 0, comments: 0, photos: 0,
-        trainer: false, commute: false, devices: new Set(), workouts: new Set(), gears: new Set(),
-        maxHR: 0, maxSpeed: 0
-      };
-      
-      // Aggregate temperature
-      const newAverageTemp = activity.average_temp !== undefined && activity.average_temp !== null 
-        ? (((existing.averageTemp || 0) * existing.tempCount) + activity.average_temp) / (existing.tempCount + 1)
-        : existing.averageTemp;
-      
-      // Collect metrics
-      if (activity.average_heartrate) existing.heartrates.push(activity.average_heartrate);
-      if (activity.average_cadence) existing.cadences.push(activity.average_cadence);
-      if (activity.average_speed) existing.speeds.push(activity.average_speed);
-      
-      // Add device/workout/gear info
-      if (activity.device_name) existing.devices.add(activity.device_name);
-      if (activity.workout_type) existing.workouts.add(activity.workout_type);
-      if (activity.gear_id) existing.gears.add(activity.gear_id);
-      
-      dailyActivitiesMap.set(dateStr, {
-        distance: existing.distance + (activity.distance / 1609.34),
-        movingTime: existing.movingTime + activity.moving_time,
-        elevationGain: existing.elevationGain + (activity.total_elevation_gain * 3.28084),
-        runCount: existing.runCount + 1,
-        averageTemp: newAverageTemp,
-        tempCount: activity.average_temp !== undefined && activity.average_temp !== null ? existing.tempCount + 1 : existing.tempCount,
-        heartrates: existing.heartrates,
-        cadences: existing.cadences,
-        speeds: existing.speeds,
-        calories: existing.calories + (activity.calories || 0),
-        sufferScore: Math.max(existing.sufferScore, activity.suffer_score || 0),
-        achievements: existing.achievements + (activity.achievement_count || 0),
-        kudos: existing.kudos + (activity.kudos_count || 0),
-        comments: existing.comments + (activity.comment_count || 0),
-        photos: existing.photos + (activity.photo_count || 0),
-        trainer: existing.trainer || (activity.trainer === true),
-        commute: existing.commute || (activity.commute === true),
-        devices: existing.devices,
-        workouts: existing.workouts,
-        gears: existing.gears,
-        maxHR: Math.max(existing.maxHR || 0, activity.max_heartrate || 0),
-        maxSpeed: Math.max(existing.maxSpeed || 0, activity.max_speed || 0),
-      });
-    }
-
-    console.log(`Persisted ${dailyActivitiesMap.size} days of activities structure (will save after runner upsert)`);
-
     // Prepare comprehensive runner data with all available stats
     // Only update email if Strava provides one, otherwise keep existing email
     const shouldUpdateEmail = !!athleteProfile.email;
@@ -590,46 +512,153 @@ Deno.serve(async (req) => {
 
     console.log('Runner data saved successfully');
     
-    // Update daily activities with correct runner_id now that runner is saved
-    if (dailyActivitiesMap.size > 0) {
-      console.log(`Updating ${dailyActivitiesMap.size} daily activities with runner ID...`);
-      for (const [dateStr, data] of dailyActivitiesMap.entries()) {
-        const avgHR = data.heartrates.length > 0 ? data.heartrates.reduce((a: number, b: number) => a + b, 0) / data.heartrates.length : null;
-        const avgCadence = data.cadences.length > 0 ? data.cadences.reduce((a: number, b: number) => a + b, 0) / data.cadences.length : null;
-        const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a: number, b: number) => a + b, 0) / data.speeds.length : null;
+    // Start background sync for full activity data
+    const backgroundSync = async () => {
+      console.log('Starting background sync for full activity history...');
+      
+      try {
+        // Fetch ALL activities (all pages)
+        let allActivities: any[] = [];
+        let page = 1;
+        const perPage = 200;
         
-        await supabase
-          .from('daily_activities')
-          .upsert({
-            runner_id: savedRunner.id,
-            activity_date: dateStr,
-            distance: data.distance,
-            moving_time: data.movingTime,
-            elevation_gain: data.elevationGain,
-            run_count: data.runCount,
-            average_temp: data.averageTemp,
-            average_heartrate: avgHR,
-            max_heartrate: data.maxHR,
-            average_cadence: avgCadence,
-            average_speed: avgSpeed,
-            max_speed: data.maxSpeed,
-            calories: data.calories,
-            suffer_score: data.sufferScore,
-            achievement_count: data.achievements,
-            kudos_count: data.kudos,
-            comment_count: data.comments,
-            photo_count: data.photos,
-            trainer: data.trainer,
-            commute: data.commute,
-            device_names: Array.from(data.devices),
-            workout_types: Array.from(data.workouts),
-            gear_ids: Array.from(data.gears),
-          }, {
-            onConflict: 'runner_id,activity_date'
+        while (true) {
+          const activitiesResponse = await fetch(
+            `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}`,
+            {
+              headers: { 'Authorization': `Bearer ${tokenData.access_token}` },
+            }
+          );
+
+          if (!activitiesResponse.ok) {
+            console.error('Failed to fetch activities in background sync');
+            break;
+          }
+
+          const pageActivities = await activitiesResponse.json();
+          
+          if (pageActivities.length === 0) {
+            console.log(`Background sync: No more activities at page ${page}`);
+            break;
+          }
+          
+          allActivities = allActivities.concat(pageActivities);
+          console.log(`Background sync: Fetched page ${page}: ${pageActivities.length} activities (total: ${allActivities.length})`);
+          
+          if (pageActivities.length < perPage) {
+            console.log('Background sync: Last page reached');
+            break;
+          }
+          
+          page++;
+        }
+        
+        console.log(`Background sync: Fetched ${allActivities.length} total activities`);
+        
+        // Filter run activities
+        const runActivities = allActivities.filter((a: any) => a.type === 'Run');
+        console.log(`Background sync: Processing ${runActivities.length} run activities`);
+        
+        // Build daily activities map
+        const dailyActivitiesMap = new Map<string, any>();
+        
+        for (const activity of runActivities) {
+          const dateStr = convertToLocalDateStr(activity.start_date, timezone);
+          const existing = dailyActivitiesMap.get(dateStr) || { 
+            distance: 0, movingTime: 0, elevationGain: 0, runCount: 0,
+            averageTemp: null, tempCount: 0,
+            heartrates: [], cadences: [], speeds: [],
+            calories: 0, sufferScore: 0, achievements: 0, kudos: 0, comments: 0, photos: 0,
+            trainer: false, commute: false, devices: new Set(), workouts: new Set(), gears: new Set(),
+            maxHR: 0, maxSpeed: 0
+          };
+          
+          const newAverageTemp = activity.average_temp !== undefined && activity.average_temp !== null 
+            ? (((existing.averageTemp || 0) * existing.tempCount) + activity.average_temp) / (existing.tempCount + 1)
+            : existing.averageTemp;
+          
+          if (activity.average_heartrate) existing.heartrates.push(activity.average_heartrate);
+          if (activity.average_cadence) existing.cadences.push(activity.average_cadence);
+          if (activity.average_speed) existing.speeds.push(activity.average_speed);
+          
+          if (activity.device_name) existing.devices.add(activity.device_name);
+          if (activity.workout_type) existing.workouts.add(activity.workout_type);
+          if (activity.gear_id) existing.gears.add(activity.gear_id);
+          
+          dailyActivitiesMap.set(dateStr, {
+            distance: existing.distance + (activity.distance / 1609.34),
+            movingTime: existing.movingTime + activity.moving_time,
+            elevationGain: existing.elevationGain + (activity.total_elevation_gain * 3.28084),
+            runCount: existing.runCount + 1,
+            averageTemp: newAverageTemp,
+            tempCount: activity.average_temp !== undefined && activity.average_temp !== null ? existing.tempCount + 1 : existing.tempCount,
+            heartrates: existing.heartrates,
+            cadences: existing.cadences,
+            speeds: existing.speeds,
+            calories: existing.calories + (activity.calories || 0),
+            sufferScore: Math.max(existing.sufferScore, activity.suffer_score || 0),
+            achievements: existing.achievements + (activity.achievement_count || 0),
+            kudos: existing.kudos + (activity.kudos_count || 0),
+            comments: existing.comments + (activity.comment_count || 0),
+            photos: existing.photos + (activity.photo_count || 0),
+            trainer: existing.trainer || (activity.trainer === true),
+            commute: existing.commute || (activity.commute === true),
+            devices: existing.devices,
+            workouts: existing.workouts,
+            gears: existing.gears,
+            maxHR: Math.max(existing.maxHR || 0, activity.max_heartrate || 0),
+            maxSpeed: Math.max(existing.maxSpeed || 0, activity.max_speed || 0),
           });
+        }
+        
+        console.log(`Background sync: Persisting ${dailyActivitiesMap.size} days of activities...`);
+        
+        // Persist to database
+        for (const [dateStr, data] of dailyActivitiesMap.entries()) {
+          const avgHR = data.heartrates.length > 0 ? data.heartrates.reduce((a: number, b: number) => a + b, 0) / data.heartrates.length : null;
+          const avgCadence = data.cadences.length > 0 ? data.cadences.reduce((a: number, b: number) => a + b, 0) / data.cadences.length : null;
+          const avgSpeed = data.speeds.length > 0 ? data.speeds.reduce((a: number, b: number) => a + b, 0) / data.speeds.length : null;
+          
+          await supabase
+            .from('daily_activities')
+            .upsert({
+              runner_id: savedRunner.id,
+              activity_date: dateStr,
+              distance: data.distance,
+              moving_time: data.movingTime,
+              elevation_gain: data.elevationGain,
+              run_count: data.runCount,
+              average_temp: data.averageTemp,
+              average_heartrate: avgHR,
+              max_heartrate: data.maxHR,
+              average_cadence: avgCadence,
+              average_speed: avgSpeed,
+              max_speed: data.maxSpeed,
+              calories: data.calories,
+              suffer_score: data.sufferScore,
+              achievement_count: data.achievements,
+              kudos_count: data.kudos,
+              comment_count: data.comments,
+              photo_count: data.photos,
+              trainer: data.trainer,
+              commute: data.commute,
+              device_names: Array.from(data.devices),
+              workout_types: Array.from(data.workouts),
+              gear_ids: Array.from(data.gears),
+            }, {
+              onConflict: 'runner_id,activity_date'
+            });
+        }
+        
+        console.log('Background sync: Daily activities persisted successfully');
+      } catch (error) {
+        console.error('Background sync error:', error);
       }
-      console.log('Daily activities updated successfully');
-    }
+    };
+    
+    // Run background sync without awaiting (using EdgeRuntime.waitUntil)
+    EdgeRuntime.waitUntil(backgroundSync());
+    console.log('Background sync started, proceeding with redirect...');
     
     // Determine if this is a new user
     const isNewUser = !existingRunner;
@@ -674,10 +703,10 @@ Deno.serve(async (req) => {
     
     console.log('Session tokens generated successfully');
     
-    // NEW users: Full activity sync completed during OAuth callback
+    // NEW users: Quick redirect with background sync running
     // RETURNING users: No sync needed, only authentication
     // All future activity updates will come through webhooks
-    console.log(isNewUser ? 'New user - full sync completed, future updates via webhook only' : 'Returning user - no sync needed');
+    console.log(isNewUser ? 'New user - redirecting to onboarding, background sync running' : 'Returning user - no sync needed');
     
     // Build redirect URL with session tokens for client-side auth
     const redirectUrl = isNewUser 
