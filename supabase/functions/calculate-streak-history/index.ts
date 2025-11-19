@@ -11,27 +11,25 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const { runnerId } = await req.json();
+
+    if (!runnerId) {
+      return new Response(JSON.stringify({ error: 'runnerId is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const { data: { user } } = await supabaseClient.auth.getUser(
-      req.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-    );
-    
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // Get runner
     const { data: runner, error: runnerError } = await supabaseClient
       .from('runners')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('id', runnerId)
       .single();
 
     if (runnerError || !runner) {
