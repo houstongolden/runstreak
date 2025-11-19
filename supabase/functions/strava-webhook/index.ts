@@ -207,7 +207,7 @@ Deno.serve(async (req) => {
                 return;
               }
 
-              console.log('Activity saved to database, recalculating streak');
+              console.log('Activity saved to database, running calculations');
 
               // Recalculate streak from database (0 API calls)
               const { error: recalcError } = await supabase.functions.invoke(
@@ -219,10 +219,37 @@ Deno.serve(async (req) => {
 
               if (recalcError) {
                 console.error('Error recalculating streak:', recalcError);
-                return;
+              } else {
+                console.log('Streak recalculated successfully');
               }
 
-              console.log('Streak recalculated successfully');
+              // Calculate best efforts from database (0 API calls)
+              const { error: bestEffortsError } = await supabase.functions.invoke(
+                'calculate-best-efforts',
+                {
+                  body: { runnerId: runner.id },
+                }
+              );
+
+              if (bestEffortsError) {
+                console.error('Error calculating best efforts:', bestEffortsError);
+              } else {
+                console.log('Best efforts calculated successfully');
+              }
+
+              // Calculate streak history from database (0 API calls)
+              const { error: historyError } = await supabase.functions.invoke(
+                'calculate-streak-history',
+                {
+                  body: { runnerId: runner.id },
+                }
+              );
+
+              if (historyError) {
+                console.error('Error calculating streak history:', historyError);
+              } else {
+                console.log('Streak history calculated successfully');
+              }
 
               // Check if streak milestone reached
               const { data: updatedRunner } = await supabase
