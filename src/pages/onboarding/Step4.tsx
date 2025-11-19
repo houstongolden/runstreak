@@ -66,7 +66,7 @@ export default function Step4({ runner }: Step4Props) {
         </Card>
 
         <p className="text-base text-muted-foreground font-instrument">
-          RunStreak keeps you accountable to your running goals. Day 1 starts now!
+          RunStreaks keeps you accountable to your running goals. Day 1 starts now!
         </p>
         
         <div className="bg-muted/50 p-6 rounded-lg">

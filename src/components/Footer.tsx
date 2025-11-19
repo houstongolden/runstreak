@@ -55,7 +55,7 @@ export function Footer() {
 
             {/* About */}
             <div>
-              <h3 className="font-semibold mb-4 text-foreground">About RunStreak</h3>
+              <h3 className="font-semibold mb-4 text-foreground">About RunStreaks</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
                   <a href="/story" className="hover:text-foreground transition-colors">
@@ -93,7 +93,7 @@ export function Footer() {
 
           <div className="pt-8 border-t border-border text-center space-y-3">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} RunStreak. Built by{" "}
+              © {new Date().getFullYear()} RunStreaks. Built by{" "}
               <a
                 href="https://bamf.com"
                 target="_blank"
@@ -110,7 +110,7 @@ export function Footer() {
           <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none">
             <div className="flex items-center justify-center relative">
               <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
-                RUNSTREAK
+                RUNSTREAKS
               </h2>
               {/* Gradient fade overlay */}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none"></div>

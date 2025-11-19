@@ -69,7 +69,7 @@ export default function UnverifiedAccountBanner() {
         <AlertCircle className="h-4 w-4 text-orange-500 mt-0.5" />
         <div className="flex-1">
           <AlertDescription className="text-sm">
-            <strong>Verify your account</strong> to secure your RunStreak profile and unlock all features.
+            <strong>Verify your account</strong> to secure your RunStreaks profile and unlock all features.
           </AlertDescription>
         </div>
         <div className="flex items-center gap-2">

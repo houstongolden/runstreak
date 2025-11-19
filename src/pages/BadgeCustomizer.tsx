@@ -46,8 +46,8 @@ const BadgeCustomizer = () => {
   const badgeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/badge?id=${id}&stat1=${stat1}&stat2=${stat2}&theme=${theme}`;
   
   const embedCode = {
-    html: `<img src="${badgeUrl}" alt="RunStreak Badge" />`,
-    markdown: `![RunStreak Badge](${badgeUrl})`,
+    html: `<img src="${badgeUrl}" alt="RunStreaks Badge" />`,
+    markdown: `![RunStreaks Badge](${badgeUrl})`,
     url: badgeUrl,
   };
 

@@ -86,9 +86,9 @@ const generateBadgeSVG = (
           filter="url(#shadow-${rank})"/>
   </g>
   
-  <!-- RunStreak Text with Brand Gradient -->
+  <!-- RunStreaks Text with Brand Gradient -->
   <text x="68" y="42" font-family="'Instrument Serif', serif" font-size="26" font-weight="600" 
-        fill="url(#brand-gradient-${rank})" letter-spacing="0.5">RunStreak</text>
+        fill="url(#brand-gradient-${rank})" letter-spacing="0.5">RunStreaks</text>
   
   <!-- Runner Name -->
   <text x="24" y="75" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="500" 

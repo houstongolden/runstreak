@@ -90,7 +90,7 @@ export default function Auth() {
           </div>
           <CardTitle className="text-3xl">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to your RunStreak account
+            Sign in to your RunStreaks account
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

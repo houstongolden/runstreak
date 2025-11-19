@@ -289,7 +289,7 @@ export default function Admin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-instrument font-medium">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage your RunStreak application</p>
+          <p className="text-muted-foreground">Manage your RunStreaks application</p>
         </div>
         <div className="flex items-center gap-3">
           <Button

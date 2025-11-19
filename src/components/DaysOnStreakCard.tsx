@@ -57,7 +57,7 @@ export function DaysOnStreakCard({
           <div className="space-y-3 p-4 rounded-lg bg-background/50 border border-primary/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Since Joining RunStreak</p>
+                <p className="text-sm text-muted-foreground">Since Joining RunStreaks</p>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-4xl font-bold text-primary">
                     {daysOnStreakSinceJoining}
@@ -149,7 +149,7 @@ export function DaysOnStreakCard({
         {joinedAt && (
           <div className="text-xs text-muted-foreground flex items-center gap-1 pt-2 border-t">
             <Calendar className="h-3 w-3" />
-            Joined RunStreak on {new Date(joinedAt).toLocaleDateString('en-US', { 
+            Joined RunStreaks on {new Date(joinedAt).toLocaleDateString('en-US', { 
               month: 'long', 
               day: 'numeric', 
               year: 'numeric' 

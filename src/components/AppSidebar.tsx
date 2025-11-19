@@ -114,7 +114,7 @@ export function AppSidebar() {
               }}
             />
             <span className="font-instrument-serif text-xl font-normal transition-all duration-300 group-hover:scale-105">
-              <ShinyText text="RunStreak" speed={5} />
+              <ShinyText text="RunStreaks" speed={5} />
             </span>
             <svg width="0" height="0" style={{ position: 'absolute' }}>
               <defs>
