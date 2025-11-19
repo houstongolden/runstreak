@@ -11,7 +11,7 @@ export function Footer() {
       <AppDownloadSection />
 
       {/* Footer */}
-      <footer className="border-t border-border pt-12 pb-8 bg-background">
+      <footer className="border-t border-border pt-12 pb-8 bg-background relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 lg:px-[240px]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Explore */}
@@ -105,16 +105,16 @@ export function Footer() {
               .
             </p>
           </div>
+        </div>
 
-          {/* Large background text */}
-          <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none">
-            <div className="flex items-center justify-center relative">
-              <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
-                RUNSTREAKS
-              </h2>
-              {/* Gradient fade overlay */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none"></div>
-            </div>
+        {/* Large background text - Full width outside container */}
+        <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none w-full">
+          <div className="flex items-center justify-center relative">
+            <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
+              RUNSTREAKS
+            </h2>
+            {/* Gradient fade overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none"></div>
           </div>
         </div>
       </footer>
