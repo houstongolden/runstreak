@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setRunnerId(data.id);
         setRunnerData({ display_name: data.display_name, avatar_url: data.avatar_url });
       } else {
-        console.warn('[AuthContext] No runner found for user_id:', userId);
+        console.log('[AuthContext] No runner profile linked (admin-only account)');
       }
     } catch (error) {
       console.error('[AuthContext] Exception fetching runner ID:', error);
