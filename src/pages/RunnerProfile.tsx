@@ -356,6 +356,7 @@ export default function RunnerProfile() {
       }
 
       const { error } = await supabase.functions.invoke('calculate-best-efforts', {
+        body: { runnerId: runner.id },
         headers: {
           Authorization: `Bearer ${session.access_token}`
         }
