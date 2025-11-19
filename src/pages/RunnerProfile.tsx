@@ -366,7 +366,7 @@ export default function RunnerProfile() {
 
       toast({
         title: "Best efforts calculated!",
-        description: "Your estimated best efforts have been updated. Check individual activities for more precise times.",
+        description: "Your estimated best efforts have been updated based on your activity data.",
       });
 
       // Refresh the page to show updated best efforts
