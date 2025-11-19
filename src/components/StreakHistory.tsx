@@ -117,7 +117,7 @@ export function StreakHistory({ runnerId }: StreakHistoryProps) {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Most Miles in a Streak</p>
-                  <p className="text-2xl font-bold text-foreground">{longestMileStreak.total_miles.toFixed(1)} mi</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground whitespace-nowrap overflow-hidden text-ellipsis">{longestMileStreak.total_miles.toFixed(1)} mi</p>
                   <p className="text-[10px] text-muted-foreground mt-1">
                     {longestMileStreak.days_count} days ({longestMileStreak.average_miles_per_day.toFixed(1)} mi/day)
                   </p>
