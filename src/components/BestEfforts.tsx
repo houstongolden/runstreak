@@ -167,16 +167,16 @@ export default function BestEfforts({ runnerId }: BestEffortsProps) {
                   </p>
                   <p className="font-semibold text-foreground">How to get accurate best efforts:</p>
                   <p>
-                    Due to Strava API rate limits (1,000 requests per day for all users), we can't automatically fetch detailed data for every activity. Instead:
+                    To respect Strava's usage policies and maintain our integration in good standing, we calculate initial estimates from your synced activity data. For more precision:
                   </p>
                   <ol className="list-decimal list-inside space-y-1 text-sm">
                     <li>Initial estimates are calculated from your existing activity data</li>
-                    <li>If you know which activities contain your PRs, expand them in the Activities table below</li>
+                    <li>If you know which activities contain your PRs, expand them in the Activities table above</li>
                     <li>Click the <span className="font-semibold">"Find Best Efforts"</span> button (stopwatch icon) to fetch full details from Strava</li>
                     <li>You can extract accurate best efforts from up to <span className="font-semibold">10 activities per week</span></li>
                   </ol>
                   <p className="text-xs text-muted-foreground italic">
-                    This approach ensures we stay within API limits while letting you manually discover your true personal records.
+                    This approach keeps us in good standing with Strava while letting you manually discover your true personal records.
                   </p>
                 </DialogDescription>
               </DialogHeader>
