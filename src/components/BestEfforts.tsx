@@ -168,29 +168,16 @@ export default function BestEfforts({ runnerId, isOwnProfile, onCalculate, isCal
             </div>
             <div className="flex items-center gap-1">
               {isOwnProfile && onCalculate && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={onCalculate}
-                        disabled={isCalculating}
-                        className="h-8 w-8"
-                      >
-                        <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-sm p-3">
-                      <div className="space-y-1.5">
-                        <p className="font-semibold text-xs">Find Best Efforts (Estimates)</p>
-                        <p className="text-[10px] text-muted-foreground">
-                          Analyzes your top 20 fastest activities to estimate best times. Makes Strava API calls for detailed performance data.
-                        </p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={onCalculate}
+                  disabled={isCalculating}
+                  className="h-7 text-xs gap-1.5"
+                >
+                  <RefreshCw className={`h-3 w-3 ${isCalculating ? 'animate-spin' : ''}`} />
+                  Calculate Best Efforts
+                </Button>
               )}
               <Dialog>
                 <DialogTrigger asChild>

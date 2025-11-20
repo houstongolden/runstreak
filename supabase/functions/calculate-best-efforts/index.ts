@@ -5,13 +5,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Standard distances for best efforts (in meters)
+// All 14 standard distances for best efforts (in meters)
 const STANDARD_DISTANCES = [
-  1609,    // 1 mile
-  5000,    // 5k
-  10000,   // 10k
-  21097,   // Half Marathon
-  42195,   // Marathon
+  400,    // 400m
+  800,    // 800m
+  1000,   // 1km
+  1609,   // 1 mile
+  3219,   // 2 miles
+  5000,   // 5k
+  10000,  // 10k
+  15000,  // 15k
+  16093,  // 10 miles
+  20000,  // 20k
+  21097,  // Half Marathon
+  30000,  // 30k
+  42195,  // Marathon
+  50000,  // 50k
 ];
 
 Deno.serve(async (req) => {
@@ -79,6 +88,7 @@ Deno.serve(async (req) => {
       moving_time: number;
       start_date: string;
       is_estimated: boolean;
+      is_current_pr: boolean;
       strava_activity_id?: number;
     }> = [];
 
@@ -115,6 +125,7 @@ Deno.serve(async (req) => {
           moving_time: bestTime,
           start_date: bestActivity.activity_date,
           is_estimated: true,
+          is_current_pr: true,
         });
         
         // Track top candidates for detailed fetching (max 30)
@@ -180,6 +191,7 @@ Deno.serve(async (req) => {
                     moving_time: matchingEffort.moving_time,
                     start_date: candidate.activity.activity_date,
                     is_estimated: false,
+                    is_current_pr: true,
                     strava_activity_id: candidate.activity.strava_activity_id,
                   };
                   actualEffortsCount++;
@@ -201,20 +213,48 @@ Deno.serve(async (req) => {
 
     console.log(`Calculated ${bestEfforts.length} best efforts`);
 
-    // Delete existing best efforts for this runner
-    await supabaseClient
-      .from('best_efforts')
-      .delete()
-      .eq('runner_id', runner.id);
-
-    // Insert new best efforts
-    if (bestEfforts.length > 0) {
-      const { error: insertError } = await supabaseClient
+    // For each best effort, check if we should update or insert
+    for (const effort of bestEfforts) {
+      // Get current PR for this distance
+      const { data: currentPR } = await supabaseClient
         .from('best_efforts')
-        .insert(bestEfforts);
+        .select('*')
+        .eq('runner_id', runner.id)
+        .eq('distance', effort.distance)
+        .eq('is_current_pr', true)
+        .single();
 
-      if (insertError) {
-        throw insertError;
+      if (currentPR) {
+        // If new effort is faster, archive old PR and insert new one
+        if (effort.moving_time < currentPR.moving_time) {
+          // Mark old PR as not current
+          await supabaseClient
+            .from('best_efforts')
+            .update({ is_current_pr: false })
+            .eq('id', currentPR.id);
+
+          // Insert new PR
+          await supabaseClient
+            .from('best_efforts')
+            .insert(effort);
+        } else if (effort.is_estimated === false && currentPR.is_estimated === true) {
+          // If new effort is actual (not estimated) and old one was estimated, replace it
+          await supabaseClient
+            .from('best_efforts')
+            .update({
+              elapsed_time: effort.elapsed_time,
+              moving_time: effort.moving_time,
+              start_date: effort.start_date,
+              is_estimated: false,
+              strava_activity_id: effort.strava_activity_id,
+            })
+            .eq('id', currentPR.id);
+        }
+      } else {
+        // No current PR exists, insert this as new PR
+        await supabaseClient
+          .from('best_efforts')
+          .insert(effort);
       }
     }
 
