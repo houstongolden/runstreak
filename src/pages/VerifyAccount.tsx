@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ export default function VerifyAccount() {
   const [emailAlreadyVerified, setEmailAlreadyVerified] = useState(false);
 
   // Check if user's email is already verified in Supabase Auth
-  useState(() => {
+  useEffect(() => {
     const checkEmailVerification = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email && user.email_confirmed_at) {
@@ -63,7 +63,7 @@ export default function VerifyAccount() {
       }
     };
     checkEmailVerification();
-  });
+  }, [runnerId]);
 
   const handleEmailVerification = async () => {
     try {
@@ -83,18 +83,14 @@ export default function VerifyAccount() {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (currentUser) {
-        // User is already authenticated, send magic link to verify email
-        const { error: magicLinkError } = await supabase.auth.signInWithOtp({
+        // User is already authenticated via Strava, just update their email
+        const { error: updateError } = await supabase.auth.updateUser({
           email: validatedEmail,
-          options: {
-            emailRedirectTo: `${window.location.origin}/?verified=true`,
-            shouldCreateUser: false,
-          }
         });
 
-        if (magicLinkError) throw magicLinkError;
+        if (updateError) throw updateError;
 
-        toast.success('Verification link sent! Please check your email and click the link to verify.');
+        toast.success('Verification email sent! Please check your inbox and click the link.');
         setIsLoading(false);
         return;
       }
