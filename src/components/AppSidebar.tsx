@@ -1,4 +1,5 @@
-import { Trophy, TrendingUp, Plus, Shield, Gift, Flame, Zap, Users, MessageSquare } from "lucide-react";
+import { Trophy, TrendingUp, Plus, Shield, Gift, Zap, Users, MessageSquare } from "lucide-react";
+import runstreaksLogo from "@/assets/runstreaks-logo.png";
 import ShinyText from "@/components/ui/shiny-text";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -104,27 +105,18 @@ export function AppSidebar() {
       <SidebarContent className="flex flex-col h-full p-0">
         {/* Logo - Fixed at Top */}
         <div className="px-4 pt-4 pb-4 flex-shrink-0 bg-sidebar">
-          <div className="flex items-center gap-0.5">
-            <Flame 
-              className="h-7 w-7 animate-shiny-text"
+          <div className="flex items-center gap-2">
+            <img 
+              src={runstreaksLogo} 
+              alt="RunStreaks Logo"
+              className="h-8 w-8 object-contain"
               style={{
-                stroke: 'url(#gradient-logo-sidebar)',
-                fill: 'none',
-                strokeWidth: 2,
                 filter: 'drop-shadow(0 0 12px hsl(16 100% 50% / 0.5)) drop-shadow(0 0 20px hsl(16 100% 50% / 0.3))'
               }}
             />
             <span className="text-xl font-heading font-bold">
               <ShinyText text="RunStreaks" speed={5} />
             </span>
-            <svg width="0" height="0" style={{ position: 'absolute' }}>
-              <defs>
-                <linearGradient id="gradient-logo-sidebar" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(16 100% 50%)" />
-                  <stop offset="100%" stopColor="hsl(14 100% 59%)" />
-                </linearGradient>
-              </defs>
-            </svg>
           </div>
         </div>
 
