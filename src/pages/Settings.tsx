@@ -572,10 +572,10 @@ export default function Settings() {
                 Account Information
               </CardTitle>
               <CardDescription>
-                Verify your email and phone to unlock features
+                Verify your email, phone, and update your password
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="user-email">Your Email Address</Label>
                 <div className="flex gap-2">
@@ -703,6 +703,43 @@ export default function Settings() {
                 )}
               </div>
 
+              <Separator />
+
+              {/* Password Management */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Password
+                </h3>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                </div>
+                <Button
+                  onClick={handlePasswordUpdate}
+                  disabled={isUpdatingPassword}
+                  variant="outline"
+                >
+                  {isUpdatingPassword ? "Updating..." : "Update Password"}
+                </Button>
+              </div>
+
               {canClaimFreeMonth && (
                 <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -727,54 +764,6 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
-
-          <Separator />
-
-          {/* Password Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5" />
-                Password
-              </CardTitle>
-              <CardDescription>
-                Update your account password
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <Button
-                onClick={handlePasswordUpdate}
-                disabled={isUpdatingPassword}
-                variant="outline"
-              >
-                {isUpdatingPassword ? "Updating..." : "Update Password"}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Separator />
 
           {/* AI Coach Settings */}
           <Card>

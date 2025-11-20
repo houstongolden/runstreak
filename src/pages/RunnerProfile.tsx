@@ -427,7 +427,7 @@ export default function RunnerProfile() {
             {isOwnProfile && (
               <Button 
                 variant="outline"
-                onClick={() => setShowProfileEditor(true)}
+                onClick={() => navigate("/edit-profile")}
                 className="gap-2"
               >
                 <Pencil className="h-4 w-4" />
@@ -510,17 +510,25 @@ export default function RunnerProfile() {
                     </p>
                   )}
 
-                  {/* Follower/Following Counts */}
-                  <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start">
-                    <div className="text-center">
-                      <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
-                      <div className="text-xs text-muted-foreground">Followers</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
-                      <div className="text-xs text-muted-foreground">Following</div>
-                    </div>
-                  </div>
+                   {/* Follower/Following & Key Stats */}
+                   <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
+                       <div className="text-xs text-muted-foreground">Followers</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
+                       <div className="text-xs text-muted-foreground">Following</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
+                       <div className="text-xs text-muted-foreground">Total Runs</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
+                       <div className="text-xs text-muted-foreground">Longest Streak</div>
+                     </div>
+                   </div>
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
@@ -538,34 +546,34 @@ export default function RunnerProfile() {
                     </div>
                   )}
                   
-                  <div className="flex flex-col gap-2 items-center">
-                    <div className="flex items-center gap-2 flex-wrap justify-center">
-                      <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
-                        {streakActive ? (
-                          <>
-                            <Flame className="h-4 w-4 mr-1" />
-                            {runner.current_streak_days} {runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak
-                          </>
-                        ) : (
-                          "No Active Streak"
-                        )}
-                      </Badge>
-                      
-                      {!isOwnProfile && runner.timezone && streakActive && (
-                        <RunnerStreakStatus 
-                          lastActivityDate={runner.last_activity_date}
-                          timezone={runner.timezone}
-                          country={runner.country}
-                        />
-                      )}
-                    </div>
-                    
-                    {runner.joined_runstreak_at && (
-                      <div className="text-xs text-muted-foreground text-center">
-                        RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                      </div>
-                    )}
-                  </div>
+                   <div className="flex flex-col gap-2 items-center sm:items-start">
+                     <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                       <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
+                         {streakActive ? (
+                           <>
+                             <Flame className="h-4 w-4 mr-1" />
+                             {runner.current_streak_days} {runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak
+                           </>
+                         ) : (
+                           "No Active Streak"
+                         )}
+                       </Badge>
+                       
+                       {!isOwnProfile && runner.timezone && streakActive && (
+                         <RunnerStreakStatus 
+                           lastActivityDate={runner.last_activity_date}
+                           timezone={runner.timezone}
+                           country={runner.country}
+                         />
+                       )}
+                     </div>
+                     
+                     {runner.joined_runstreak_at && (
+                       <div className="text-xs text-muted-foreground text-center sm:text-left">
+                         RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                       </div>
+                     )}
+                   </div>
                 </div>
               </div>
               
@@ -600,9 +608,6 @@ export default function RunnerProfile() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {/* Streak Countdown - Only on own profile */}
-            {isOwnProfile && <StreakCountdown lastActivityDate={runner.last_activity_date} timezone={runner.timezone || 'America/Los_Angeles'} variant="profile" />}
-            
             {/* Current Streak */}
             <CurrentStreakCard
               streakDays={runner.current_streak_days || 0}
