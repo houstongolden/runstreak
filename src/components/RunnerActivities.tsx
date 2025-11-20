@@ -257,7 +257,8 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                             </div>
                           ) : (
                             // Show aggregate data when individual activities not available
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                             {activity.average_speed && (
                               <div>
                                 <span className="text-muted-foreground">Avg Speed:</span>{' '}
@@ -360,6 +361,21 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                 <span className="font-medium text-[10px]">{activity.gear_ids.join(', ')}</span>
                               </div>
                             )}
+                          </div>
+                          
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              extractBestEffort(activity.activity_date);
+                            }}
+                            disabled={extractingBestEffort === activity.activity_date}
+                            variant="outline"
+                            size="sm"
+                            className="w-full md:w-auto gap-2"
+                          >
+                            <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
+                            {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
+                          </Button>
                           </div>
                           )}
                         </TableCell>
