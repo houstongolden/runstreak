@@ -83,69 +83,57 @@ export default function VerifyAccount() {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (currentUser) {
-        // User is already authenticated, just update their email
-        const { error: updateError } = await supabase.auth.updateUser({
+        // User is already authenticated, send magic link to verify email
+        const { error: magicLinkError } = await supabase.auth.signInWithOtp({
           email: validatedEmail,
+          options: {
+            emailRedirectTo: `${window.location.origin}/?verified=true`,
+            shouldCreateUser: false,
+          }
         });
 
-        if (updateError) throw updateError;
+        if (magicLinkError) throw magicLinkError;
 
-        toast.success('Verification email sent! Please check your inbox.');
+        toast.success('Verification link sent! Please check your email and click the link to verify.');
         setIsLoading(false);
         return;
       }
 
-      // User not authenticated, create new auth user with email
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // User not authenticated, send magic link
+      const { error: magicLinkError2 } = await supabase.auth.signInWithOtp({
         email: validatedEmail,
-        password: crypto.randomUUID(), // Generate random password
         options: {
           emailRedirectTo: `${window.location.origin}/?verified=true`,
-          data: {
-            runner_id: runnerId,
-          }
+          shouldCreateUser: true,
         }
       });
 
-      if (authError) throw authError;
+      if (magicLinkError2) throw magicLinkError2;
 
-      if (authData.user) {
-        // Link runner to auth user
-        const { error: updateError } = await supabase
-          .from('runners')
-          .update({ 
-            user_id: authData.user.id,
-            email: validatedEmail 
-          })
-          .eq('id', runnerId);
+      // Update runners table with email
+      const { error: updateError } = await supabase
+        .from('runners')
+        .update({ email: validatedEmail })
+        .eq('id', runnerId);
 
-        if (updateError) throw updateError;
+      if (updateError) throw updateError;
 
-        // Create or update user settings
-        const { data: existingSettings } = await supabase
-          .from('user_settings')
-          .select('*')
-          .eq('runner_id', runnerId)
-          .maybeSingle();
+      // Update user_settings with email (not verified until they click link)
+      const { error: settingsError } = await supabase
+        .from('user_settings')
+        .upsert({
+          runner_id: runnerId,
+          email: validatedEmail,
+          email_verified: false
+        }, {
+          onConflict: 'runner_id'
+        });
 
-        if (existingSettings) {
-          await supabase
-            .from('user_settings')
-            .update({ email: validatedEmail, email_verified: false })
-            .eq('runner_id', runnerId);
-        } else {
-          await supabase
-            .from('user_settings')
-            .insert({
-              runner_id: runnerId,
-              email: validatedEmail,
-              email_verified: false
-            });
-        }
+      if (settingsError) throw settingsError;
 
-        toast.success('Verification email sent! Check your inbox.');
-        setTimeout(() => navigate('/'), 2000);
-      }
+      toast.success('Verification link sent! Please check your email and click the link to verify.');
+      
+      // Don't redirect - user needs to click email link first
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
