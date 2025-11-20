@@ -71,54 +71,46 @@ export default function Settings() {
     }
   }, [currentRunnerId]);
 
-  // Handle magic link callback from email verification
+  // Handle custom verification link callback (doesn't touch auth session)
   useEffect(() => {
-    const handleMagicLinkCallback = async () => {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const type = hashParams.get('type');
+    const handleVerificationCallback = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const verifyToken = searchParams.get('verify_email');
+      const verifyRunnerId = searchParams.get('runner_id');
 
-      if (accessToken && type === 'magiclink') {
-        console.log('Magic link detected, verifying email...');
+      if (verifyToken && verifyRunnerId && currentRunnerId === verifyRunnerId) {
+        console.log('Email verification link detected...');
         
-        // Get current session first
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        // Update database with verified email (no session changes)
+        const { error: updateError } = await supabase
+          .from('user_settings')
+          .update({ email_verified: true })
+          .eq('runner_id', verifyRunnerId);
         
-        if (currentSession?.user && currentRunnerId) {
-          // Update database with verified email WITHOUT logging out
-          const { error: updateError } = await supabase
-            .from('user_settings')
-            .upsert({ 
-              runner_id: currentRunnerId,
-              user_email: currentSession.user.email || '',
-              email: currentSession.user.email || '',
-              email_verified: true 
-            }, {
-              onConflict: 'runner_id'
-            });
+        if (!updateError) {
+          setSettings(prev => ({ ...prev, email_verified: true }));
           
-          if (!updateError) {
-            setSettings(prev => ({ 
-              ...prev, 
-              user_email: currentSession.user.email || '',
-              email: currentSession.user.email || '',
-              email_verified: true 
-            }));
-            
-            toast({
-              title: "Email verified!",
-              description: "Your email has been successfully verified.",
-            });
-          }
+          toast({
+            title: "✅ Email verified!",
+            description: "Your email has been successfully verified.",
+          });
+        } else {
+          toast({
+            title: "Verification failed",
+            description: "Could not verify email. Please try again.",
+            variant: "destructive",
+          });
         }
         
-        // Clean up URL hash without reload
+        // Clean up URL without reload
         window.history.replaceState(null, '', window.location.pathname);
         fetchSettings();
       }
     };
 
-    handleMagicLinkCallback();
+    if (currentRunnerId) {
+      handleVerificationCallback();
+    }
   }, [currentRunnerId]);
 
   const fetchSettings = async () => {
@@ -283,41 +275,34 @@ export default function Settings() {
 
       if (saveError) throw saveError;
 
-      // Check if user is already logged in
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session) {
-        // User is authenticated via Strava, send verification email
-        const { error: updateError } = await supabase.auth.updateUser(
-          { email: settings.user_email },
-          { emailRedirectTo: `${window.location.origin}/settings` }
-        );
-
-        if (updateError) {
-          // Handle "email already exists" error gracefully
-          if (updateError.message.includes('already been registered')) {
-            toast({
-              title: "Email already in use",
-              description: "This email is registered to another account. Please use a different email.",
-              variant: "destructive",
-            });
-          } else {
-            throw updateError;
-          }
-        } else {
-          setEmailSent(true);
-          toast({
-            title: "Verification email sent!",
-            description: "Check your inbox and click the link to verify your email.",
-          });
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: "Please sign in first",
-          variant: "destructive",
-        });
+      // Generate test verification link (doesn't touch auth session)
+      const verificationUrl = `${window.location.origin}/settings?verify_email=test_token&runner_id=${currentRunnerId}`;
+      
+      // For testing: Copy link to clipboard and show in toast
+      try {
+        await navigator.clipboard.writeText(verificationUrl);
+      } catch (e) {
+        // Clipboard API might not be available
+        console.log('Could not copy to clipboard:', e);
       }
+      
+      setEmailSent(true);
+      toast({
+        title: "Test Mode: Email verification link generated",
+        description: (
+          <div className="space-y-2">
+            <p className="text-sm">Click the link below to test verification:</p>
+            <a 
+              href={verificationUrl} 
+              className="text-primary hover:underline block break-all text-xs font-mono bg-muted p-2 rounded"
+            >
+              {verificationUrl}
+            </a>
+            <p className="text-xs text-muted-foreground">Link copied to clipboard!</p>
+          </div>
+        ),
+        duration: 15000,
+      });
     } catch (error: any) {
       console.error("Email verification error:", error);
       toast({
