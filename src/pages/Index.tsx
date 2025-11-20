@@ -44,7 +44,7 @@ const Index = () => {
   const [adsEnabled, setAdsEnabled] = useState(false);
   const [isStravaConnecting, setIsStravaConnecting] = useState(false);
   const [sortBy, setSortBy] = useState<"streak" | "miles" | "pace">("streak");
-  const [timePeriod, setTimePeriod] = useState<"7d" | "30d" | "60d" | "90d" | "6mo" | "1yr" | "ytd">("7d");
+  const [timePeriod, setTimePeriod] = useState<"7d" | "30d" | "60d" | "90d" | "6mo" | "ytd" | "1yr" | "all">("7d");
 
   const handleStravaConnect = async () => {
     try {
@@ -91,11 +91,14 @@ const Index = () => {
         case "6mo":
           startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
           break;
+        case "ytd":
+          startDate = `${now.getFullYear()}-01-01`;
+          break;
         case "1yr":
           startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
           break;
-        case "ytd":
-          startDate = `${now.getFullYear()}-01-01`;
+        case "all":
+          startDate = "1970-01-01"; // Beginning of time for all-time stats
           break;
         default:
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -470,8 +473,9 @@ const Index = () => {
                   <SelectItem value="60d">Last 60 days</SelectItem>
                   <SelectItem value="90d">Last 90 days</SelectItem>
                   <SelectItem value="6mo">Last 6 months</SelectItem>
-                  <SelectItem value="1yr">Last year</SelectItem>
                   <SelectItem value="ytd">Year to date</SelectItem>
+                  <SelectItem value="1yr">Last 12 months</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
                 </SelectContent>
               </Select>
             </div>
