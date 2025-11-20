@@ -252,9 +252,12 @@ const Index = () => {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
             poster={heroRunningBg}
+            onLoadedData={(e) => {
+              const video = e.target as HTMLVideoElement;
+              video.play().catch(err => console.log('Video autoplay blocked:', err));
+            }}
           >
             <source src="/videos/hero-running-bg.mp4" type="video/mp4" />
-            {/* Fallback to image if video fails to load */}
           </video>
           {/* White overlay */}
           <div className="absolute inset-0 bg-white/80" />
