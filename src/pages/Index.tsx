@@ -43,6 +43,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [adsEnabled, setAdsEnabled] = useState(false);
   const [isStravaConnecting, setIsStravaConnecting] = useState(false);
+  const [sortBy, setSortBy] = useState<"streak" | "miles" | "pace">("streak");
+  const [timePeriod, setTimePeriod] = useState<"7d" | "30d" | "60d" | "90d" | "6mo" | "1yr" | "ytd">("7d");
 
   const handleStravaConnect = async () => {
     try {
@@ -67,19 +69,89 @@ const Index = () => {
 
   const fetchRunners = async () => {
     try {
-      console.log("Fetching runners...");
-      const { data, error } = await (supabase as any)
-        .from("runners")
-        .select("*")
-        .order("current_streak_days", { ascending: false });
-
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
+      console.log("Fetching runners with filters:", { sortBy, timePeriod });
       
-      console.log(`Fetched ${data?.length || 0} runners:`, data);
-      setRunners((data || []) as Runner[]);
+      // Calculate date range for time period filter
+      const now = new Date();
+      let startDate: string;
+      
+      switch (timePeriod) {
+        case "7d":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case "30d":
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case "60d":
+          startDate = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case "90d":
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case "6mo":
+          startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case "1yr":
+          startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          break;
+        case "ytd":
+          startDate = `${now.getFullYear()}-01-01`;
+          break;
+        default:
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      }
+
+      // Fetch runners with their base data
+      const { data: runnersData, error: runnersError } = await supabase
+        .from("runners")
+        .select("*");
+
+      if (runnersError) throw runnersError;
+
+      // Fetch aggregated activity data for the time period
+      const { data: activityData, error: activityError } = await supabase
+        .from("daily_activities")
+        .select("runner_id, distance, moving_time")
+        .gte("activity_date", startDate);
+
+      if (activityError) throw activityError;
+
+      // Aggregate activity data by runner
+      const activityStats = (activityData || []).reduce((acc: any, activity: any) => {
+        if (!acc[activity.runner_id]) {
+          acc[activity.runner_id] = { totalDistance: 0, totalTime: 0 };
+        }
+        acc[activity.runner_id].totalDistance += activity.distance || 0;
+        acc[activity.runner_id].totalTime += activity.moving_time || 0;
+        return acc;
+      }, {});
+
+      // Combine runner data with activity stats and calculate pace
+      const enrichedRunners = (runnersData || []).map((runner: any) => {
+        const stats = activityStats[runner.id] || { totalDistance: 0, totalTime: 0 };
+        const distanceInMiles = stats.totalDistance / 1609.34;
+        const timeInMinutes = stats.totalTime / 60;
+        const pace = distanceInMiles > 0 ? timeInMinutes / distanceInMiles : 999999; // min/mile
+        
+        return {
+          ...runner,
+          period_distance: distanceInMiles,
+          period_pace: pace,
+        };
+      });
+
+      // Sort based on selected metric
+      let sorted = [...enrichedRunners];
+      if (sortBy === "miles") {
+        sorted.sort((a, b) => b.period_distance - a.period_distance);
+      } else if (sortBy === "pace") {
+        sorted.sort((a, b) => a.period_pace - b.period_pace); // Lower pace is better
+      } else {
+        sorted.sort((a, b) => b.current_streak_days - a.current_streak_days);
+      }
+
+      console.log(`Fetched ${sorted.length} runners with period stats`);
+      setRunners(sorted as Runner[]);
     } catch (error) {
       console.error("Error fetching runners:", error);
       toast({
@@ -226,6 +298,14 @@ const Index = () => {
     loadData();
   }, [navigate, toast]);
 
+  // Refetch when filters change
+  useEffect(() => {
+    if (!isLoading) {
+      setIsLoading(true);
+      fetchRunners();
+    }
+  }, [sortBy, timePeriod]);
+
   const displayedRunners = runners.slice(0, displayCount);
   const hasMore = displayCount < runners.length;
 
@@ -370,23 +450,28 @@ const Index = () => {
         <div className="mb-6 px-4 sm:px-6">
           <div className="rounded-xl border-0 bg-card/80 backdrop-blur-[40px] p-4 sm:p-6 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-4 sm:mb-5">
-              <Select defaultValue="streak">
+              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
                 <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border border-border/40 bg-muted/30 backdrop-blur-[32px] hover:bg-muted/40">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
                   <SelectItem value="streak">Longest streak</SelectItem>
                   <SelectItem value="miles">Most miles</SelectItem>
+                  <SelectItem value="pace">Fastest pace</SelectItem>
                 </SelectContent>
               </Select>
-              <Select defaultValue="all">
+              <Select value={timePeriod} onValueChange={(value: any) => setTimePeriod(value)}>
                 <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-10 text-sm border border-border/40 bg-muted/30 backdrop-blur-[32px] hover:bg-muted/40">
                   <SelectValue placeholder="Time period" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
-                  <SelectItem value="all">All time</SelectItem>
-                  <SelectItem value="year">This year</SelectItem>
-                  <SelectItem value="month">This month</SelectItem>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="60d">Last 60 days</SelectItem>
+                  <SelectItem value="90d">Last 90 days</SelectItem>
+                  <SelectItem value="6mo">Last 6 months</SelectItem>
+                  <SelectItem value="1yr">Last year</SelectItem>
+                  <SelectItem value="ytd">Year to date</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -401,7 +486,7 @@ const Index = () => {
               </div>
             ) : (
               <>
-                <LeaderboardTable runners={displayedRunners} view="total" />
+                <LeaderboardTable runners={displayedRunners} view="total" sortBy={sortBy} />
                 
                  {hasMore && (
                    <div className="mt-5 flex flex-col items-center gap-4">
