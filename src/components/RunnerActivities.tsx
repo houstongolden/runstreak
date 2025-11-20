@@ -234,10 +234,19 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                       <span className="font-medium">{Math.round(indivActivity.elevation_gain)}ft</span>
                                     </div>
                                     {indivActivity.average_speed && (
-                                      <div>
-                                        <span className="text-muted-foreground">Avg Speed:</span>{' '}
-                                        <span className="font-medium">{(indivActivity.average_speed * 2.237).toFixed(2)} mph</span>
-                                      </div>
+                                      <>
+                                        <div>
+                                          <span className="text-muted-foreground">Avg Pace:</span>{' '}
+                                          <span className="font-semibold text-primary">
+                                            {Math.floor(60 / (indivActivity.average_speed * 2.237))}:
+                                            {String(Math.round((60 / (indivActivity.average_speed * 2.237) % 1) * 60)).padStart(2, '0')} /mi
+                                          </span>
+                                        </div>
+                                        <div>
+                                          <span className="text-muted-foreground">Avg Speed:</span>{' '}
+                                          <span className="font-medium">{(indivActivity.average_speed * 2.237).toFixed(2)} mph</span>
+                                        </div>
+                                      </>
                                     )}
                                     {indivActivity.average_heartrate && (
                                       <div>
@@ -260,10 +269,19 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                             {activity.average_speed && (
-                              <div>
-                                <span className="text-muted-foreground">Avg Speed:</span>{' '}
-                                <span className="font-medium">{(activity.average_speed * 2.237).toFixed(2)} mph</span>
-                              </div>
+                              <>
+                                <div>
+                                  <span className="text-muted-foreground">Avg Pace:</span>{' '}
+                                  <span className="font-semibold text-primary">
+                                    {Math.floor(60 / (activity.average_speed * 2.237))}:
+                                    {String(Math.round((60 / (activity.average_speed * 2.237) % 1) * 60)).padStart(2, '0')} /mi
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Avg Speed:</span>{' '}
+                                  <span className="font-medium">{(activity.average_speed * 2.237).toFixed(2)} mph</span>
+                                </div>
+                              </>
                             )}
                             {activity.max_speed && (
                               <div>
