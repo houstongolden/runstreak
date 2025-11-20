@@ -255,18 +255,6 @@ const Index = () => {
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent" />
         </div>
 
-        {/* Dark mode hero background */}
-        <div className="absolute left-0 right-0 top-0 h-[600px] overflow-hidden light:hidden dark:block pointer-events-none -z-10">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${heroDarkBg})` }}
-          />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/40" />
-          {/* Bottom fade to black */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black via-black/80 to-transparent" />
-        </div>
-
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4 relative z-10">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
