@@ -105,35 +105,52 @@ Deno.serve(async (req) => {
     const athleteProfile = await athleteResponse.json();
     console.log('Fetched athlete profile:', { id: athleteProfile.id, email: athleteProfile.email });
 
-    // Create or get Supabase auth user
-    const userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreaks.internal`;
+    // CRITICAL: First check if a runner profile exists with this strava_user_id
+    // This ensures we use the correct user_id if the profile is already linked to an account
+    const { data: existingRunnerProfile } = await supabase
+      .from('runners')
+      .select('user_id, email')
+      .eq('strava_user_id', athleteProfile.id)
+      .maybeSingle();
+
     let userId: string;
+    let userEmail: string;
     
-    // Check if user already exists
-    const { data: existingUser } = await supabase.auth.admin.listUsers();
-    const foundUser = existingUser.users.find(u => u.email === userEmail);
-    
-    if (foundUser) {
-      userId = foundUser.id;
-      console.log('Found existing user:', userId);
+    if (existingRunnerProfile?.user_id) {
+      // Runner profile exists and is linked to a user - use that user_id
+      userId = existingRunnerProfile.user_id;
+      userEmail = existingRunnerProfile.email || `strava_${athleteProfile.id}@runstreaks.internal`;
+      console.log('Found existing runner profile linked to user:', userId);
     } else {
-      // Create new auth user
-      const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
-        email: userEmail,
-        email_confirm: true,
-        user_metadata: {
-          strava_user_id: athleteProfile.id,
-          display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
+      // No runner profile exists, so check/create auth user by email
+      userEmail = athleteProfile.email || `strava_${athleteProfile.id}@runstreaks.internal`;
+      
+      // Check if user already exists
+      const { data: existingUser } = await supabase.auth.admin.listUsers();
+      const foundUser = existingUser.users.find(u => u.email === userEmail);
+      
+      if (foundUser) {
+        userId = foundUser.id;
+        console.log('Found existing user by email:', userId);
+      } else {
+        // Create new auth user
+        const { data: newUser, error: createUserError } = await supabase.auth.admin.createUser({
+          email: userEmail,
+          email_confirm: true,
+          user_metadata: {
+            strava_user_id: athleteProfile.id,
+            display_name: `${athleteProfile.firstname} ${athleteProfile.lastname}`,
+          }
+        });
+        
+        if (createUserError || !newUser.user) {
+          console.error('Error creating user:', createUserError);
+          throw new Error('Failed to create user account');
         }
-      });
-      
-      if (createUserError || !newUser.user) {
-        console.error('Error creating user:', createUserError);
-        throw new Error('Failed to create user account');
+        
+        userId = newUser.user.id;
+        console.log('Created new user:', userId);
       }
-      
-      userId = newUser.user.id;
-      console.log('Created new user:', userId);
     }
 
     // Download and store avatar in our own storage
