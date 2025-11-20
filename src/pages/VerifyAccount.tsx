@@ -83,7 +83,7 @@ export default function VerifyAccount() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session) {
-        // User is authenticated via Strava, update their email
+        // User is authenticated via Strava, update their email and send verification
         const { error: updateError } = await supabase.auth.updateUser({
           email: validatedEmail,
         });
@@ -95,39 +95,9 @@ export default function VerifyAccount() {
         return;
       }
 
-      // User not authenticated - this shouldn't happen after Strava OAuth
-      // Try to get the runner's existing email and send verification link
-      const { data: runner } = await supabase
-        .from('runners')
-        .select('email')
-        .eq('id', runnerId)
-        .single();
-
-      const emailToUse = validatedEmail || runner?.email;
-      
-      if (!emailToUse) {
-        throw new Error('No email address available');
-      }
-
-      // Update runners table with email
-      await supabase
-        .from('runners')
-        .update({ email: emailToUse })
-        .eq('id', runnerId);
-
-      // Update user_settings with email
-      await supabase
-        .from('user_settings')
-        .upsert({
-          runner_id: runnerId,
-          email: emailToUse,
-          email_verified: true
-        }, {
-          onConflict: 'runner_id'
-        });
-
-      toast.success('Email verified!');
-      setTimeout(() => navigate('/'), 1000);
+      // If no session, this shouldn't happen but handle gracefully
+      toast.error('Please sign in with Strava first');
+      navigate('/strava-connect');
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
