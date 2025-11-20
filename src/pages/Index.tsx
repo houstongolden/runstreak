@@ -254,6 +254,7 @@ const Index = () => {
             poster={heroRunningBg}
             onLoadedData={(e) => {
               const video = e.target as HTMLVideoElement;
+              video.playbackRate = 0.5;
               video.play().catch(err => console.log('Video autoplay blocked:', err));
             }}
           >
