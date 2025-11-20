@@ -468,14 +468,14 @@ const Index = () => {
                   <SelectValue placeholder="Time period" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
-                  <SelectItem value="7d">Last 7 days</SelectItem>
-                  <SelectItem value="30d">Last 30 days</SelectItem>
-                  <SelectItem value="60d">Last 60 days</SelectItem>
-                  <SelectItem value="90d">Last 90 days</SelectItem>
-                  <SelectItem value="6mo">Last 6 months</SelectItem>
-                  <SelectItem value="ytd">Year to date</SelectItem>
-                  <SelectItem value="1yr">Last 12 months</SelectItem>
-                  <SelectItem value="all">All time</SelectItem>
+                  <SelectItem value="7d">7d</SelectItem>
+                  <SelectItem value="30d">30d</SelectItem>
+                  <SelectItem value="60d">60d</SelectItem>
+                  <SelectItem value="90d">90d</SelectItem>
+                  <SelectItem value="6mo">6m</SelectItem>
+                  <SelectItem value="ytd">YTD</SelectItem>
+                  <SelectItem value="1yr">12m</SelectItem>
+                  <SelectItem value="all">All-Time</SelectItem>
                 </SelectContent>
               </Select>
             </div>
