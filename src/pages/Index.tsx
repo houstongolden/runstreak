@@ -26,6 +26,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { AnimatedHeatmap } from "@/components/AnimatedHeatmap";
 import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
 import heroRunningBg from "@/assets/hero-running-bg.png";
+import heroDarkBg from "@/assets/hero-dark-bg.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -242,6 +243,7 @@ const Index = () => {
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24 py-6 sm:py-12">
         {/* Light mode hero background with overlay and fade */}
+        {/* Light mode hero background */}
         <div className="absolute left-0 right-0 top-0 h-[600px] overflow-hidden light:block dark:hidden pointer-events-none -z-10">
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -251,6 +253,18 @@ const Index = () => {
           <div className="absolute inset-0 bg-white/80" />
           {/* Bottom fade to white */}
           <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        </div>
+
+        {/* Dark mode hero background */}
+        <div className="absolute left-0 right-0 top-0 h-[600px] overflow-hidden light:hidden dark:block pointer-events-none -z-10">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroDarkBg})` }}
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/40" />
+          {/* Bottom fade to black */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black via-black/80 to-transparent" />
         </div>
 
         {/* Header */}
