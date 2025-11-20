@@ -61,6 +61,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
   const [enrichedActivityDates, setEnrichedActivityDates] = useState<Set<string>>(new Set());
   const [individualActivities, setIndividualActivities] = useState<Map<string, any[]>>(new Map());
+  const [loadingActivities, setLoadingActivities] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -124,14 +125,30 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
       
       // Fetch individual activities when expanding if not already loaded
       if (!individualActivities.has(activityDate)) {
-        const { data: stravaActivities } = await supabase
-          .from('strava_activities')
-          .select('*')
-          .eq('runner_id', runnerId)
-          .eq('activity_date', activityDate);
+        setLoadingActivities(prev => new Set(prev).add(activityDate));
         
-        if (stravaActivities && stravaActivities.length > 0) {
-          setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities));
+        try {
+          const { data: stravaActivities, error } = await supabase
+            .from('strava_activities')
+            .select('*')
+            .eq('runner_id', runnerId)
+            .eq('activity_date', activityDate);
+          
+          if (error) {
+            console.error('Error fetching strava activities:', error);
+            toast.error('Failed to load activity details');
+          } else {
+            setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities || []));
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          toast.error('Failed to load activity details');
+        } finally {
+          setLoadingActivities(prev => {
+            const next = new Set(prev);
+            next.delete(activityDate);
+            return next;
+          });
         }
       }
     }
@@ -283,7 +300,9 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                     {isExpanded && (
                       <TableRow key={`${activity.id}-expanded`}>
                         <TableCell colSpan={6} className="bg-muted/30 p-4">
-                          {individualActivities.has(activity.activity_date) && individualActivities.get(activity.activity_date)!.length > 0 ? (
+                          {loadingActivities.has(activity.activity_date) ? (
+                            <div className="text-sm text-muted-foreground">Loading activity details...</div>
+                          ) : individualActivities.has(activity.activity_date) && individualActivities.get(activity.activity_date)!.length > 0 ? (
                             // Show individual activities for this date
                             <div className="space-y-4">
                               {individualActivities.get(activity.activity_date)!.map((indivActivity, idx) => (
@@ -292,7 +311,36 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                     <div className="font-semibold text-sm mb-2 text-foreground">{indivActivity.name}</div>
                                   )}
                                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-...
+                                    <div>
+                                      <span className="text-muted-foreground">Distance: </span>
+                                      <span className="text-foreground">{formatNumber(indivActivity.distance)} mi</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Time: </span>
+                                      <span className="text-foreground">{Math.floor(indivActivity.moving_time / 60)}m</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Elevation: </span>
+                                      <span className="text-foreground">{Math.round(indivActivity.elevation_gain)}ft</span>
+                                    </div>
+                                    {indivActivity.average_speed && (
+                                      <div>
+                                        <span className="text-muted-foreground">Avg Pace: </span>
+                                        <span className="text-foreground">{Math.floor(26.8224 / indivActivity.average_speed)}:{String(Math.round((26.8224 / indivActivity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.average_heartrate && (
+                                      <div>
+                                        <span className="text-muted-foreground">Avg HR: </span>
+                                        <span className="text-foreground">{Math.round(indivActivity.average_heartrate)} bpm</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.average_cadence && (
+                                      <div>
+                                        <span className="text-muted-foreground">Avg Cadence: </span>
+                                        <span className="text-foreground">{Math.round(indivActivity.average_cadence * 2)} spm</span>
+                                      </div>
+                                    )}
                                   </div>
                                   <Button
                                     onClick={(e) => {
@@ -311,7 +359,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                               ))}
                             </div>
                           ) : (
-                            <div className="text-sm text-muted-foreground">Loading activity details...</div>
+                            <div className="text-sm text-muted-foreground">No detailed activity data available for this date.</div>
                           )}
                         </TableCell>
                       </TableRow>
