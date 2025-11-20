@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Mail, Phone, Sparkles, Lock } from "lucide-react";
+import { CheckCircle, Mail, Phone, Sparkles, Lock, Loader2 } from "lucide-react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -40,9 +41,8 @@ export default function Settings() {
   const { runnerId: currentRunnerId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showEmailOtpInput, setShowEmailOtpInput] = useState(false);
-  const [emailOtp, setEmailOtp] = useState("");
-  const [verifyingEmailOtp, setVerifyingEmailOtp] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [sendingEmailVerification, setSendingEmailVerification] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -69,6 +69,48 @@ export default function Settings() {
     if (currentRunnerId) {
       fetchSettings();
     }
+  }, [currentRunnerId]);
+
+  // Handle magic link callback from email verification
+  useEffect(() => {
+    const handleMagicLinkCallback = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const type = hashParams.get('type');
+
+      if (accessToken && type === 'magiclink') {
+        setLoading(true);
+        toast({
+          title: "Email verified!",
+          description: "Your email has been successfully verified.",
+        });
+        
+        // Update database with verified email
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.email && currentRunnerId) {
+          const { error: updateError } = await supabase
+            .from('user_settings')
+            .upsert({ 
+              runner_id: currentRunnerId,
+              user_email: user.email,
+              email_verified: true 
+            }, {
+              onConflict: 'runner_id'
+            });
+          
+          if (!updateError) {
+            setSettings(prev => ({ ...prev, user_email: user.email, email_verified: true }));
+          }
+        }
+        
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setLoading(false);
+        fetchSettings();
+      }
+    };
+
+    handleMagicLinkCallback();
   }, [currentRunnerId]);
 
   const fetchSettings = async () => {
@@ -185,84 +227,53 @@ export default function Settings() {
       return;
     }
 
-    setSendingCode(true);
+    setSendingEmailVerification(true);
     try {
-      // Use Supabase's built-in email OTP
-      const { error } = await supabase.auth.signInWithOtp({
-        email: settings.user_email,
-        options: {
-          shouldCreateUser: false, // Don't create new user, just send OTP
-        }
-      });
+      // Save email to database first
+      const { error: saveError } = await supabase
+        .from('user_settings')
+        .upsert({ 
+          runner_id: currentRunnerId,
+          user_email: settings.user_email,
+          email_verified: false
+        }, {
+          onConflict: 'runner_id'
+        });
 
-      if (error) throw error;
+      if (saveError) throw saveError;
 
-      setShowEmailOtpInput(true);
-      toast({
-        title: "Verification code sent",
-        description: "Check your email for a 6-digit code to verify your email address.",
-      });
+      // Check if user is already logged in
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session) {
+        // User is authenticated via Strava, update their email and send verification
+        const { error: updateError } = await supabase.auth.updateUser({
+          email: settings.user_email,
+        });
+
+        if (updateError) throw updateError;
+
+        setEmailSent(true);
+        toast({
+          title: "Verification email sent!",
+          description: "Check your inbox and click the link to verify your email.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Please sign in first",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       console.error("Email verification error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send verification code",
+        description: error.message || "Failed to send verification email",
         variant: "destructive",
       });
     } finally {
-      setSendingCode(false);
-    }
-  };
-
-  const handleVerifyEmailOtp = async () => {
-    if (!emailOtp || emailOtp.length !== 6) {
-      toast({
-        title: "Error",
-        description: "Please enter the 6-digit code",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setVerifyingEmailOtp(true);
-    try {
-      // Verify the OTP
-      const { error } = await supabase.auth.verifyOtp({
-        email: settings.user_email,
-        token: emailOtp,
-        type: 'email'
-      });
-
-      if (error) throw error;
-
-      // Update user_settings to mark email as verified
-      const { error: updateError } = await supabase
-        .from('user_settings')
-        .update({ 
-          email_verified: true,
-          user_email: settings.user_email 
-        })
-        .eq('runner_id', currentRunnerId);
-
-      if (updateError) throw updateError;
-
-      setSettings({ ...settings, email_verified: true });
-      setShowEmailOtpInput(false);
-      setEmailOtp("");
-      
-      toast({
-        title: "Email verified",
-        description: "Your email has been successfully verified!",
-      });
-    } catch (error: any) {
-      console.error("Email OTP verification error:", error);
-      toast({
-        title: "Verification failed",
-        description: error.message || "Invalid or expired code. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setVerifyingEmailOtp(false);
+      setSendingEmailVerification(false);
     }
   };
 
@@ -304,6 +315,19 @@ export default function Settings() {
 
     setSendingCode(true);
     try {
+      // Save phone number to database first
+      const { error: saveError } = await supabase
+        .from('user_settings')
+        .upsert({ 
+          runner_id: currentRunnerId,
+          phone_number: formattedPhone,
+          phone_verified: false
+        }, {
+          onConflict: 'runner_id'
+        });
+
+      if (saveError) throw saveError;
+
       const { data, error } = await supabase.functions.invoke("send-verification-sms", {
         body: { phoneNumber: formattedPhone },
       });
@@ -523,8 +547,7 @@ export default function Settings() {
                     value={settings.user_email || ""}
                     onChange={(e) => {
                       setSettings({ ...settings, user_email: e.target.value });
-                      setShowEmailOtpInput(false);
-                      setEmailOtp("");
+                      setEmailSent(false);
                     }}
                     placeholder="your@email.com"
                     disabled={settings.email_verified && !!settings.user_email}
@@ -539,9 +562,10 @@ export default function Settings() {
                       onClick={handleVerifyEmail} 
                       variant="outline" 
                       size="sm" 
-                      disabled={!settings.user_email || sendingCode}
+                      disabled={!settings.user_email || sendingEmailVerification}
                     >
-                      {sendingCode ? "Sending..." : "Verify"}
+                      {sendingEmailVerification && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {sendingEmailVerification ? "Sending..." : "Verify"}
                     </Button>
                   )}
                 </div>
@@ -550,37 +574,17 @@ export default function Settings() {
                 </p>
               </div>
 
-              {showEmailOtpInput && !settings.email_verified && (
-                <div className="space-y-2">
-                  <Label htmlFor="email-otp">Enter 6-Digit Code</Label>
-                  <div className="flex gap-2">
-                    <InputOTP
-                      maxLength={6}
-                      value={emailOtp}
-                      onChange={setEmailOtp}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                    <Button 
-                      onClick={handleVerifyEmailOtp} 
-                      variant="default" 
-                      size="sm"
-                      disabled={verifyingEmailOtp || emailOtp.length !== 6}
-                    >
-                      {verifyingEmailOtp ? "Verifying..." : "Verify"}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Enter the code sent to {settings.user_email}
-                  </p>
-                </div>
+              {emailSent && !settings.email_verified && (
+                <Alert className="border-orange-500/20 bg-orange-500/10">
+                  <Mail className="h-4 w-4 text-orange-500" />
+                  <AlertDescription className="text-sm">
+                    <p className="font-medium mb-2">Verification email sent!</p>
+                    <p className="text-muted-foreground">
+                      Check your inbox and click the link to verify your email. 
+                      The link will automatically verify your account.
+                    </p>
+                  </AlertDescription>
+                </Alert>
               )}
 
               <div className="space-y-2">
