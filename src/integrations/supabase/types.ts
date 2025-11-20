@@ -270,42 +270,56 @@ export type Database = {
       }
       best_efforts: {
         Row: {
-          activity_id: number | null
+          achieved_at: string
           created_at: string
           distance: number
           elapsed_time: number
           id: string
+          is_current_pr: boolean
           is_estimated: boolean
           moving_time: number
           runner_id: string
           start_date: string | null
+          strava_activity_id: number | null
           updated_at: string
         }
         Insert: {
-          activity_id?: number | null
+          achieved_at?: string
           created_at?: string
           distance: number
           elapsed_time: number
           id?: string
+          is_current_pr?: boolean
           is_estimated?: boolean
           moving_time: number
           runner_id: string
           start_date?: string | null
+          strava_activity_id?: number | null
           updated_at?: string
         }
         Update: {
-          activity_id?: number | null
+          achieved_at?: string
           created_at?: string
           distance?: number
           elapsed_time?: number
           id?: string
+          is_current_pr?: boolean
           is_estimated?: boolean
           moving_time?: number
           runner_id?: string
           start_date?: string | null
+          strava_activity_id?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "best_efforts_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       coach_messages: {
         Row: {
@@ -1033,6 +1047,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      initialize_runner_best_efforts: {
+        Args: { p_runner_id: string }
+        Returns: undefined
       }
     }
     Enums: {
