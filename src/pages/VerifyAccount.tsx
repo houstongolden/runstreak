@@ -79,12 +79,28 @@ export default function VerifyAccount() {
       
       setIsLoading(true);
 
-      // Create Supabase auth user with email
+      // Check if user is already logged in (from Strava)
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+      if (currentUser) {
+        // User is already authenticated, just update their email
+        const { error: updateError } = await supabase.auth.updateUser({
+          email: validatedEmail,
+        });
+
+        if (updateError) throw updateError;
+
+        toast.success('Verification email sent! Please check your inbox.');
+        setIsLoading(false);
+        return;
+      }
+
+      // User not authenticated, create new auth user with email
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: validatedEmail,
         password: crypto.randomUUID(), // Generate random password
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/?verified=true`,
           data: {
             runner_id: runnerId,
           }

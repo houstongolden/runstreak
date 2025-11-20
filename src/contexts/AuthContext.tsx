@@ -37,21 +37,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [runnerData, setRunnerData] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     // Check for existing session first (handles page refresh and redirects)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[AuthContext] Initial session check:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    }).catch((error) => {
-      console.error('[AuthContext] Error getting session:', error);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (error) {
+          console.error('[AuthContext] Error getting session:', error);
+        } else {
+          console.log('[AuthContext] Initial session check:', session?.user?.id);
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('[AuthContext] Exception getting session:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     // Set up auth state listener for future changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('[AuthContext] Auth state changed:', event, 'User:', session?.user?.id);
+        
+        if (!mounted) return;
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -74,7 +92,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Fetch runner ID and data when user changes (separate from auth state listener)
