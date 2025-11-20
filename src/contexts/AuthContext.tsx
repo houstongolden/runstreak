@@ -37,10 +37,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [runnerData, setRunnerData] = useState<{ display_name: string; avatar_url: string | null } | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Check for existing session first (handles page refresh and redirects)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[AuthContext] Initial session check:', session?.user?.id);
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((error) => {
+      console.error('[AuthContext] Error getting session:', error);
+      setLoading(false);
+    });
+
+    // Set up auth state listener for future changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('[AuthContext] Auth state changed:', event, 'User:', session?.user?.id);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -49,16 +61,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setRunnerId(null);
           setRunnerData(null);
         }
+        
+        // Handle token refresh to ensure session stays alive
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('[AuthContext] Token refreshed successfully');
+        }
+        
+        // Handle sign in events
+        if (event === 'SIGNED_IN') {
+          console.log('[AuthContext] User signed in');
+        }
       }
     );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[AuthContext] Initial session check:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
 
     return () => subscription.unsubscribe();
   }, []);
