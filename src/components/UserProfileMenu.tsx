@@ -35,9 +35,7 @@ export function UserProfileMenu({ runnerId, runnerData, align = "end" }: UserPro
   };
 
   const handleEditProfile = () => {
-    if (runnerId) {
-      navigate(`/runner/${runnerId}`);
-    }
+    navigate('/edit-profile');
   };
 
   const handleSettings = () => {
