@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { formatDistance, formatDuration } from "@/lib/formatters";
-import { Calendar, MapPin, TrendingUp, Clock, Sparkles } from "lucide-react";
+import { Calendar, MapPin, TrendingUp, Clock, Timer } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -206,7 +206,7 @@ export default function Activities() {
                     size="sm"
                     className="w-full"
                   >
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Timer className="mr-2 h-4 w-4" />
                     {enrichingActivity === activity.id ? "Finding Best Efforts..." : "Find Best Efforts"}
                   </Button>
                 </div>
