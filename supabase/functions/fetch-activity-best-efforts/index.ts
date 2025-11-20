@@ -158,7 +158,17 @@ Deno.serve(async (req) => {
       );
 
       if (!detailResponse.ok) {
-        console.error(`Failed to fetch activity ${dbActivity.strava_activity_id}`);
+        const errorText = await detailResponse.text();
+        console.error(`Failed to fetch activity ${dbActivity.strava_activity_id}: ${detailResponse.status} - ${errorText}`);
+        
+        if (detailResponse.status === 401) {
+          return new Response(JSON.stringify({ 
+            error: 'Strava authorization expired. Please reconnect your Strava account.' 
+          }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
         continue;
       }
 
