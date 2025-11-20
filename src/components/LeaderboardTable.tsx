@@ -18,15 +18,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface LeaderboardTableProps {
   runners: Runner[];
   view: "total" | "percent" | "fiveday";
+  sortBy?: "streak" | "miles" | "pace";
 }
 
-export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
+export function LeaderboardTable({ runners, view, sortBy = "streak" }: LeaderboardTableProps) {
   const isMobile = useIsMobile();
   
-  // Sort by current streak days descending
-  const sortedRunners = [...runners].sort(
-    (a, b) => b.current_streak_days - a.current_streak_days
-  );
+  // Runners are already sorted from parent, use as-is
+  const sortedRunners = runners;
 
   // Calculate 5-day week streaks (simplified version using current streak as proxy for now)
   const fiveDayRunners = [...runners].sort(
@@ -134,7 +133,9 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
           <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
             <TableHead className="w-[80px]">Rank</TableHead>
             <TableHead>Runner</TableHead>
-            <TableHead className="text-right">Streak Days</TableHead>
+            {sortBy === "streak" && <TableHead className="text-right">Streak Days</TableHead>}
+            {sortBy === "miles" && <TableHead className="text-right">Miles</TableHead>}
+            {sortBy === "pace" && <TableHead className="text-right">Avg Pace</TableHead>}
             <TableHead className="text-right">Status</TableHead>
             <TableHead className="text-right">Total Miles</TableHead>
           </TableRow>
@@ -169,14 +170,34 @@ export function LeaderboardTable({ runners, view }: LeaderboardTableProps) {
                   </div>
                 </Link>
               </TableCell>
-              <TableCell className="text-right">
-                <Link to={`/runner/${runner.id}`}>
-                  <div className="flex items-center justify-end gap-2">
-                    <Flame className="h-6 w-6 text-orange-500 drop-shadow-[0_0_8px_rgba(255,69,0,0.5)]" />
-                    <span className="text-2xl font-semibold">{runner.current_streak_days}</span>
-                  </div>
-                </Link>
-              </TableCell>
+              {sortBy === "streak" && (
+                <TableCell className="text-right">
+                  <Link to={`/runner/${runner.id}`}>
+                    <div className="flex items-center justify-end gap-2">
+                      <Flame className="h-6 w-6 text-orange-500 drop-shadow-[0_0_8px_rgba(255,69,0,0.5)]" />
+                      <span className="text-2xl font-semibold">{runner.current_streak_days}</span>
+                    </div>
+                  </Link>
+                </TableCell>
+              )}
+              {sortBy === "miles" && (
+                <TableCell className="text-right">
+                  <Link to={`/runner/${runner.id}`}>
+                    <span className="text-2xl font-semibold">{(runner as any).period_distance?.toFixed(1) || '0.0'}</span>
+                  </Link>
+                </TableCell>
+              )}
+              {sortBy === "pace" && (
+                <TableCell className="text-right">
+                  <Link to={`/runner/${runner.id}`}>
+                    <span className="text-2xl font-semibold">
+                      {(runner as any).period_pace && (runner as any).period_pace < 999999 
+                        ? `${Math.floor((runner as any).period_pace)}:${String(Math.round(((runner as any).period_pace % 1) * 60)).padStart(2, '0')}`
+                        : 'N/A'}
+                    </span>
+                  </Link>
+                </TableCell>
+              )}
               <TableCell className="text-right">
                 <RunnerStreakStatus 
                   lastActivityDate={runner.last_activity_date}
