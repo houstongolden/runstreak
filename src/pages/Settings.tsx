@@ -16,7 +16,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import AICoachChat from "@/components/AICoachChat";
+
 import PrivacySettings from "@/components/PrivacySettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { settingsSchema, phoneSchema, emailSchema } from "@/lib/validation";
@@ -894,16 +894,6 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
-
-          <Separator />
-
-
-          {/* AI Coach Chat Interface */}
-          {settings.phone_verified && (
-            <div>
-              <AICoachChat runnerId={settings.runner_id} />
-            </div>
-          )}
 
           <Separator />
 
