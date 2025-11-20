@@ -61,7 +61,6 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
   const [enrichedActivityDates, setEnrichedActivityDates] = useState<Set<string>>(new Set());
   const [individualActivities, setIndividualActivities] = useState<Map<string, any[]>>(new Map());
-  const [loadingActivities, setLoadingActivities] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,65 +115,40 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     fetchData();
   }, [runnerId]);
 
-  const toggleRow = async (activityId: string, activityDate: string) => {
+  const toggleRow = (activityId: string) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(activityId)) {
       newExpanded.delete(activityId);
     } else {
       newExpanded.add(activityId);
-      
-      // Fetch individual activities when expanding if not already loaded
-      if (!individualActivities.has(activityDate)) {
-        setLoadingActivities(prev => new Set(prev).add(activityDate));
-        
-        try {
-          const { data: stravaActivities, error } = await supabase
-            .from('strava_activities')
-            .select('*')
-            .eq('runner_id', runnerId)
-            .eq('activity_date', activityDate);
-          
-          if (error) {
-            console.error('Error fetching strava activities:', error);
-            toast.error('Failed to load activity details');
-          } else {
-            setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities || []));
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          toast.error('Failed to load activity details');
-        } finally {
-          setLoadingActivities(prev => {
-            const next = new Set(prev);
-            next.delete(activityDate);
-            return next;
-          });
-        }
-      }
     }
     setExpandedRows(newExpanded);
   };
 
-  const extractBestEffort = async (stravaActivityId: number, activityDate: string) => {
+  const extractBestEffort = async (activityDate: string) => {
     setExtractingBestEffort(activityDate);
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
-        body: { strava_activity_id: stravaActivityId, runner_id: runnerId }
-      });
-
-      if (error) throw error;
-      
-      // Refresh the activity data to show enriched details
-      const { data: enrichedActivities } = await supabase
+      // Fetch strava activities for this date first
+      const { data: stravaActivities, error: fetchError } = await supabase
         .from('strava_activities')
         .select('*')
         .eq('runner_id', runnerId)
         .eq('activity_date', activityDate);
 
-      if (enrichedActivities && enrichedActivities.length > 0) {
-        setIndividualActivities(prev => new Map(prev).set(activityDate, enrichedActivities));
-        setEnrichedActivityDates(prev => new Set(prev).add(activityDate));
+      if (fetchError) throw fetchError;
+      if (!stravaActivities || stravaActivities.length === 0) {
+        throw new Error('No activities found for this date');
       }
+
+      // Store the activities in state
+      setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities));
+
+      // Process best efforts for the first activity
+      const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
+        body: { strava_activity_id: stravaActivities[0].strava_activity_id, runner_id: runnerId }
+      });
+
+      if (error) throw error;
 
       // Refresh best efforts
       const { data: bestEffortsData } = await supabase
@@ -191,7 +165,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         setBestEffortDates(dates);
       }
 
-      toast.success(data?.message || 'Activity enriched successfully!');
+      toast.success(data?.message || 'Best efforts extracted successfully!');
     } catch (error: any) {
       console.error('Error extracting best efforts:', error);
       toast.error(error.message || 'Failed to extract best efforts');
@@ -244,14 +218,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                 return (
                   <>
                     <TableRow key={activity.id} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="py-2" onClick={() => toggleRow(activity.id, activity.activity_date)}>
+                      <TableCell className="py-2" onClick={() => toggleRow(activity.id)}>
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4 text-muted-foreground" />
                         ) : (
                           <ChevronDown className="h-4 w-4 text-muted-foreground" />
                         )}
                       </TableCell>
-                      <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id, activity.activity_date)}>
+                      <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
                         <div className="flex items-center gap-2">
                           {(() => {
                             const [year, month, day] = activity.activity_date.split('-');
@@ -284,28 +258,26 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm py-2" onClick={() => toggleRow(activity.id, activity.activity_date)}>
+                      <TableCell className="text-sm py-2" onClick={() => toggleRow(activity.id)}>
                         {activity.run_count}
                       </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id, activity.activity_date)}>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {formatNumber(activity.distance)} mi
                       </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id, activity.activity_date)}>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {Math.floor(activity.moving_time / 60)}m
                       </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id, activity.activity_date)}>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {Math.round(activity.elevation_gain)}ft
                       </TableCell>
                     </TableRow>
                     {isExpanded && (
                       <TableRow key={`${activity.id}-expanded`}>
                         <TableCell colSpan={6} className="bg-muted/30 p-4">
-                          {loadingActivities.has(activity.activity_date) ? (
-                            <div className="text-sm text-muted-foreground">Loading activity details...</div>
-                          ) : individualActivities.has(activity.activity_date) && individualActivities.get(activity.activity_date)!.length > 0 ? (
-                            // Show individual activities for this date
+                          {individualActivities.has(activity.activity_date) && individualActivities.get(activity.activity_date)!.length > 0 ? (
+                            // Show individual activities fetched via Find Best Efforts
                             <div className="space-y-4">
-                              {individualActivities.get(activity.activity_date)!.map((indivActivity, idx) => (
+                              {individualActivities.get(activity.activity_date)!.map((indivActivity) => (
                                 <div key={indivActivity.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
                                   {indivActivity.name && (
                                     <div className="font-semibold text-sm mb-2 text-foreground">{indivActivity.name}</div>
@@ -342,24 +314,58 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                       </div>
                                     )}
                                   </div>
-                                  <Button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      extractBestEffort(indivActivity.strava_activity_id, activity.activity_date);
-                                    }}
-                                    disabled={extractingBestEffort === activity.activity_date}
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full md:w-auto gap-2 mt-3"
-                                  >
-                                    <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
-                                    {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
-                                  </Button>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-sm text-muted-foreground">No detailed activity data available for this date.</div>
+                            // Show aggregated data from daily_activities
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                                <div>
+                                  <span className="text-muted-foreground">Total Distance: </span>
+                                  <span className="text-foreground">{formatNumber(activity.distance)} mi</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Total Time: </span>
+                                  <span className="text-foreground">{Math.floor(activity.moving_time / 60)}m</span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground">Elevation Gain: </span>
+                                  <span className="text-foreground">{Math.round(activity.elevation_gain)}ft</span>
+                                </div>
+                                {activity.average_speed && (
+                                  <div>
+                                    <span className="text-muted-foreground">Avg Pace: </span>
+                                    <span className="text-foreground">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                  </div>
+                                )}
+                                {activity.average_heartrate && (
+                                  <div>
+                                    <span className="text-muted-foreground">Avg HR: </span>
+                                    <span className="text-foreground">{Math.round(activity.average_heartrate)} bpm</span>
+                                  </div>
+                                )}
+                                {activity.average_cadence && (
+                                  <div>
+                                    <span className="text-muted-foreground">Avg Cadence: </span>
+                                    <span className="text-foreground">{Math.round(activity.average_cadence * 2)} spm</span>
+                                  </div>
+                                )}
+                              </div>
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  extractBestEffort(activity.activity_date);
+                                }}
+                                disabled={extractingBestEffort === activity.activity_date}
+                                variant="outline"
+                                size="sm"
+                                className="w-full md:w-auto gap-2"
+                              >
+                                <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
+                                {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
+                              </Button>
+                            </div>
                           )}
                         </TableCell>
                       </TableRow>
