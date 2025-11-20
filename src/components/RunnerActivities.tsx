@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ChevronDown, ChevronUp, Timer, Trophy, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Tooltip,
   TooltipContent,
@@ -54,6 +55,7 @@ interface RunnerActivitiesProps {
 }
 
 export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
+  const { runnerId: currentUserRunnerId } = useAuth();
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -61,6 +63,8 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
   const [enrichedActivityDates, setEnrichedActivityDates] = useState<Set<string>>(new Set());
   const [individualActivities, setIndividualActivities] = useState<Map<string, any[]>>(new Map());
+  
+  const isOwnProfile = currentUserRunnerId === runnerId;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -282,15 +286,21 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                   {indivActivity.name && (
                                     <div className="font-semibold text-sm mb-2 text-foreground">{indivActivity.name}</div>
                                   )}
-                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
                                     <div>
                                       <span className="text-muted-foreground">Distance: </span>
                                       <span className="text-foreground">{formatNumber(indivActivity.distance)} mi</span>
                                     </div>
                                     <div>
-                                      <span className="text-muted-foreground">Time: </span>
+                                      <span className="text-muted-foreground">Moving Time: </span>
                                       <span className="text-foreground">{Math.floor(indivActivity.moving_time / 60)}m</span>
                                     </div>
+                                    {indivActivity.elapsed_time && (
+                                      <div>
+                                        <span className="text-muted-foreground">Elapsed Time: </span>
+                                        <span className="text-foreground">{Math.floor(indivActivity.elapsed_time / 60)}m</span>
+                                      </div>
+                                    )}
                                     <div>
                                       <span className="text-muted-foreground">Elevation: </span>
                                       <span className="text-foreground">{Math.round(indivActivity.elevation_gain)}ft</span>
@@ -298,7 +308,13 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                     {indivActivity.average_speed && (
                                       <div>
                                         <span className="text-muted-foreground">Avg Pace: </span>
-                                        <span className="text-foreground">{Math.floor(26.8224 / indivActivity.average_speed)}:{String(Math.round((26.8224 / indivActivity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                        <span className="text-foreground font-semibold">{Math.floor(26.8224 / indivActivity.average_speed)}:{String(Math.round((26.8224 / indivActivity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.max_speed && (
+                                      <div>
+                                        <span className="text-muted-foreground">Max Pace: </span>
+                                        <span className="text-foreground">{Math.floor(26.8224 / indivActivity.max_speed)}:{String(Math.round((26.8224 / indivActivity.max_speed % 1) * 60)).padStart(2, '0')}/mi</span>
                                       </div>
                                     )}
                                     {indivActivity.average_heartrate && (
@@ -307,10 +323,82 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                         <span className="text-foreground">{Math.round(indivActivity.average_heartrate)} bpm</span>
                                       </div>
                                     )}
+                                    {indivActivity.max_heartrate && (
+                                      <div>
+                                        <span className="text-muted-foreground">Max HR: </span>
+                                        <span className="text-foreground">{Math.round(indivActivity.max_heartrate)} bpm</span>
+                                      </div>
+                                    )}
                                     {indivActivity.average_cadence && (
                                       <div>
                                         <span className="text-muted-foreground">Avg Cadence: </span>
                                         <span className="text-foreground">{Math.round(indivActivity.average_cadence * 2)} spm</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.calories && (
+                                      <div>
+                                        <span className="text-muted-foreground">Calories: </span>
+                                        <span className="text-foreground">{Math.round(indivActivity.calories)}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.suffer_score && (
+                                      <div>
+                                        <span className="text-muted-foreground">Suffer Score: </span>
+                                        <span className="text-foreground">{indivActivity.suffer_score}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.average_temp !== null && indivActivity.average_temp !== undefined && (
+                                      <div>
+                                        <span className="text-muted-foreground">Temperature: </span>
+                                        <span className="text-foreground">{Math.round(indivActivity.average_temp * 9/5 + 32)}°F</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.device_name && (
+                                      <div>
+                                        <span className="text-muted-foreground">Device: </span>
+                                        <span className="text-foreground">{indivActivity.device_name}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.workout_type && (
+                                      <div>
+                                        <span className="text-muted-foreground">Workout Type: </span>
+                                        <span className="text-foreground">{indivActivity.workout_type}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.trainer && (
+                                      <div>
+                                        <span className="text-muted-foreground">Type: </span>
+                                        <Badge variant="secondary" className="text-xs">Treadmill</Badge>
+                                      </div>
+                                    )}
+                                    {indivActivity.commute && (
+                                      <div>
+                                        <span className="text-muted-foreground">Type: </span>
+                                        <Badge variant="secondary" className="text-xs">Commute</Badge>
+                                      </div>
+                                    )}
+                                    {indivActivity.achievement_count > 0 && (
+                                      <div>
+                                        <span className="text-muted-foreground">Achievements: </span>
+                                        <span className="text-foreground">{indivActivity.achievement_count}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.kudos_count > 0 && (
+                                      <div>
+                                        <span className="text-muted-foreground">Kudos: </span>
+                                        <span className="text-foreground">{indivActivity.kudos_count}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.comment_count > 0 && (
+                                      <div>
+                                        <span className="text-muted-foreground">Comments: </span>
+                                        <span className="text-foreground">{indivActivity.comment_count}</span>
+                                      </div>
+                                    )}
+                                    {indivActivity.photo_count > 0 && (
+                                      <div>
+                                        <span className="text-muted-foreground">Photos: </span>
+                                        <span className="text-foreground">{indivActivity.photo_count}</span>
                                       </div>
                                     )}
                                   </div>
@@ -320,7 +408,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           ) : (
                             // Show aggregated data from daily_activities
                             <div className="space-y-3">
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
                                 <div>
                                   <span className="text-muted-foreground">Total Distance: </span>
                                   <span className="text-foreground">{formatNumber(activity.distance)} mi</span>
@@ -333,10 +421,20 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                   <span className="text-muted-foreground">Elevation Gain: </span>
                                   <span className="text-foreground">{Math.round(activity.elevation_gain)}ft</span>
                                 </div>
+                                <div>
+                                  <span className="text-muted-foreground">Runs: </span>
+                                  <span className="text-foreground">{activity.run_count}</span>
+                                </div>
                                 {activity.average_speed && (
                                   <div>
                                     <span className="text-muted-foreground">Avg Pace: </span>
-                                    <span className="text-foreground">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                    <span className="text-foreground font-semibold">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                  </div>
+                                )}
+                                {activity.max_speed && (
+                                  <div>
+                                    <span className="text-muted-foreground">Max Pace: </span>
+                                    <span className="text-foreground">{Math.floor(26.8224 / activity.max_speed)}:{String(Math.round((26.8224 / activity.max_speed % 1) * 60)).padStart(2, '0')}/mi</span>
                                   </div>
                                 )}
                                 {activity.average_heartrate && (
@@ -345,26 +443,98 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                     <span className="text-foreground">{Math.round(activity.average_heartrate)} bpm</span>
                                   </div>
                                 )}
+                                {activity.max_heartrate && (
+                                  <div>
+                                    <span className="text-muted-foreground">Max HR: </span>
+                                    <span className="text-foreground">{Math.round(activity.max_heartrate)} bpm</span>
+                                  </div>
+                                )}
                                 {activity.average_cadence && (
                                   <div>
                                     <span className="text-muted-foreground">Avg Cadence: </span>
                                     <span className="text-foreground">{Math.round(activity.average_cadence * 2)} spm</span>
                                   </div>
                                 )}
+                                {activity.calories && (
+                                  <div>
+                                    <span className="text-muted-foreground">Calories: </span>
+                                    <span className="text-foreground">{Math.round(activity.calories)}</span>
+                                  </div>
+                                )}
+                                {activity.suffer_score && (
+                                  <div>
+                                    <span className="text-muted-foreground">Suffer Score: </span>
+                                    <span className="text-foreground">{activity.suffer_score}</span>
+                                  </div>
+                                )}
+                                {activity.average_temp !== null && activity.average_temp !== undefined && (
+                                  <div>
+                                    <span className="text-muted-foreground">Temperature: </span>
+                                    <span className="text-foreground">{Math.round(activity.average_temp * 9/5 + 32)}°F</span>
+                                  </div>
+                                )}
+                                {activity.device_names && (
+                                  <div className="col-span-2">
+                                    <span className="text-muted-foreground">Devices: </span>
+                                    <span className="text-foreground">{JSON.stringify(activity.device_names)}</span>
+                                  </div>
+                                )}
+                                {activity.workout_types && (
+                                  <div>
+                                    <span className="text-muted-foreground">Workout Types: </span>
+                                    <span className="text-foreground">{JSON.stringify(activity.workout_types)}</span>
+                                  </div>
+                                )}
+                                {activity.trainer && (
+                                  <div>
+                                    <Badge variant="secondary" className="text-xs">Treadmill</Badge>
+                                  </div>
+                                )}
+                                {activity.commute && (
+                                  <div>
+                                    <Badge variant="secondary" className="text-xs">Commute</Badge>
+                                  </div>
+                                )}
+                                {activity.achievement_count && activity.achievement_count > 0 && (
+                                  <div>
+                                    <span className="text-muted-foreground">Achievements: </span>
+                                    <span className="text-foreground">{activity.achievement_count}</span>
+                                  </div>
+                                )}
+                                {activity.kudos_count && activity.kudos_count > 0 && (
+                                  <div>
+                                    <span className="text-muted-foreground">Kudos: </span>
+                                    <span className="text-foreground">{activity.kudos_count}</span>
+                                  </div>
+                                )}
+                                {activity.comment_count && activity.comment_count > 0 && (
+                                  <div>
+                                    <span className="text-muted-foreground">Comments: </span>
+                                    <span className="text-foreground">{activity.comment_count}</span>
+                                  </div>
+                                )}
+                                {activity.photo_count && activity.photo_count > 0 && (
+                                  <div>
+                                    <span className="text-muted-foreground">Photos: </span>
+                                    <span className="text-foreground">{activity.photo_count}</span>
+                                  </div>
+                                )}
                               </div>
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  extractBestEffort(activity.activity_date);
-                                }}
-                                disabled={extractingBestEffort === activity.activity_date}
-                                variant="outline"
-                                size="sm"
-                                className="w-full md:w-auto gap-2"
-                              >
-                                <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
-                                {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
-                              </Button>
+                              {isOwnProfile && (
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    extractBestEffort(activity.activity_date);
+                                  }}
+                                  disabled={extractingBestEffort === activity.activity_date}
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full md:w-auto gap-2"
+                                >
+                                  <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
+                                  {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
+                                </Button>
+                              )}
                             </div>
                           )}
                         </TableCell>
