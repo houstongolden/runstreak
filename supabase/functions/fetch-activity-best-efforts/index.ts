@@ -5,13 +5,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Standard distances for best efforts (in meters)
+// All 14 standard distances for best efforts (in meters)
 const STANDARD_DISTANCES = [
-  1609,    // 1 mile
-  5000,    // 5k
-  10000,   // 10k
-  21097,   // Half Marathon
-  42195,   // Marathon
+  400,    // 400m
+  800,    // 800m
+  1000,   // 1km
+  1609,   // 1 mile
+  3219,   // 2 miles
+  5000,   // 5k
+  10000,  // 10k
+  15000,  // 15k
+  16093,  // 10 miles
+  20000,  // 20k
+  21097,  // Half Marathon
+  30000,  // 30k
+  42195,  // Marathon
+  50000,  // 50k
 ];
 
 Deno.serve(async (req) => {
@@ -157,47 +166,72 @@ Deno.serve(async (req) => {
           // Only process standard distances
           if (!STANDARD_DISTANCES.includes(effort.distance)) continue;
 
-          // Check if we already have a better effort for this distance
-          const { data: existingEffort } = await supabaseClient
+          // Check if we already have a current PR for this distance
+          const { data: currentPR } = await supabaseClient
             .from('best_efforts')
             .select('*')
             .eq('runner_id', runner_id)
             .eq('distance', effort.distance)
+            .eq('is_current_pr', true)
             .single();
 
-          // If we have an existing effort and it's faster, skip
-          if (existingEffort && existingEffort.moving_time <= effort.moving_time) {
-            console.log(`Skipping ${effort.distance}m - existing effort is faster`);
-            continue;
-          }
-
-          // Insert or update the best effort
-          const bestEffortData = {
-            runner_id: runner_id,
-            distance: effort.distance,
-            elapsed_time: effort.elapsed_time,
-            moving_time: effort.moving_time,
-            start_date: effort.start_date,
-            is_estimated: false,
-            activity_id: activity.id,
-          };
-
-          if (existingEffort) {
+          // If new effort is faster than current PR, archive the old one
+          if (currentPR && effort.moving_time < currentPR.moving_time) {
+            // Mark the old PR as no longer current
             await supabaseClient
               .from('best_efforts')
-              .update(bestEffortData)
-              .eq('id', existingEffort.id);
-            console.log(`Updated best effort for ${effort.distance}m`);
+              .update({ is_current_pr: false })
+              .eq('id', currentPR.id);
+
+            // Insert new PR
+            await supabaseClient
+              .from('best_efforts')
+              .insert({
+                runner_id: runner_id,
+                distance: effort.distance,
+                elapsed_time: effort.elapsed_time,
+                moving_time: effort.moving_time,
+                start_date: effort.start_date,
+                is_estimated: false,
+                is_current_pr: true,
+                strava_activity_id: activity.id,
+                achieved_at: new Date().toISOString(),
+              });
+            console.log(`New PR for ${effort.distance}m! Archived previous best.`);
+            updatedCount++;
+          } else if (!currentPR) {
+            // No current PR exists, insert this as the new PR
+            await supabaseClient
+              .from('best_efforts')
+              .insert({
+                runner_id: runner_id,
+                distance: effort.distance,
+                elapsed_time: effort.elapsed_time,
+                moving_time: effort.moving_time,
+                start_date: effort.start_date,
+                is_estimated: false,
+                is_current_pr: true,
+                strava_activity_id: activity.id,
+                achieved_at: new Date().toISOString(),
+              });
+            console.log(`Inserted first PR for ${effort.distance}m`);
+            updatedCount++;
           } else {
-            await supabaseClient
-              .from('best_efforts')
-              .insert(bestEffortData);
-            console.log(`Inserted new best effort for ${effort.distance}m`);
+            console.log(`Skipping ${effort.distance}m - current PR is faster`);
           }
-
-          updatedCount++;
         }
       }
+
+      // Mark this activity as enriched in strava_activities table
+      await supabaseClient
+        .from('strava_activities')
+        .update({ 
+          workout_type: detailData.workout_type?.toString() || null,
+          device_name: detailData.device_name || null,
+          gear_id: detailData.gear_id || null,
+        })
+        .eq('strava_activity_id', activity.id)
+        .eq('runner_id', runner_id);
     }
 
     return new Response(JSON.stringify({ 

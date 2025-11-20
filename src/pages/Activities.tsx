@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDistance, formatDuration } from "@/lib/formatters";
-import { Calendar, MapPin, TrendingUp, Clock, Timer } from "lucide-react";
+import { Calendar, MapPin, TrendingUp, Clock, Timer, Trophy } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +17,7 @@ interface DailyActivity {
   elevation_gain: number;
   run_count: number;
   runner_id: string;
+  has_best_efforts?: boolean;
 }
 
 export default function Activities() {
@@ -49,7 +51,27 @@ export default function Activities() {
         .order('activity_date', { ascending: false });
 
       if (error) throw error;
-      setActivities(data || []);
+
+      // Check which activities have best efforts extracted
+      const activitiesWithBadges = await Promise.all(
+        (data || []).map(async (activity) => {
+          const { data: bestEfforts } = await supabase
+            .from('best_efforts')
+            .select('id')
+            .eq('runner_id', activity.runner_id)
+            .eq('is_estimated', false)
+            .gte('start_date', activity.activity_date)
+            .lt('start_date', new Date(new Date(activity.activity_date).getTime() + 86400000).toISOString().split('T')[0])
+            .limit(1);
+
+          return {
+            ...activity,
+            has_best_efforts: (bestEfforts?.length || 0) > 0,
+          };
+        })
+      );
+
+      setActivities(activitiesWithBadges);
     } catch (error) {
       console.error('Error fetching activities:', error);
     } finally {
@@ -131,9 +153,23 @@ export default function Activities() {
           >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">
-                  {format(new Date(activity.activity_date), 'EEEE, MMMM d, yyyy')}
-                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl">
+                    {format(new Date(activity.activity_date), 'EEEE, MMMM d, yyyy')}
+                  </CardTitle>
+                  {activity.has_best_efforts && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Trophy className="h-4 w-4 text-primary" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Best efforts extracted</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
                 <div className="text-sm text-muted-foreground">
                   {activity.run_count} run{activity.run_count !== 1 ? 's' : ''}
                 </div>
