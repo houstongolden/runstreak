@@ -133,7 +133,18 @@ Deno.serve(async (req) => {
       .eq('runner_id', runner_id)
       .eq('activity_date', activity_date);
 
-    if (stravaError || !stravaActivities || stravaActivities.length === 0) {
+    console.log('Strava activities query result:', { stravaError, count: stravaActivities?.length });
+
+    if (stravaError) {
+      console.error('Database error fetching strava_activities:', stravaError);
+      return new Response(JSON.stringify({ error: `Database error: ${stravaError.message}` }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!stravaActivities || stravaActivities.length === 0) {
+      console.log('No strava_activities found for date:', activity_date);
       return new Response(JSON.stringify({ error: 'No Strava activities found for this date' }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -147,6 +158,7 @@ Deno.serve(async (req) => {
 
     // For each activity from database, fetch detailed data from Strava API
     for (const dbActivity of stravaActivities) {
+      console.log(`Fetching details for activity ${dbActivity.strava_activity_id}...`);
 
       const detailResponse = await fetch(
         `https://www.strava.com/api/v3/activities/${dbActivity.strava_activity_id}`,
