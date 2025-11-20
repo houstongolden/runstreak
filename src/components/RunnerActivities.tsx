@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, Timer, Trophy } from "lucide-react";
+import { ChevronDown, ChevronUp, Timer, Trophy, Zap } from "lucide-react";
 import { toast } from "sonner";
 import {
   Tooltip,
@@ -59,6 +59,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
   const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
+  const [enrichedActivityDates, setEnrichedActivityDates] = useState<Set<string>>(new Set());
   const [individualActivities, setIndividualActivities] = useState<Map<string, any[]>>(new Map());
 
   useEffect(() => {
@@ -90,6 +91,20 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
           );
           setBestEffortDates(dates);
         }
+
+        // Fetch strava_activities to identify which activities have been enriched
+        const { data: stravaActivitiesData, error: stravaActivitiesError } = await supabase
+          .from('strava_activities')
+          .select('activity_date, name')
+          .eq('runner_id', runnerId)
+          .not('name', 'is', null);
+
+        if (!stravaActivitiesError && stravaActivitiesData) {
+          const enrichedDates = new Set(
+            stravaActivitiesData.map(act => act.activity_date)
+          );
+          setEnrichedActivityDates(enrichedDates);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -113,12 +128,40 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const extractBestEffort = async (activityDate: string) => {
     setExtractingBestEffort(activityDate);
     try {
-      const { error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
+      const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
         body: { activity_date: activityDate, runner_id: runnerId }
       });
 
       if (error) throw error;
-      toast.success('Best efforts extracted successfully!');
+      
+      // Refresh the activity data to show enriched details
+      const { data: enrichedActivities } = await supabase
+        .from('strava_activities')
+        .select('*')
+        .eq('runner_id', runnerId)
+        .eq('activity_date', activityDate);
+
+      if (enrichedActivities && enrichedActivities.length > 0) {
+        setIndividualActivities(prev => new Map(prev).set(activityDate, enrichedActivities));
+        setEnrichedActivityDates(prev => new Set(prev).add(activityDate));
+      }
+
+      // Refresh best efforts
+      const { data: bestEffortsData } = await supabase
+        .from('best_efforts')
+        .select('start_date')
+        .eq('runner_id', runnerId);
+
+      if (bestEffortsData) {
+        const dates = new Set(
+          bestEffortsData
+            .map(effort => effort.start_date?.split('T')[0])
+            .filter(Boolean) as string[]
+        );
+        setBestEffortDates(dates);
+      }
+
+      toast.success(data?.message || 'Activity enriched successfully!');
     } catch (error: any) {
       console.error('Error extracting best efforts:', error);
       toast.error(error.message || 'Failed to extract best efforts');
@@ -166,8 +209,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               {activities.map((activity) => {
                 const isExpanded = expandedRows.has(activity.id);
                 const hasBestEffort = bestEffortDates.has(activity.activity_date);
-                // Don't show "Detailed" badge - activities are aggregated by date, not individually tracked
-                const isDetailed = false;
+                const isEnriched = enrichedActivityDates.has(activity.activity_date);
                 
                 return (
                   <>
@@ -187,12 +229,28 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                             return format(localDate, "MMM d, yy");
                           })()}
                           {hasBestEffort && (
-                            <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Trophy className="h-3.5 w-3.5 text-yellow-500" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Contains personal best efforts</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
-                          {isDetailed && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
-                              Detailed
-                            </Badge>
+                          {isEnriched && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Zap className="h-3.5 w-3.5 text-primary" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Enriched with full Strava data</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
                       </TableCell>

@@ -101,6 +101,16 @@ Deno.serve(async (req) => {
 
     console.log(`Extracting best efforts for activity on ${activity_date} (${extractionsToday}/10 today)`);
 
+    // Get the runner's timezone
+    const { data: runnerData, error: runnerDataError } = await supabaseClient
+      .from('runners')
+      .select('timezone')
+      .eq('id', runner_id)
+      .single();
+
+    const timezone = runnerData?.timezone || 'America/Los_Angeles';
+    console.log(`Using timezone: ${timezone} for runner ${runner_id}`);
+
     // Get the daily activity to find Strava activity IDs
     const { data: dailyActivity, error: activityError } = await supabaseClient
       .from('daily_activities')
@@ -116,34 +126,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch all activities for this date from Strava
-    const startOfDay = new Date(activity_date + 'T00:00:00Z');
-    const endOfDay = new Date(activity_date + 'T23:59:59Z');
+    // Fetch all activities for this date from strava_activities table (already in local timezone)
+    const { data: stravaActivities, error: stravaError } = await supabaseClient
+      .from('strava_activities')
+      .select('*')
+      .eq('runner_id', runner_id)
+      .eq('activity_date', activity_date);
 
-    const activitiesResponse = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?after=${Math.floor(startOfDay.getTime() / 1000)}&before=${Math.floor(endOfDay.getTime() / 1000)}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${runner.strava_access_token}`,
-        },
-      }
-    );
-
-    if (!activitiesResponse.ok) {
-      throw new Error(`Strava API error: ${activitiesResponse.statusText}`);
+    if (stravaError || !stravaActivities || stravaActivities.length === 0) {
+      return new Response(JSON.stringify({ error: 'No Strava activities found for this date' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const activities = await activitiesResponse.json();
-    console.log(`Found ${activities.length} activities on ${activity_date}`);
+    console.log(`Found ${stravaActivities.length} activities on ${activity_date} from database`);
 
     let updatedCount = 0;
+    let enrichedCount = 0;
 
-    // For each activity, fetch detailed data and extract best efforts
-    for (const activity of activities) {
-      if (activity.type !== 'Run') continue;
+    // For each activity from database, fetch detailed data from Strava API
+    for (const dbActivity of stravaActivities) {
 
       const detailResponse = await fetch(
-        `https://www.strava.com/api/v3/activities/${activity.id}`,
+        `https://www.strava.com/api/v3/activities/${dbActivity.strava_activity_id}`,
         {
           headers: {
             'Authorization': `Bearer ${runner.strava_access_token}`,
@@ -152,14 +158,16 @@ Deno.serve(async (req) => {
       );
 
       if (!detailResponse.ok) {
-        console.error(`Failed to fetch activity ${activity.id}`);
+        console.error(`Failed to fetch activity ${dbActivity.strava_activity_id}`);
         continue;
       }
 
       const detailData = await detailResponse.json();
+      enrichedCount++;
+      console.log(`Enriched activity ${dbActivity.strava_activity_id} with full details`);
 
       if (detailData.best_efforts && Array.isArray(detailData.best_efforts)) {
-        console.log(`Found ${detailData.best_efforts.length} best efforts in activity ${activity.id}`);
+        console.log(`Found ${detailData.best_efforts.length} best efforts in activity ${dbActivity.strava_activity_id}`);
 
         // Process each best effort
         for (const effort of detailData.best_efforts) {
@@ -194,7 +202,7 @@ Deno.serve(async (req) => {
                 start_date: effort.start_date,
                 is_estimated: false,
                 is_current_pr: true,
-                strava_activity_id: activity.id,
+                strava_activity_id: dbActivity.strava_activity_id,
                 achieved_at: new Date().toISOString(),
               });
             console.log(`New PR for ${effort.distance}m! Archived previous best.`);
@@ -211,7 +219,7 @@ Deno.serve(async (req) => {
                 start_date: effort.start_date,
                 is_estimated: false,
                 is_current_pr: true,
-                strava_activity_id: activity.id,
+                strava_activity_id: dbActivity.strava_activity_id,
                 achieved_at: new Date().toISOString(),
               });
             console.log(`Inserted first PR for ${effort.distance}m`);
@@ -222,22 +230,38 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Mark this activity as enriched in strava_activities table
+      // Update strava_activities with enriched data
       await supabaseClient
         .from('strava_activities')
         .update({ 
+          name: detailData.name || null,
           workout_type: detailData.workout_type?.toString() || null,
           device_name: detailData.device_name || null,
           gear_id: detailData.gear_id || null,
+          average_speed: detailData.average_speed || null,
+          max_speed: detailData.max_speed || null,
+          average_cadence: detailData.average_cadence || null,
+          average_heartrate: detailData.average_heartrate || null,
+          max_heartrate: detailData.max_heartrate || null,
+          average_temp: detailData.average_temp || null,
+          calories: detailData.calories || null,
+          suffer_score: detailData.suffer_score || null,
+          achievement_count: detailData.achievement_count || null,
+          kudos_count: detailData.kudos_count || null,
+          comment_count: detailData.comment_count || null,
+          photo_count: detailData.photo_count || null,
         })
-        .eq('strava_activity_id', activity.id)
+        .eq('strava_activity_id', dbActivity.strava_activity_id)
         .eq('runner_id', runner_id);
     }
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Successfully extracted ${updatedCount} best efforts`,
+      message: updatedCount > 0 
+        ? `Successfully extracted ${updatedCount} best effort${updatedCount > 1 ? 's' : ''} from ${enrichedCount} activit${enrichedCount > 1 ? 'ies' : 'y'}`
+        : `Enriched ${enrichedCount} activit${enrichedCount > 1 ? 'ies' : 'y'} with full details (no new best efforts found)`,
       updated_count: updatedCount,
+      enriched_count: enrichedCount,
       extractions_today: extractionsToday + 1
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
