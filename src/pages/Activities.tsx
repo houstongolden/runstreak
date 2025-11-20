@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { formatDistance, formatDuration } from "@/lib/formatters";
-import { Calendar, MapPin, TrendingUp, Clock } from "lucide-react";
+import { Calendar, MapPin, TrendingUp, Clock, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 interface DailyActivity {
   id: string;
@@ -17,9 +19,11 @@ interface DailyActivity {
 }
 
 export default function Activities() {
+  const { toast } = useToast();
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedActivity, setSelectedActivity] = useState<DailyActivity | null>(null);
+  const [enrichingActivity, setEnrichingActivity] = useState<string | null>(null);
 
   useEffect(() => {
     fetchActivities();
@@ -50,6 +54,39 @@ export default function Activities() {
       console.error('Error fetching activities:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFindBestEfforts = async (activity: DailyActivity, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card collapse
+    setEnrichingActivity(activity.id);
+    
+    try {
+      const { error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
+        body: { 
+          runnerId: activity.runner_id,
+          activityDate: activity.activity_date
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Activity enriched",
+        description: "Best efforts have been found and updated for this activity.",
+      });
+
+      // Refresh activities to show updated data
+      await fetchActivities();
+    } catch (error) {
+      console.error('Error enriching activity:', error);
+      toast({
+        title: "Error",
+        description: "Failed to enrich activity. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setEnrichingActivity(null);
     }
   };
 
@@ -142,7 +179,7 @@ export default function Activities() {
               </div>
 
               {selectedActivity?.id === activity.id && (
-                <div className="mt-4 pt-4 border-t">
+                <div className="mt-4 pt-4 border-t space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-muted-foreground">Total Distance</div>
@@ -161,6 +198,17 @@ export default function Activities() {
                       <div className="font-medium">{activity.run_count}</div>
                     </div>
                   </div>
+                  
+                  <Button
+                    onClick={(e) => handleFindBestEfforts(activity, e)}
+                    disabled={enrichingActivity === activity.id}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {enrichingActivity === activity.id ? "Finding Best Efforts..." : "Find Best Efforts"}
+                  </Button>
                 </div>
               )}
             </CardContent>
