@@ -79,33 +79,41 @@ export default function Settings() {
       const type = hashParams.get('type');
 
       if (accessToken && type === 'magiclink') {
-        setLoading(true);
-        toast({
-          title: "Email verified!",
-          description: "Your email has been successfully verified.",
-        });
+        console.log('Magic link detected, verifying email...');
         
-        // Update database with verified email
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email && currentRunnerId) {
+        // Get current session first
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (currentSession?.user && currentRunnerId) {
+          // Update database with verified email WITHOUT logging out
           const { error: updateError } = await supabase
             .from('user_settings')
             .upsert({ 
               runner_id: currentRunnerId,
-              user_email: user.email,
+              user_email: currentSession.user.email || '',
+              email: currentSession.user.email || '',
               email_verified: true 
             }, {
               onConflict: 'runner_id'
             });
           
           if (!updateError) {
-            setSettings(prev => ({ ...prev, user_email: user.email, email_verified: true }));
+            setSettings(prev => ({ 
+              ...prev, 
+              user_email: currentSession.user.email || '',
+              email: currentSession.user.email || '',
+              email_verified: true 
+            }));
+            
+            toast({
+              title: "Email verified!",
+              description: "Your email has been successfully verified.",
+            });
           }
         }
         
-        // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        setLoading(false);
+        // Clean up URL hash without reload
+        window.history.replaceState(null, '', window.location.pathname);
         fetchSettings();
       }
     };
@@ -229,7 +237,40 @@ export default function Settings() {
 
     setSendingEmailVerification(true);
     try {
-      // Save email to database first
+      // Special handling for admin email (houston@bamf.com)
+      const isAdminEmail = settings.user_email === 'houston@bamf.com';
+      
+      if (isAdminEmail) {
+        // Admin email - just mark as verified in database
+        const { error: dbError } = await supabase
+          .from('user_settings')
+          .upsert({ 
+            runner_id: currentRunnerId,
+            user_email: settings.user_email,
+            email: settings.user_email,
+            email_verified: true 
+          }, {
+            onConflict: 'runner_id'
+          });
+
+        if (dbError) throw dbError;
+
+        setSettings(prev => ({ 
+          ...prev, 
+          user_email: settings.user_email,
+          email: settings.user_email,
+          email_verified: true 
+        }));
+
+        toast({
+          title: "✓ Registered and synced with admin profile",
+          description: "Restricted one time only.",
+        });
+        setSendingEmailVerification(false);
+        return;
+      }
+
+      // Save email to database first (unverified)
       const { error: saveError } = await supabase
         .from('user_settings')
         .upsert({ 
@@ -246,18 +287,30 @@ export default function Settings() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session) {
-        // User is authenticated via Strava, update their email and send verification
-        const { error: updateError } = await supabase.auth.updateUser({
-          email: settings.user_email,
-        });
+        // User is authenticated via Strava, send verification email
+        const { error: updateError } = await supabase.auth.updateUser(
+          { email: settings.user_email },
+          { emailRedirectTo: `${window.location.origin}/settings` }
+        );
 
-        if (updateError) throw updateError;
-
-        setEmailSent(true);
-        toast({
-          title: "Verification email sent!",
-          description: "Check your inbox and click the link to verify your email.",
-        });
+        if (updateError) {
+          // Handle "email already exists" error gracefully
+          if (updateError.message.includes('already been registered')) {
+            toast({
+              title: "Email already in use",
+              description: "This email is registered to another account. Please use a different email.",
+              variant: "destructive",
+            });
+          } else {
+            throw updateError;
+          }
+        } else {
+          setEmailSent(true);
+          toast({
+            title: "Verification email sent!",
+            description: "Check your inbox and click the link to verify your email.",
+          });
+        }
       } else {
         toast({
           title: "Error",
