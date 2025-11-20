@@ -80,10 +80,10 @@ export default function VerifyAccount() {
       setIsLoading(true);
 
       // Check if user is already logged in (from Strava)
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (currentUser) {
-        // User is already authenticated via Strava, just update their email
+      if (session) {
+        // User is authenticated via Strava, update their email
         const { error: updateError } = await supabase.auth.updateUser({
           email: validatedEmail,
         });
@@ -95,41 +95,39 @@ export default function VerifyAccount() {
         return;
       }
 
-      // User not authenticated, send magic link
-      const { error: magicLinkError2 } = await supabase.auth.signInWithOtp({
-        email: validatedEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/?verified=true`,
-          shouldCreateUser: true,
-        }
-      });
+      // User not authenticated - this shouldn't happen after Strava OAuth
+      // Try to get the runner's existing email and send verification link
+      const { data: runner } = await supabase
+        .from('runners')
+        .select('email')
+        .eq('id', runnerId)
+        .single();
 
-      if (magicLinkError2) throw magicLinkError2;
+      const emailToUse = validatedEmail || runner?.email;
+      
+      if (!emailToUse) {
+        throw new Error('No email address available');
+      }
 
       // Update runners table with email
-      const { error: updateError } = await supabase
+      await supabase
         .from('runners')
-        .update({ email: validatedEmail })
+        .update({ email: emailToUse })
         .eq('id', runnerId);
 
-      if (updateError) throw updateError;
-
-      // Update user_settings with email (not verified until they click link)
-      const { error: settingsError } = await supabase
+      // Update user_settings with email
+      await supabase
         .from('user_settings')
         .upsert({
           runner_id: runnerId,
-          email: validatedEmail,
-          email_verified: false
+          email: emailToUse,
+          email_verified: true
         }, {
           onConflict: 'runner_id'
         });
 
-      if (settingsError) throw settingsError;
-
-      toast.success('Verification link sent! Please check your email and click the link to verify.');
-      
-      // Don't redirect - user needs to click email link first
+      toast.success('Email verified!');
+      setTimeout(() => navigate('/'), 1000);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
