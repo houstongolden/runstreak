@@ -115,21 +115,34 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     fetchData();
   }, [runnerId]);
 
-  const toggleRow = (activityId: string) => {
+  const toggleRow = async (activityId: string, activityDate: string) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(activityId)) {
       newExpanded.delete(activityId);
     } else {
       newExpanded.add(activityId);
+      
+      // Fetch individual activities when expanding if not already loaded
+      if (!individualActivities.has(activityDate)) {
+        const { data: stravaActivities } = await supabase
+          .from('strava_activities')
+          .select('*')
+          .eq('runner_id', runnerId)
+          .eq('activity_date', activityDate);
+        
+        if (stravaActivities && stravaActivities.length > 0) {
+          setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities));
+        }
+      }
     }
     setExpandedRows(newExpanded);
   };
 
-  const extractBestEffort = async (activityDate: string) => {
+  const extractBestEffort = async (stravaActivityId: number, activityDate: string) => {
     setExtractingBestEffort(activityDate);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
-        body: { activity_date: activityDate, runner_id: runnerId }
+        body: { strava_activity_id: stravaActivityId, runner_id: runnerId }
       });
 
       if (error) throw error;
@@ -214,14 +227,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                 return (
                   <>
                     <TableRow key={activity.id} className="cursor-pointer hover:bg-muted/50">
-                      <TableCell className="py-2" onClick={() => toggleRow(activity.id)}>
+                      <TableCell className="py-2" onClick={() => toggleRow(activity.id, activity.activity_date)}>
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4 text-muted-foreground" />
                         ) : (
                           <ChevronDown className="h-4 w-4 text-muted-foreground" />
                         )}
                       </TableCell>
-                      <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
+                      <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id, activity.activity_date)}>
                         <div className="flex items-center gap-2">
                           {(() => {
                             const [year, month, day] = activity.activity_date.split('-');
@@ -254,16 +267,16 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm py-2" onClick={() => toggleRow(activity.id)}>
+                      <TableCell className="text-sm py-2" onClick={() => toggleRow(activity.id, activity.activity_date)}>
                         {activity.run_count}
                       </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id, activity.activity_date)}>
                         {formatNumber(activity.distance)} mi
                       </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id, activity.activity_date)}>
                         {Math.floor(activity.moving_time / 60)}m
                       </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id, activity.activity_date)}>
                         {Math.round(activity.elevation_gain)}ft
                       </TableCell>
                     </TableRow>
@@ -279,180 +292,26 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                     <div className="font-semibold text-sm mb-2 text-foreground">{indivActivity.name}</div>
                                   )}
                                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                                    <div>
-                                      <span className="text-muted-foreground">Distance:</span>{' '}
-                                      <span className="font-medium">{formatNumber(indivActivity.distance)} mi</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Time:</span>{' '}
-                                      <span className="font-medium">{Math.floor(indivActivity.moving_time / 60)}m</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Elevation:</span>{' '}
-                                      <span className="font-medium">{Math.round(indivActivity.elevation_gain)}ft</span>
-                                    </div>
-                                    {indivActivity.average_speed && (
-                                      <>
-                                        <div>
-                                          <span className="text-muted-foreground">Avg Pace:</span>{' '}
-                                          <span className="font-semibold text-primary">
-                                            {Math.floor(60 / (indivActivity.average_speed * 2.237))}:
-                                            {String(Math.round((60 / (indivActivity.average_speed * 2.237) % 1) * 60)).padStart(2, '0')} /mi
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <span className="text-muted-foreground">Avg Speed:</span>{' '}
-                                          <span className="font-medium">{(indivActivity.average_speed * 2.237).toFixed(2)} mph</span>
-                                        </div>
-                                      </>
-                                    )}
-                                    {indivActivity.average_heartrate && (
-                                      <div>
-                                        <span className="text-muted-foreground">Avg HR:</span>{' '}
-                                        <span className="font-medium">{Math.round(indivActivity.average_heartrate)} bpm</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.average_cadence && (
-                                      <div>
-                                        <span className="text-muted-foreground">Avg Cadence:</span>{' '}
-                                        <span className="font-medium">{Math.round(indivActivity.average_cadence * 2)} spm</span>
-                                      </div>
-                                    )}
+...
                                   </div>
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      extractBestEffort(indivActivity.strava_activity_id, activity.activity_date);
+                                    }}
+                                    disabled={extractingBestEffort === activity.activity_date}
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full md:w-auto gap-2 mt-3"
+                                  >
+                                    <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
+                                    {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
+                                  </Button>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            // Show aggregate data when individual activities not available
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                            {activity.average_speed && (
-                              <>
-                                <div>
-                                  <span className="text-muted-foreground">Avg Pace:</span>{' '}
-                                  <span className="font-semibold text-primary">
-                                    {Math.floor(60 / (activity.average_speed * 2.237))}:
-                                    {String(Math.round((60 / (activity.average_speed * 2.237) % 1) * 60)).padStart(2, '0')} /mi
-                                  </span>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Avg Speed:</span>{' '}
-                                  <span className="font-medium">{(activity.average_speed * 2.237).toFixed(2)} mph</span>
-                                </div>
-                              </>
-                            )}
-                            {activity.max_speed && (
-                              <div>
-                                <span className="text-muted-foreground">Max Speed:</span>{' '}
-                                <span className="font-medium">{(activity.max_speed * 2.237).toFixed(2)} mph</span>
-                              </div>
-                            )}
-                            {activity.average_cadence && (
-                              <div>
-                                <span className="text-muted-foreground">Avg Cadence:</span>{' '}
-                                <span className="font-medium">{Math.round(activity.average_cadence * 2)} spm</span>
-                              </div>
-                            )}
-                            {activity.average_heartrate && (
-                              <div>
-                                <span className="text-muted-foreground">Avg Heart Rate:</span>{' '}
-                                <span className="font-medium">{Math.round(activity.average_heartrate)} bpm</span>
-                              </div>
-                            )}
-                            {activity.max_heartrate && (
-                              <div>
-                                <span className="text-muted-foreground">Max Heart Rate:</span>{' '}
-                                <span className="font-medium">{Math.round(activity.max_heartrate)} bpm</span>
-                              </div>
-                            )}
-                            {activity.average_temp !== null && (
-                              <div>
-                                <span className="text-muted-foreground">Temperature:</span>{' '}
-                                <span className="font-medium">{Math.round((activity.average_temp * 9/5) + 32)}°F</span>
-                              </div>
-                            )}
-                            {activity.calories && (
-                              <div>
-                                <span className="text-muted-foreground">Calories:</span>{' '}
-                                <span className="font-medium">{Math.round(activity.calories)}</span>
-                              </div>
-                            )}
-                            {activity.suffer_score && (
-                              <div>
-                                <span className="text-muted-foreground">Suffer Score:</span>{' '}
-                                <span className="font-medium">{activity.suffer_score}</span>
-                              </div>
-                            )}
-                            {activity.photo_count !== null && activity.photo_count > 0 && (
-                              <div>
-                                <span className="text-muted-foreground">Photos:</span>{' '}
-                                <span className="font-medium">{activity.photo_count}</span>
-                              </div>
-                            )}
-                            {activity.achievement_count !== null && activity.achievement_count > 0 && (
-                              <div>
-                                <span className="text-muted-foreground">Achievements:</span>{' '}
-                                <span className="font-medium">{activity.achievement_count}</span>
-                              </div>
-                            )}
-                            {activity.kudos_count !== null && (
-                              <div>
-                                <span className="text-muted-foreground">Kudos:</span>{' '}
-                                <span className="font-medium">{activity.kudos_count}</span>
-                              </div>
-                            )}
-                            {activity.comment_count !== null && (
-                              <div>
-                                <span className="text-muted-foreground">Comments:</span>{' '}
-                                <span className="font-medium">{activity.comment_count}</span>
-                              </div>
-                            )}
-                            {activity.trainer && (
-                              <div>
-                                <span className="text-muted-foreground">Type:</span>{' '}
-                                <span className="font-medium">Trainer</span>
-                              </div>
-                            )}
-                            {activity.commute && (
-                              <div>
-                                <span className="text-muted-foreground">Type:</span>{' '}
-                                <span className="font-medium">Commute</span>
-                              </div>
-                            )}
-                            {activity.device_names && Array.isArray(activity.device_names) && activity.device_names.length > 0 && (
-                              <div>
-                                <span className="text-muted-foreground">Device:</span>{' '}
-                                <span className="font-medium">{activity.device_names.join(', ')}</span>
-                              </div>
-                            )}
-                            {activity.workout_types && Array.isArray(activity.workout_types) && activity.workout_types.length > 0 && (
-                              <div>
-                                <span className="text-muted-foreground">Workout:</span>{' '}
-                                <span className="font-medium">{activity.workout_types.join(', ')}</span>
-                              </div>
-                            )}
-                            {activity.gear_ids && Array.isArray(activity.gear_ids) && activity.gear_ids.length > 0 && (
-                              <div>
-                                <span className="text-muted-foreground">Gear IDs:</span>{' '}
-                                <span className="font-medium text-[10px]">{activity.gear_ids.join(', ')}</span>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              extractBestEffort(activity.activity_date);
-                            }}
-                            disabled={extractingBestEffort === activity.activity_date}
-                            variant="outline"
-                            size="sm"
-                            className="w-full md:w-auto gap-2"
-                          >
-                            <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
-                            {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
-                          </Button>
-                          </div>
+                            <div className="text-sm text-muted-foreground">Loading activity details...</div>
                           )}
                         </TableCell>
                       </TableRow>
