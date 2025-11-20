@@ -246,17 +246,25 @@ const Index = () => {
         {/* Light mode hero background - Video */}
         <div className="absolute left-0 right-0 top-0 h-[600px] overflow-hidden light:block dark:hidden pointer-events-none -z-10">
           <video 
-            autoPlay 
+            ref={(el) => {
+              if (el) {
+                el.muted = true;
+                el.playbackRate = 0.5;
+                el.play().catch(() => {
+                  // Autoplay blocked, try again on first user interaction
+                  const playOnInteraction = () => {
+                    el.play().catch(() => {});
+                    document.removeEventListener('click', playOnInteraction);
+                  };
+                  document.addEventListener('click', playOnInteraction);
+                });
+              }
+            }}
             loop 
             muted 
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
             poster={heroRunningBg}
-            onLoadedData={(e) => {
-              const video = e.target as HTMLVideoElement;
-              video.playbackRate = 0.5;
-              video.play().catch(err => console.log('Video autoplay blocked:', err));
-            }}
           >
             <source src="/videos/hero-running-bg.mp4" type="video/mp4" />
           </video>
