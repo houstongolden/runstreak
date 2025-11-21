@@ -120,7 +120,13 @@ export function Footer() {
         {/* Large background text - Full width breaking out of container */}
         <div className="absolute left-0 right-0 -bottom-12 overflow-hidden pointer-events-none z-0">
           <div className="flex items-center justify-center relative">
-            <h2 className="text-[50px] sm:text-[80px] md:text-[100px] lg:text-[130px] xl:text-[160px] 2xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/10 via-orange-600/15 to-orange-500/10 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
+            <h2 
+              className="text-[50px] sm:text-[80px] md:text-[100px] lg:text-[130px] xl:text-[160px] 2xl:text-[200px] font-logo font-semibold leading-none bg-gradient-to-r from-orange-500/10 via-orange-600/15 to-orange-500/10 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px] uppercase"
+              style={{
+                transform: 'skewX(-6deg)',
+                letterSpacing: '0.01em'
+              }}
+            >
               RUNSTREAKS
             </h2>
             {/* Gradient fade overlay */}

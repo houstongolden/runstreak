@@ -50,7 +50,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   <img 
                     src={runstreaksLogo} 
                     alt="RunStreaks Logo"
-                    className="h-9 w-9 object-contain"
+                    className="h-9 w-9 object-contain transition-all duration-300 hover:animate-logo-glow hover:scale-110"
                     style={{
                       filter: isDark 
                         ? 'drop-shadow(0 0 12px hsl(16 100% 65% / 0.6)) drop-shadow(0 0 20px hsl(16 100% 65% / 0.4))' 
