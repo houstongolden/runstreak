@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, Timer, Trophy, Zap } from "lucide-react";
+import { ChevronDown, ChevronUp, Timer, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -24,13 +24,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface DailyActivity {
+interface StravaActivity {
   id: string;
+  strava_activity_id: number;
   activity_date: string;
+  name: string | null;
   distance: number;
   moving_time: number;
+  elapsed_time: number;
   elevation_gain: number;
-  run_count: number;
+  type: string | null;
+  sport_type: string | null;
   average_speed: number | null;
   max_speed: number | null;
   average_cadence: number | null;
@@ -41,13 +45,15 @@ interface DailyActivity {
   suffer_score: number | null;
   commute: boolean | null;
   trainer: boolean | null;
+  manual: boolean | null;
   photo_count: number | null;
   achievement_count: number | null;
   kudos_count: number | null;
   comment_count: number | null;
-  device_names: any | null;
-  workout_types: any | null;
-  gear_ids: any | null;
+  device_name: string | null;
+  workout_type: string | null;
+  gear_id: string | null;
+  pr_count: number | null;
 }
 
 interface RunnerActivitiesProps {
@@ -56,13 +62,11 @@ interface RunnerActivitiesProps {
 
 export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const { runnerId: currentUserRunnerId } = useAuth();
-  const [activities, setActivities] = useState<DailyActivity[]>([]);
+  const [activities, setActivities] = useState<StravaActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
-  const [bestEffortDates, setBestEffortDates] = useState<Set<string>>(new Set());
-  const [enrichedActivityDates, setEnrichedActivityDates] = useState<Set<string>>(new Set());
-  const [individualActivities, setIndividualActivities] = useState<Map<string, any[]>>(new Map());
+  const [bestEffortIds, setBestEffortIds] = useState<Set<number>>(new Set());
   
   const isOwnProfile = currentUserRunnerId === runnerId;
 
@@ -70,13 +74,13 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch activities
+        // Fetch individual strava activities
         const { data: activitiesData, error: activitiesError } = await supabase
-          .from('daily_activities')
+          .from('strava_activities')
           .select('*')
           .eq('runner_id', runnerId)
           .order('activity_date', { ascending: false })
-          .limit(100);
+          .limit(200);
 
         if (activitiesError) throw activitiesError;
         setActivities(activitiesData || []);
@@ -84,30 +88,17 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         // Fetch best efforts to identify which activities have PRs
         const { data: bestEffortsData, error: bestEffortsError } = await supabase
           .from('best_efforts')
-          .select('start_date')
-          .eq('runner_id', runnerId);
+          .select('strava_activity_id')
+          .eq('runner_id', runnerId)
+          .not('strava_activity_id', 'is', null);
 
         if (!bestEffortsError && bestEffortsData) {
-          const dates = new Set(
+          const ids = new Set(
             bestEffortsData
-              .map(effort => effort.start_date?.split('T')[0])
-              .filter(Boolean) as string[]
+              .map(effort => effort.strava_activity_id)
+              .filter(Boolean) as number[]
           );
-          setBestEffortDates(dates);
-        }
-
-        // Fetch strava_activities to identify which activities have been enriched
-        const { data: stravaActivitiesData, error: stravaActivitiesError } = await supabase
-          .from('strava_activities')
-          .select('activity_date, name')
-          .eq('runner_id', runnerId)
-          .not('name', 'is', null);
-
-        if (!stravaActivitiesError && stravaActivitiesData) {
-          const enrichedDates = new Set(
-            stravaActivitiesData.map(act => act.activity_date)
-          );
-          setEnrichedActivityDates(enrichedDates);
+          setBestEffortIds(ids);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -129,66 +120,35 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     setExpandedRows(newExpanded);
   };
 
-  const extractBestEffort = async (activityDate: string) => {
-    setExtractingBestEffort(activityDate);
+  const extractBestEffort = async (activityId: string, stravaActivityId: number) => {
+    setExtractingBestEffort(activityId);
     try {
-      // First check if strava_activities exist for this date
-      const { data: stravaActivities, error: fetchError } = await supabase
-        .from('strava_activities')
-        .select('*')
-        .eq('runner_id', runnerId)
-        .eq('activity_date', activityDate);
+      const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
+        body: { strava_activity_id: stravaActivityId, runner_id: runnerId }
+      });
 
-      if (fetchError) throw fetchError;
-      
-      // If no individual activities exist, we need to trigger a full sync first
-      if (!stravaActivities || stravaActivities.length === 0) {
-        toast.info('No individual activity data found. Please sync your Strava account first to fetch detailed activity information.');
-        return;
-      }
-
-      // Store the activities in state
-      setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities));
-
-      // Process best efforts for each activity on this date
-      let totalUpdated = 0;
-      for (const activity of stravaActivities) {
-        const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
-          body: { strava_activity_id: activity.strava_activity_id, runner_id: runnerId }
-        });
-
-        if (error) {
-          console.error(`Error processing activity ${activity.strava_activity_id}:`, error);
-          continue;
-        }
-
-        if (data?.updated_count) {
-          totalUpdated += data.updated_count;
-        }
-      }
+      if (error) throw error;
 
       // Refresh best efforts
       const { data: bestEffortsData } = await supabase
         .from('best_efforts')
-        .select('start_date')
-        .eq('runner_id', runnerId);
+        .select('strava_activity_id')
+        .eq('runner_id', runnerId)
+        .not('strava_activity_id', 'is', null);
 
       if (bestEffortsData) {
-        const dates = new Set(
+        const ids = new Set(
           bestEffortsData
-            .map(effort => effort.start_date?.split('T')[0])
-            .filter(Boolean) as string[]
+            .map(effort => effort.strava_activity_id)
+            .filter(Boolean) as number[]
         );
-        setBestEffortDates(dates);
+        setBestEffortIds(ids);
       }
 
-      // Mark this date as enriched
-      setEnrichedActivityDates(prev => new Set(prev).add(activityDate));
-
-      if (totalUpdated > 0) {
-        toast.success(`Found ${totalUpdated} new best effort${totalUpdated > 1 ? 's' : ''}!`);
+      if (data?.updated_count && data.updated_count > 0) {
+        toast.success(`Found ${data.updated_count} new best effort${data.updated_count > 1 ? 's' : ''}!`);
       } else {
-        toast.success('Activity enriched with full details (no new best efforts found)');
+        toast.success('Activity scanned (no new best efforts found)');
       }
     } catch (error: any) {
       console.error('Error extracting best efforts:', error);
@@ -227,7 +187,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               <TableRow>
                 <TableHead className="text-xs py-2 w-8"></TableHead>
                 <TableHead className="text-xs py-2">Date</TableHead>
-                <TableHead className="text-xs py-2">Runs</TableHead>
+                <TableHead className="text-xs py-2">Name</TableHead>
                 <TableHead className="text-xs py-2 text-right">Distance</TableHead>
                 <TableHead className="text-xs py-2 text-right">Time</TableHead>
                 <TableHead className="text-xs py-2 text-right">Elevation</TableHead>
@@ -236,8 +196,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
             <TableBody>
               {activities.map((activity) => {
                 const isExpanded = expandedRows.has(activity.id);
-                const hasBestEffort = bestEffortDates.has(activity.activity_date);
-                const isEnriched = enrichedActivityDates.has(activity.activity_date);
+                const hasBestEffort = bestEffortIds.has(activity.strava_activity_id);
                 
                 return (
                   <>
@@ -268,22 +227,10 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                               </Tooltip>
                             </TooltipProvider>
                           )}
-                          {isEnriched && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Zap className="h-3.5 w-3.5 text-primary" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Enriched with full Strava data</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm py-2" onClick={() => toggleRow(activity.id)}>
-                        {activity.run_count}
+                      <TableCell className="text-sm py-2 max-w-[200px] truncate" onClick={() => toggleRow(activity.id)}>
+                        {activity.name || 'Unnamed Activity'}
                       </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {formatNumber(activity.distance)} mi
@@ -298,280 +245,155 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                     {isExpanded && (
                       <TableRow key={`${activity.id}-expanded`}>
                         <TableCell colSpan={6} className="bg-muted/30 p-4">
-                          {individualActivities.has(activity.activity_date) && individualActivities.get(activity.activity_date)!.length > 0 ? (
-                            // Show individual activities fetched via Find Best Efforts
-                            <div className="space-y-4">
-                              {individualActivities.get(activity.activity_date)!.map((indivActivity) => (
-                                <div key={indivActivity.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
-                                  {indivActivity.name && (
-                                    <div className="font-semibold text-sm mb-2 text-foreground">{indivActivity.name}</div>
-                                  )}
-                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
-                                    <div>
-                                      <span className="text-muted-foreground">Distance: </span>
-                                      <span className="text-foreground">{formatNumber(indivActivity.distance)} mi</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Moving Time: </span>
-                                      <span className="text-foreground">{Math.floor(indivActivity.moving_time / 60)}m</span>
-                                    </div>
-                                    {indivActivity.elapsed_time && (
-                                      <div>
-                                        <span className="text-muted-foreground">Elapsed Time: </span>
-                                        <span className="text-foreground">{Math.floor(indivActivity.elapsed_time / 60)}m</span>
-                                      </div>
-                                    )}
-                                    <div>
-                                      <span className="text-muted-foreground">Elevation: </span>
-                                      <span className="text-foreground">{Math.round(indivActivity.elevation_gain)}ft</span>
-                                    </div>
-                                    {indivActivity.average_speed && (
-                                      <div>
-                                        <span className="text-muted-foreground">Avg Pace: </span>
-                                        <span className="text-foreground font-semibold">{Math.floor(26.8224 / indivActivity.average_speed)}:{String(Math.round((26.8224 / indivActivity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.max_speed && (
-                                      <div>
-                                        <span className="text-muted-foreground">Max Pace: </span>
-                                        <span className="text-foreground">{Math.floor(26.8224 / indivActivity.max_speed)}:{String(Math.round((26.8224 / indivActivity.max_speed % 1) * 60)).padStart(2, '0')}/mi</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.average_heartrate && (
-                                      <div>
-                                        <span className="text-muted-foreground">Avg HR: </span>
-                                        <span className="text-foreground">{Math.round(indivActivity.average_heartrate)} bpm</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.max_heartrate && (
-                                      <div>
-                                        <span className="text-muted-foreground">Max HR: </span>
-                                        <span className="text-foreground">{Math.round(indivActivity.max_heartrate)} bpm</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.average_cadence && (
-                                      <div>
-                                        <span className="text-muted-foreground">Avg Cadence: </span>
-                                        <span className="text-foreground">{Math.round(indivActivity.average_cadence * 2)} spm</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.calories && (
-                                      <div>
-                                        <span className="text-muted-foreground">Calories: </span>
-                                        <span className="text-foreground">{Math.round(indivActivity.calories)}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.suffer_score && (
-                                      <div>
-                                        <span className="text-muted-foreground">Suffer Score: </span>
-                                        <span className="text-foreground">{indivActivity.suffer_score}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.average_temp !== null && indivActivity.average_temp !== undefined && (
-                                      <div>
-                                        <span className="text-muted-foreground">Temperature: </span>
-                                        <span className="text-foreground">{Math.round(indivActivity.average_temp * 9/5 + 32)}°F</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.device_name && (
-                                      <div>
-                                        <span className="text-muted-foreground">Device: </span>
-                                        <span className="text-foreground">{indivActivity.device_name}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.workout_type && (
-                                      <div>
-                                        <span className="text-muted-foreground">Workout Type: </span>
-                                        <span className="text-foreground">{indivActivity.workout_type}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.trainer && (
-                                      <div>
-                                        <span className="text-muted-foreground">Type: </span>
-                                        <Badge variant="secondary" className="text-xs">Treadmill</Badge>
-                                      </div>
-                                    )}
-                                    {indivActivity.commute && (
-                                      <div>
-                                        <span className="text-muted-foreground">Type: </span>
-                                        <Badge variant="secondary" className="text-xs">Commute</Badge>
-                                      </div>
-                                    )}
-                                    {indivActivity.achievement_count > 0 && (
-                                      <div>
-                                        <span className="text-muted-foreground">Achievements: </span>
-                                        <span className="text-foreground">{indivActivity.achievement_count}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.kudos_count > 0 && (
-                                      <div>
-                                        <span className="text-muted-foreground">Kudos: </span>
-                                        <span className="text-foreground">{indivActivity.kudos_count}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.comment_count > 0 && (
-                                      <div>
-                                        <span className="text-muted-foreground">Comments: </span>
-                                        <span className="text-foreground">{indivActivity.comment_count}</span>
-                                      </div>
-                                    )}
-                                    {indivActivity.photo_count > 0 && (
-                                      <div>
-                                        <span className="text-muted-foreground">Photos: </span>
-                                        <span className="text-foreground">{indivActivity.photo_count}</span>
-                                      </div>
-                                    )}
-                                   </div>
-                                 </div>
-                               ))}
-                               {isOwnProfile && (
-                                 <Button
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     extractBestEffort(activity.activity_date);
-                                   }}
-                                   disabled={extractingBestEffort === activity.activity_date}
-                                   variant="outline"
-                                   size="sm"
-                                   className="mt-4 w-full md:w-auto gap-2"
-                                 >
-                                   <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
-                                   {extractingBestEffort === activity.activity_date ? "Re-scan Best Efforts" : "Re-scan Best Efforts"}
-                                 </Button>
-                               )}
-                             </div>
-                          ) : (
-                            // Show aggregated data from daily_activities
-                            <div className="space-y-3">
-                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
-                                <div>
-                                  <span className="text-muted-foreground">Total Distance: </span>
-                                  <span className="text-foreground">{formatNumber(activity.distance)} mi</span>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Total Time: </span>
-                                  <span className="text-foreground">{Math.floor(activity.moving_time / 60)}m</span>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Elevation Gain: </span>
-                                  <span className="text-foreground">{Math.round(activity.elevation_gain)}ft</span>
-                                </div>
-                                <div>
-                                  <span className="text-muted-foreground">Runs: </span>
-                                  <span className="text-foreground">{activity.run_count}</span>
-                                </div>
-                                {activity.average_speed && (
-                                  <div>
-                                    <span className="text-muted-foreground">Avg Pace: </span>
-                                    <span className="text-foreground font-semibold">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
-                                  </div>
-                                )}
-                                {activity.max_speed && (
-                                  <div>
-                                    <span className="text-muted-foreground">Max Pace: </span>
-                                    <span className="text-foreground">{Math.floor(26.8224 / activity.max_speed)}:{String(Math.round((26.8224 / activity.max_speed % 1) * 60)).padStart(2, '0')}/mi</span>
-                                  </div>
-                                )}
-                                {activity.average_heartrate && (
-                                  <div>
-                                    <span className="text-muted-foreground">Avg HR: </span>
-                                    <span className="text-foreground">{Math.round(activity.average_heartrate)} bpm</span>
-                                  </div>
-                                )}
-                                {activity.max_heartrate && (
-                                  <div>
-                                    <span className="text-muted-foreground">Max HR: </span>
-                                    <span className="text-foreground">{Math.round(activity.max_heartrate)} bpm</span>
-                                  </div>
-                                )}
-                                {activity.average_cadence && (
-                                  <div>
-                                    <span className="text-muted-foreground">Avg Cadence: </span>
-                                    <span className="text-foreground">{Math.round(activity.average_cadence * 2)} spm</span>
-                                  </div>
-                                )}
-                                {activity.calories && (
-                                  <div>
-                                    <span className="text-muted-foreground">Calories: </span>
-                                    <span className="text-foreground">{Math.round(activity.calories)}</span>
-                                  </div>
-                                )}
-                                {activity.suffer_score && (
-                                  <div>
-                                    <span className="text-muted-foreground">Suffer Score: </span>
-                                    <span className="text-foreground">{activity.suffer_score}</span>
-                                  </div>
-                                )}
-                                {activity.average_temp !== null && activity.average_temp !== undefined && (
-                                  <div>
-                                    <span className="text-muted-foreground">Temperature: </span>
-                                    <span className="text-foreground">{Math.round(activity.average_temp * 9/5 + 32)}°F</span>
-                                  </div>
-                                )}
-                                {activity.device_names && (
-                                  <div className="col-span-2">
-                                    <span className="text-muted-foreground">Devices: </span>
-                                    <span className="text-foreground">{JSON.stringify(activity.device_names)}</span>
-                                  </div>
-                                )}
-                                {activity.workout_types && (
-                                  <div>
-                                    <span className="text-muted-foreground">Workout Types: </span>
-                                    <span className="text-foreground">{JSON.stringify(activity.workout_types)}</span>
-                                  </div>
-                                )}
-                                {activity.trainer && (
-                                  <div>
-                                    <Badge variant="secondary" className="text-xs">Treadmill</Badge>
-                                  </div>
-                                )}
-                                {activity.commute && (
-                                  <div>
-                                    <Badge variant="secondary" className="text-xs">Commute</Badge>
-                                  </div>
-                                )}
-                                {activity.achievement_count && activity.achievement_count > 0 && (
-                                  <div>
-                                    <span className="text-muted-foreground">Achievements: </span>
-                                    <span className="text-foreground">{activity.achievement_count}</span>
-                                  </div>
-                                )}
-                                {activity.kudos_count && activity.kudos_count > 0 && (
-                                  <div>
-                                    <span className="text-muted-foreground">Kudos: </span>
-                                    <span className="text-foreground">{activity.kudos_count}</span>
-                                  </div>
-                                )}
-                                {activity.comment_count && activity.comment_count > 0 && (
-                                  <div>
-                                    <span className="text-muted-foreground">Comments: </span>
-                                    <span className="text-foreground">{activity.comment_count}</span>
-                                  </div>
-                                )}
-                                {activity.photo_count && activity.photo_count > 0 && (
-                                  <div>
-                                    <span className="text-muted-foreground">Photos: </span>
-                                    <span className="text-foreground">{activity.photo_count}</span>
-                                  </div>
-                                )}
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
+                              <div>
+                                <span className="text-muted-foreground">Type: </span>
+                                <span className="text-foreground">{activity.sport_type || activity.type || 'Run'}</span>
                               </div>
-                              {isOwnProfile && (
-                                <Button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    extractBestEffort(activity.activity_date);
-                                  }}
-                                  disabled={extractingBestEffort === activity.activity_date}
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full md:w-auto gap-2"
-                                >
-                                  <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
-                                  {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
-                                </Button>
-                               )}
-                             </div>
-                           )}
+                              <div>
+                                <span className="text-muted-foreground">Distance: </span>
+                                <span className="text-foreground">{formatNumber(activity.distance)} mi</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Moving Time: </span>
+                                <span className="text-foreground">{Math.floor(activity.moving_time / 60)}m</span>
+                              </div>
+                              {activity.elapsed_time && (
+                                <div>
+                                  <span className="text-muted-foreground">Elapsed Time: </span>
+                                  <span className="text-foreground">{Math.floor(activity.elapsed_time / 60)}m</span>
+                                </div>
+                              )}
+                              <div>
+                                <span className="text-muted-foreground">Elevation: </span>
+                                <span className="text-foreground">{Math.round(activity.elevation_gain)}ft</span>
+                              </div>
+                              {activity.average_speed && (
+                                <div>
+                                  <span className="text-muted-foreground">Avg Pace: </span>
+                                  <span className="text-foreground font-semibold">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                </div>
+                              )}
+                              {activity.max_speed && (
+                                <div>
+                                  <span className="text-muted-foreground">Max Pace: </span>
+                                  <span className="text-foreground">{Math.floor(26.8224 / activity.max_speed)}:{String(Math.round((26.8224 / activity.max_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                                </div>
+                              )}
+                              {activity.average_heartrate && (
+                                <div>
+                                  <span className="text-muted-foreground">Avg HR: </span>
+                                  <span className="text-foreground">{Math.round(activity.average_heartrate)} bpm</span>
+                                </div>
+                              )}
+                              {activity.max_heartrate && (
+                                <div>
+                                  <span className="text-muted-foreground">Max HR: </span>
+                                  <span className="text-foreground">{Math.round(activity.max_heartrate)} bpm</span>
+                                </div>
+                              )}
+                              {activity.average_cadence && (
+                                <div>
+                                  <span className="text-muted-foreground">Avg Cadence: </span>
+                                  <span className="text-foreground">{Math.round(activity.average_cadence * 2)} spm</span>
+                                </div>
+                              )}
+                              {activity.calories && (
+                                <div>
+                                  <span className="text-muted-foreground">Calories: </span>
+                                  <span className="text-foreground">{Math.round(activity.calories)}</span>
+                                </div>
+                              )}
+                              {activity.suffer_score && (
+                                <div>
+                                  <span className="text-muted-foreground">Suffer Score: </span>
+                                  <span className="text-foreground">{activity.suffer_score}</span>
+                                </div>
+                              )}
+                              {activity.average_temp !== null && activity.average_temp !== undefined && (
+                                <div>
+                                  <span className="text-muted-foreground">Temperature: </span>
+                                  <span className="text-foreground">{Math.round(activity.average_temp * 9/5 + 32)}°F</span>
+                                </div>
+                              )}
+                              {activity.device_name && (
+                                <div>
+                                  <span className="text-muted-foreground">Device: </span>
+                                  <span className="text-foreground">{activity.device_name}</span>
+                                </div>
+                              )}
+                              {activity.workout_type && (
+                                <div>
+                                  <span className="text-muted-foreground">Workout Type: </span>
+                                  <span className="text-foreground">{activity.workout_type}</span>
+                                </div>
+                              )}
+                              {activity.trainer && (
+                                <div>
+                                  <span className="text-muted-foreground">Type: </span>
+                                  <Badge variant="secondary" className="text-xs">Treadmill</Badge>
+                                </div>
+                              )}
+                              {activity.commute && (
+                                <div>
+                                  <span className="text-muted-foreground">Type: </span>
+                                  <Badge variant="secondary" className="text-xs">Commute</Badge>
+                                </div>
+                              )}
+                              {activity.manual && (
+                                <div>
+                                  <span className="text-muted-foreground">Source: </span>
+                                  <Badge variant="outline" className="text-xs">Manual Entry</Badge>
+                                </div>
+                              )}
+                              {activity.achievement_count && activity.achievement_count > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">Achievements: </span>
+                                  <span className="text-foreground">{activity.achievement_count}</span>
+                                </div>
+                              )}
+                              {activity.kudos_count && activity.kudos_count > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">Kudos: </span>
+                                  <span className="text-foreground">{activity.kudos_count}</span>
+                                </div>
+                              )}
+                              {activity.comment_count && activity.comment_count > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">Comments: </span>
+                                  <span className="text-foreground">{activity.comment_count}</span>
+                                </div>
+                              )}
+                              {activity.photo_count && activity.photo_count > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">Photos: </span>
+                                  <span className="text-foreground">{activity.photo_count}</span>
+                                </div>
+                              )}
+                              {activity.pr_count && activity.pr_count > 0 && (
+                                <div>
+                                  <span className="text-muted-foreground">PRs: </span>
+                                  <Badge variant="default" className="text-xs">{activity.pr_count} Personal Records</Badge>
+                                </div>
+                              )}
+                            </div>
+                            {isOwnProfile && (
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  extractBestEffort(activity.id, activity.strava_activity_id);
+                                }}
+                                disabled={extractingBestEffort === activity.id}
+                                variant="outline"
+                                size="sm"
+                                className="mt-4 w-full md:w-auto gap-2"
+                              >
+                                <Timer className={`h-4 w-4 ${extractingBestEffort === activity.id ? 'animate-spin' : ''}`} />
+                                {extractingBestEffort === activity.id ? "Scanning..." : hasBestEffort ? "Re-scan Best Efforts" : "Scan for Best Efforts"}
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     )}

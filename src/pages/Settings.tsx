@@ -366,8 +366,9 @@ export default function Settings() {
 
       if (saveError) throw saveError;
 
-      const { data, error } = await supabase.functions.invoke("send-verification-sms", {
-        body: { phoneNumber: formattedPhone },
+      // Use Supabase native phone OTP (not Vonage)
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
       });
 
       if (error) {
@@ -406,11 +407,11 @@ export default function Settings() {
 
     setVerifyingCode(true);
     try {
-      const { error } = await supabase.functions.invoke("verify-sms-code", {
-        body: { 
-          phoneNumber: settings.phone_number,
-          code: verificationCode 
-        },
+      // Use Supabase native phone OTP verification (not Vonage)
+      const { error } = await supabase.auth.verifyOtp({
+        phone: settings.phone_number,
+        token: verificationCode,
+        type: 'sms'
       });
 
       if (error) throw error;
