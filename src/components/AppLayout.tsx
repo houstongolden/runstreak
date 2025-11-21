@@ -7,6 +7,9 @@ import runstreaksLogo from "@/assets/runstreaks-logo.png";
 import { Link, useLocation } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
 import { useTheme } from "next-themes";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -17,6 +20,19 @@ export function AppLayout({ children }: AppLayoutProps) {
   const isHomepage = location.pathname === '/';
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { user } = useAuth();
+
+  const handleStravaConnect = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('strava-auth');
+      if (error) throw error;
+      if (data?.authUrl) {
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error('Error connecting to Strava:', error);
+    }
+  };
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -50,8 +66,23 @@ export function AppLayout({ children }: AppLayoutProps) {
               </Link>
             </div>
 
-            {/* User Avatar Dropdown */}
-            <UserAvatarHeader />
+            {/* User Avatar Dropdown or Strava Button */}
+            {user ? (
+              <UserAvatarHeader />
+            ) : (
+              <Button
+                onClick={handleStravaConnect}
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+              >
+                <img 
+                  src="https://www.google.com/s2/favicons?domain=strava.com&sz=32" 
+                  alt="Strava" 
+                  className="h-4 w-4 mr-2"
+                />
+                Connect with Strava
+              </Button>
+            )}
           </div>
         </header>
 
