@@ -1,9 +1,8 @@
-import { AppLayout } from "@/components/AppLayout";
 import { Footer } from "@/components/Footer";
 
 export default function Privacy() {
   return (
-    <AppLayout>
+    <>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
         <p className="text-sm text-muted-foreground mb-8">
@@ -216,6 +215,6 @@ export default function Privacy() {
         </div>
       </div>
       <Footer />
-    </AppLayout>
+    </>
   );
 }
