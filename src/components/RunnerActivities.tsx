@@ -421,10 +421,25 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                         <span className="text-foreground">{indivActivity.photo_count}</span>
                                       </div>
                                     )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                                   </div>
+                                 </div>
+                               ))}
+                               {isOwnProfile && (
+                                 <Button
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     extractBestEffort(activity.activity_date);
+                                   }}
+                                   disabled={extractingBestEffort === activity.activity_date}
+                                   variant="outline"
+                                   size="sm"
+                                   className="mt-4 w-full md:w-auto gap-2"
+                                 >
+                                   <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
+                                   {extractingBestEffort === activity.activity_date ? "Re-scan Best Efforts" : "Re-scan Best Efforts"}
+                                 </Button>
+                               )}
+                             </div>
                           ) : (
                             // Show aggregated data from daily_activities
                             <div className="space-y-3">
@@ -554,9 +569,9 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                   <Timer className={`h-4 w-4 ${extractingBestEffort === activity.activity_date ? 'animate-spin' : ''}`} />
                                   {extractingBestEffort === activity.activity_date ? "Finding Best Efforts..." : "Find Best Efforts"}
                                 </Button>
-                              )}
-                            </div>
-                          )}
+                               )}
+                             </div>
+                           )}
                         </TableCell>
                       </TableRow>
                     )}
