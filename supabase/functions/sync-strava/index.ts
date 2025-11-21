@@ -402,7 +402,7 @@ Deno.serve(async (req) => {
           pr_count: activity.pr_count || 0,
           total_photo_count: activity.total_photo_count || null,
         }, {
-          onConflict: 'runner_id,strava_activity_id',
+          onConflict: 'strava_activity_id',
           ignoreDuplicates: false,
         });
     }
