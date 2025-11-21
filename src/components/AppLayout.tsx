@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import UnverifiedAccountBanner from "@/components/UnverifiedAccountBanner";
 import { UserAvatarHeader } from "@/components/UserAvatarHeader";
 import { StreakCountdownBanner } from "@/components/StreakCountdownBanner";
+import { InboxNotification } from "@/components/InboxNotification";
 import runstreaksLogo from "@/assets/runstreaks-logo.png";
 import { Link, useLocation } from "react-router-dom";
 import ShinyText from "@/components/ui/shiny-text";
@@ -74,7 +75,10 @@ export function AppLayout({ children }: AppLayoutProps) {
 
             {/* User Avatar Dropdown or Strava Button */}
             {user ? (
-              <UserAvatarHeader />
+              <div className="flex items-center gap-2">
+                <InboxNotification />
+                <UserAvatarHeader />
+              </div>
             ) : (
               <Button
                 onClick={handleStravaConnect}
