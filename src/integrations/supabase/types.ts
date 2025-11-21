@@ -591,6 +591,98 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_prizes: {
+        Row: {
+          campaign_name: string
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean
+          prize_description: string
+          prize_value: string | null
+          start_date: string
+          updated_at: string
+          winner_runner_id: string | null
+        }
+        Insert: {
+          campaign_name: string
+          created_at?: string
+          end_date: string
+          id?: string
+          is_active?: boolean
+          prize_description: string
+          prize_value?: string | null
+          start_date: string
+          updated_at?: string
+          winner_runner_id?: string | null
+        }
+        Update: {
+          campaign_name?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          prize_description?: string
+          prize_value?: string | null
+          start_date?: string
+          updated_at?: string
+          winner_runner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_prizes_winner_runner_id_fkey"
+            columns: ["winner_runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          referred_runner_id: string | null
+          referrer_id: string
+          signup_completed: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_runner_id?: string | null
+          referrer_id: string
+          signup_completed?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_runner_id?: string | null
+          referrer_id?: string
+          signup_completed?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_runner_id_fkey"
+            columns: ["referred_runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       runners: {
         Row: {
           ai_analysis: Json | null
@@ -1311,6 +1403,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: { Args: { p_runner_id: string }; Returns: string }
       get_admin_analytics: {
         Args: never
         Returns: {

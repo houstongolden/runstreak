@@ -50,7 +50,19 @@ const Index = () => {
   const handleStravaConnect = async () => {
     try {
       setIsStravaConnecting(true);
-      const { data, error } = await supabase.functions.invoke('strava-auth');
+      
+      // Capture referral code from URL if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCode = urlParams.get('ref') || '';
+      
+      // Store in localStorage for callback
+      if (referralCode) {
+        localStorage.setItem('referralCode', referralCode);
+      }
+      
+      const { data, error } = await supabase.functions.invoke('strava-auth', {
+        body: { referralCode }
+      });
       
       if (error) throw error;
       
@@ -400,22 +412,8 @@ const Index = () => {
           <div className="mb-10 sm:mb-12">
             <div className="flex flex-col items-center gap-3">
               <Button
-                onClick={async () => {
-                  try {
-                    const { data, error } = await supabase.functions.invoke('strava-auth');
-                    if (error) throw error;
-                    if (data?.authUrl) {
-                      window.location.href = data.authUrl;
-                    }
-                  } catch (error) {
-                    console.error('Error connecting to Strava:', error);
-                    toast({
-                      title: "Error",
-                      description: "Failed to initiate Strava connection",
-                      variant: "destructive",
-                    });
-                  }
-                }}
+                onClick={handleStravaConnect}
+                disabled={isStravaConnecting}
                 size="lg"
                 className="gap-2.5 text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto shadow-lg hover:shadow-xl transition-all"
               >

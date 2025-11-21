@@ -35,6 +35,18 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get('code');
+    const state = url.searchParams.get('state');
+    
+    // Extract referral code from state parameter if present
+    let referralCode: string | null = null;
+    if (state) {
+      try {
+        const stateData = JSON.parse(decodeURIComponent(state));
+        referralCode = stateData.ref || null;
+      } catch (e) {
+        console.log('No referral code in state parameter');
+      }
+    }
     
     if (!code) {
       throw new Error('No authorization code provided');
@@ -599,6 +611,57 @@ Deno.serve(async (req) => {
     }
 
     console.log('Runner data saved successfully');
+
+    // Handle referral tracking for new users
+    if (!existingRunner && referralCode) {
+      console.log('Processing referral code:', referralCode);
+      
+      // Find the referrer by their referral code
+      const { data: referrerData } = await supabase
+        .from('runners')
+        .select('id')
+        .filter('id', 'eq', supabase.rpc('generate_referral_code', { p_runner_id: 'id' }))
+        .limit(1);
+      
+      // Alternatively, we can search all runners and match code (less efficient but works)
+      const { data: allRunners } = await supabase
+        .from('runners')
+        .select('id');
+      
+      let referrerId: string | null = null;
+      
+      if (allRunners) {
+        for (const runner of allRunners) {
+          const { data: generatedCode } = await supabase
+            .rpc('generate_referral_code', { p_runner_id: runner.id });
+          
+          if (generatedCode === referralCode) {
+            referrerId = runner.id;
+            break;
+          }
+        }
+      }
+      
+      if (referrerId) {
+        // Create referral record
+        const { error: referralError } = await supabase
+          .from('referrals')
+          .insert({
+            referrer_id: referrerId,
+            referred_runner_id: savedRunner.id,
+            referral_code: referralCode,
+            signup_completed: true
+          });
+        
+        if (referralError) {
+          console.error('Error creating referral record:', referralError);
+        } else {
+          console.log('Referral record created successfully');
+        }
+      } else {
+        console.log('Referrer not found for code:', referralCode);
+      }
+    }
 
     // Insert streak history now that we have runner_id
     if (allStreaks.length > 0) {

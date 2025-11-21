@@ -31,7 +31,19 @@ export default function StravaConnect() {
   const handleConnect = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('strava-auth');
+      
+      // Capture referral code from URL if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCode = urlParams.get('ref') || '';
+      
+      // Store in localStorage for callback
+      if (referralCode) {
+        localStorage.setItem('referralCode', referralCode);
+      }
+      
+      const { data, error } = await supabase.functions.invoke('strava-auth', {
+        body: { referralCode }
+      });
       
       if (error) throw error;
       
