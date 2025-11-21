@@ -86,6 +86,75 @@ Deno.serve(async (req) => {
 
         console.log('Processing event for runner:', runner.id, 'Activity ID:', activityId);
 
+        // Handle delete events - remove activity from database
+        if (event.aspect_type === 'delete') {
+          console.log('Activity deleted, removing from database');
+          
+          (async () => {
+            try {
+              // Delete from strava_activities table if it exists there
+              const { error: deleteStravaError } = await supabase
+                .from('strava_activities')
+                .delete()
+                .eq('runner_id', runner.id)
+                .eq('strava_activity_id', activityId);
+
+              if (deleteStravaError) {
+                console.error('Error deleting from strava_activities:', deleteStravaError);
+              }
+
+              // Recalculate streak, best efforts, and history after deletion
+              await supabase.functions.invoke('recalculate-streak', { body: { runnerId: runner.id } });
+              await supabase.functions.invoke('calculate-best-efforts', { body: { runnerId: runner.id } });
+              await supabase.functions.invoke('calculate-streak-history', { body: { runnerId: runner.id } });
+              
+              console.log('Activity deleted and stats recalculated');
+            } catch (error) {
+              console.error('Error handling delete event:', error);
+            }
+          })();
+        }
+
+        // Handle privacy changes - respect when activities become private
+        if (event.aspect_type === 'update' && event.updates?.private) {
+          console.log('Activity privacy changed:', event.updates.private);
+          
+          // If activity is now private, treat it like a delete
+          if (event.updates.private === 'true') {
+            console.log('Activity made private, removing from database');
+            
+            (async () => {
+              try {
+                // Delete from strava_activities table
+                const { error: deleteError } = await supabase
+                  .from('strava_activities')
+                  .delete()
+                  .eq('runner_id', runner.id)
+                  .eq('strava_activity_id', activityId);
+
+                if (deleteError) {
+                  console.error('Error deleting private activity:', deleteError);
+                }
+
+                // Recalculate stats after removing private activity
+                await supabase.functions.invoke('recalculate-streak', { body: { runnerId: runner.id } });
+                await supabase.functions.invoke('calculate-best-efforts', { body: { runnerId: runner.id } });
+                await supabase.functions.invoke('calculate-streak-history', { body: { runnerId: runner.id } });
+                
+                console.log('Private activity removed and stats recalculated');
+              } catch (error) {
+                console.error('Error handling privacy change:', error);
+              }
+            })();
+            
+            // Don't process the activity further
+            return new Response(JSON.stringify({ success: true }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 200,
+            });
+          }
+        }
+
         // Fetch only the specific activity for create/update events
         if (event.aspect_type === 'create' || event.aspect_type === 'update') {
           const previousStreak = runner.current_streak_days || 0;
