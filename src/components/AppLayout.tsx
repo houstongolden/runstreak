@@ -41,16 +41,16 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="w-full min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-40 w-full bg-sidebar/50 backdrop-blur-[40px]">
-          <div className="flex h-14 items-center justify-between px-4 gap-4">
-            <div className="flex items-center gap-4">
+          <div className="flex h-14 items-center justify-between px-3 sm:px-4 gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <SidebarTrigger />
               
-              <Link to="/" className="flex items-center" style={{ gap: '0.15em' }}>
+              <Link to="/" className="flex items-center shrink-0" style={{ gap: '0.15em' }}>
                 {!isHomepage && (
                   <img 
                     src={runstreaksLogo} 
                     alt="RunStreaks Logo"
-                    className="h-9 w-9 object-contain transition-all duration-300 hover:animate-logo-glow hover:scale-110"
+                    className="h-7 w-7 sm:h-9 sm:w-9 object-contain transition-all duration-300 hover:animate-logo-glow hover:scale-110"
                     style={{
                       filter: isDark 
                         ? 'drop-shadow(0 0 12px hsl(16 100% 65% / 0.6)) drop-shadow(0 0 20px hsl(16 100% 65% / 0.4))' 
@@ -60,7 +60,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 )}
                 {!isHomepage && (
                   <span 
-                    className="text-2xl font-logo font-semibold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent uppercase"
+                    className="text-xl sm:text-2xl font-logo font-semibold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent uppercase"
                     style={{
                       transform: 'skewX(-6deg)',
                       letterSpacing: '0.01em'
@@ -79,14 +79,15 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Button
                 onClick={handleStravaConnect}
                 size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base px-3 sm:px-4 shrink-0"
               >
                 <img 
                   src="https://www.google.com/s2/favicons?domain=strava.com&sz=32" 
                   alt="Strava" 
-                  className="h-4 w-4 mr-2"
+                  className="h-4 w-4 mr-1.5 sm:mr-2"
                 />
-                Connect with Strava
+                <span className="hidden xs:inline">Connect with Strava</span>
+                <span className="xs:hidden">Connect</span>
               </Button>
             )}
           </div>
