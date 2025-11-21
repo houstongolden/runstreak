@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.calculate-streak-history]
 verify_jwt = false
+
+[functions.generate-invite-message]
+verify_jwt = true

@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gift, Copy, Check, Trophy, Users, ExternalLink } from "lucide-react";
+import { Gift, Copy, Check, Trophy, Users, ExternalLink, Sparkles, Edit2, Save, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Referral {
   id: string;
@@ -47,7 +49,13 @@ export default function Invite() {
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [copied, setCopied] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [generatingMessage, setGeneratingMessage] = useState(false);
+  const [aiMessage, setAiMessage] = useState<string>("");
+  const [editingCode, setEditingCode] = useState(false);
+  const [customCode, setCustomCode] = useState<string>("");
+  const [savingCode, setSavingCode] = useState(false);
 
   useEffect(() => {
     if (runnerId) {
@@ -160,6 +168,93 @@ export default function Invite() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const generateInviteMessage = async () => {
+    if (!runnerId) return;
+    
+    setGeneratingMessage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-invite-message', {
+        body: { runnerId }
+      });
+
+      if (error) throw error;
+      setAiMessage(data.message);
+      toast.success('Invite message generated!');
+    } catch (error: any) {
+      console.error('Error generating message:', error);
+      toast.error(error.message || 'Failed to generate invite message');
+    } finally {
+      setGeneratingMessage(false);
+    }
+  };
+
+  const copyFullInviteMessage = () => {
+    const referralLink = `https://runstreaks.io/?ref=${referralCode}`;
+    const fullMessage = `${aiMessage}\n\nJoin me: ${referralLink}`;
+    navigator.clipboard.writeText(fullMessage);
+    setCopiedMessage(true);
+    toast.success('Invite message copied! Ready to share via SMS/WhatsApp');
+    setTimeout(() => setCopiedMessage(false), 2000);
+  };
+
+  const startEditingCode = () => {
+    setCustomCode(referralCode);
+    setEditingCode(true);
+  };
+
+  const cancelEditingCode = () => {
+    setCustomCode("");
+    setEditingCode(false);
+  };
+
+  const saveCustomCode = async () => {
+    if (!runnerId || !customCode) return;
+
+    // Validate code format (alphanumeric, 4-20 chars)
+    const codeRegex = /^[a-zA-Z0-9]{4,20}$/;
+    if (!codeRegex.test(customCode)) {
+      toast.error('Referral code must be 4-20 alphanumeric characters');
+      return;
+    }
+
+    setSavingCode(true);
+    try {
+      // Check if code is already taken
+      const { data: existingReferral, error: checkError } = await supabase
+        .from('referrals')
+        .select('referrer_id')
+        .eq('referral_code', customCode.toUpperCase())
+        .neq('referrer_id', runnerId)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existingReferral) {
+        toast.error('This referral code is already taken. Try another one.');
+        setSavingCode(false);
+        return;
+      }
+
+      // Update all referrals with this runner's ID to use the new code
+      const { error: updateError } = await supabase
+        .from('referrals')
+        .update({ referral_code: customCode.toUpperCase() })
+        .eq('referrer_id', runnerId);
+
+      if (updateError) throw updateError;
+
+      setReferralCode(customCode.toUpperCase());
+      setEditingCode(false);
+      setCustomCode("");
+      toast.success('Referral code updated successfully!');
+    } catch (error: any) {
+      console.error('Error updating referral code:', error);
+      toast.error(error.message || 'Failed to update referral code');
+    } finally {
+      setSavingCode(false);
+    }
+  };
+
   const completedReferrals = referrals.filter(r => r.signup_completed).length;
   const pendingReferrals = referrals.filter(r => !r.signup_completed).length;
 
@@ -242,12 +337,88 @@ export default function Invite() {
         </Card>
       </div>
 
+      {/* AI Invite Message Generator */}
+      <Card className="border-primary/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI Invite Message Generator
+          </CardTitle>
+          <CardDescription>
+            Generate a personalized invite message based on your running achievements
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!aiMessage ? (
+            <Button 
+              onClick={generateInviteMessage} 
+              disabled={generatingMessage}
+              className="w-full"
+            >
+              {generatingMessage ? (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate Invite Message
+                </>
+              )}
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <Textarea
+                value={aiMessage}
+                onChange={(e) => setAiMessage(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+              <div className="flex gap-2">
+                <Button 
+                  onClick={copyFullInviteMessage}
+                  className="flex-1"
+                  variant={copiedMessage ? "secondary" : "default"}
+                >
+                  {copiedMessage ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy Full Message
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  onClick={generateInviteMessage}
+                  variant="outline"
+                  disabled={generatingMessage}
+                >
+                  {generatingMessage ? (
+                    <Sparkles className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Your referral link will be automatically added when you copy
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Referral Link */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Referral Link</CardTitle>
+          <CardTitle>Your Referral Link & Code</CardTitle>
           <CardDescription>
-            Share this link with your running friends. When they sign up via your link, you'll both get credit!
+            Share this link with your running friends. Customize your code to make it memorable!
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -259,9 +430,51 @@ export default function Invite() {
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Your referral code: <span className="font-mono font-semibold">{referralCode}</span>
-          </p>
+          
+          <Separator />
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">Your referral code:</p>
+              {!editingCode && (
+                <Button onClick={startEditingCode} variant="ghost" size="sm">
+                  <Edit2 className="h-3 w-3 mr-1" />
+                  Customize
+                </Button>
+              )}
+            </div>
+            
+            {editingCode ? (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={customCode}
+                    onChange={(e) => setCustomCode(e.target.value.toUpperCase())}
+                    placeholder="Enter custom code (4-20 chars)"
+                    maxLength={20}
+                    className="font-mono"
+                  />
+                  <Button 
+                    onClick={saveCustomCode} 
+                    size="icon" 
+                    disabled={savingCode || customCode.length < 4}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                  <Button onClick={cancelEditingCode} size="icon" variant="outline">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  4-20 alphanumeric characters. Make it memorable and on-brand!
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 rounded-md bg-muted/50 font-mono text-lg font-semibold text-center">
+                {referralCode}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
