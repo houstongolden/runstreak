@@ -58,8 +58,9 @@ export default function VerifyPhone() {
     setIsSendingCode(true);
     
     try {
-      const { error } = await supabase.functions.invoke('send-verification-sms', {
-        body: { phoneNumber }
+      // Use Supabase native phone OTP (not Vonage)
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phoneNumber,
       });
 
       if (error) throw error;
@@ -82,11 +83,11 @@ export default function VerifyPhone() {
     setIsVerifying(true);
     
     try {
-      const { error } = await supabase.functions.invoke('verify-sms-code', {
-        body: { 
-          phoneNumber,
-          code 
-        }
+      // Use Supabase native phone OTP verification (not Vonage)
+      const { error } = await supabase.auth.verifyOtp({
+        phone: phoneNumber,
+        token: code,
+        type: 'sms'
       });
 
       if (error) throw error;
