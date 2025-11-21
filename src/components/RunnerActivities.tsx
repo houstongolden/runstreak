@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, Timer, Trophy, Zap } from "lucide-react";
+import { ChevronDown, ChevronUp, Timer, Trophy, Zap, Watch, Activity, Hand, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -70,6 +70,33 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [bulkEnriching, setBulkEnriching] = useState(false);
   
   const isOwnProfile = currentUserRunnerId === runnerId;
+  
+  const getDeviceIcon = (deviceName: string | null, isManual: boolean | null) => {
+    if (isManual) {
+      return <Hand className="h-3 w-3 text-muted-foreground" />;
+    }
+    
+    if (!deviceName) {
+      return <Smartphone className="h-3 w-3 text-muted-foreground" />;
+    }
+    
+    const deviceLower = deviceName.toLowerCase();
+    
+    // Check for watch
+    if (deviceLower.includes('watch') || deviceLower.includes('garmin') || deviceLower.includes('apple') || 
+        deviceLower.includes('suunto') || deviceLower.includes('polar') || deviceLower.includes('coros')) {
+      return <Watch className="h-3 w-3 text-muted-foreground" />;
+    }
+    
+    // Check for heart rate monitor
+    if (deviceLower.includes('heart') || deviceLower.includes('hrm') || deviceLower.includes('h10') || 
+        deviceLower.includes('tickr') || deviceLower.includes('rhythm') || deviceLower.includes('wahoo')) {
+      return <Activity className="h-3 w-3 text-muted-foreground" />;
+    }
+    
+    // Default to phone/device icon
+    return <Smartphone className="h-3 w-3 text-muted-foreground" />;
+  };
   
   // Calculate stats
   const totalActivities = activities.length;
@@ -399,9 +426,12 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                 </div>
                               )}
                               {activity.device_name && (
-                                <div>
+                                <div className="flex items-center gap-1.5">
                                   <span className="text-muted-foreground">Device: </span>
-                                  <span className="text-foreground">{activity.device_name}</span>
+                                  <span className="text-foreground flex items-center gap-1">
+                                    {getDeviceIcon(activity.device_name, activity.manual)}
+                                    {activity.device_name}
+                                  </span>
                                 </div>
                               )}
                               {activity.workout_type && (
