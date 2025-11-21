@@ -17,6 +17,7 @@ export default {
         sans: ['Inter', 'sans-serif'],
         heading: ['Space Grotesk', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        logo: ['Teko', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

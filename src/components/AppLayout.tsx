@@ -45,12 +45,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               
-              <Link to="/" className="flex items-center gap-2">
+              <Link to="/" className="flex items-center" style={{ gap: '0.6em' }}>
                 {!isHomepage && (
                   <img 
                     src={runstreaksLogo} 
                     alt="RunStreaks Logo"
-                    className="h-8 w-8 object-contain"
+                    className="h-9 w-9 object-contain"
                     style={{
                       filter: isDark 
                         ? 'drop-shadow(0 0 12px hsl(16 100% 65% / 0.6)) drop-shadow(0 0 20px hsl(16 100% 65% / 0.4))' 
@@ -59,7 +59,13 @@ export function AppLayout({ children }: AppLayoutProps) {
                   />
                 )}
                 {!isHomepage && (
-                  <span className="text-xl font-heading font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  <span 
+                    className="text-2xl font-logo font-semibold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent uppercase"
+                    style={{
+                      transform: 'skewX(-6deg)',
+                      letterSpacing: '0.01em'
+                    }}
+                  >
                     RunStreaks
                   </span>
                 )}

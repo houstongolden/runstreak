@@ -105,17 +105,23 @@ export function AppSidebar() {
       <SidebarContent className="flex flex-col h-full p-0">
         {/* Logo - Fixed at Top */}
         <div className="px-4 pt-4 pb-4 flex-shrink-0 bg-sidebar">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center" style={{ gap: '0.6em' }}>
             <img 
               src={runstreaksLogo} 
               alt="RunStreaks Logo"
-              className="h-8 w-8 object-contain"
+              className="h-9 w-9 object-contain"
               style={{
                 filter: 'drop-shadow(0 0 12px hsl(16 100% 50% / 0.5)) drop-shadow(0 0 20px hsl(16 100% 50% / 0.3))'
               }}
             />
-            <span className="text-xl font-heading font-bold">
-              <ShinyText text="RunStreaks" speed={5} />
+            <span 
+              className="text-2xl font-logo font-semibold uppercase"
+              style={{
+                transform: 'skewX(-6deg)',
+                letterSpacing: '0.01em'
+              }}
+            >
+              <ShinyText text="RUNSTREAKS" speed={5} />
             </span>
           </div>
         </div>
