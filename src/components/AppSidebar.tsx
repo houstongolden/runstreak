@@ -322,8 +322,11 @@ export function AppSidebar() {
               {/* AI Coach Section */}
               <SidebarGroup>
                 <div className="px-2 mb-2">
-                  <SidebarGroupLabel className="mb-2">AI Coach</SidebarGroupLabel>
-                  <button 
+                  <div className="flex items-center gap-2 mb-2">
+                    <SidebarGroupLabel>AI Coach</SidebarGroupLabel>
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/20 text-primary">BETA</span>
+                  </div>
+                  <button
                     onClick={handleNewChat}
                     className="w-full text-left py-2 px-3 text-sm bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity flex items-center gap-2"
                   >

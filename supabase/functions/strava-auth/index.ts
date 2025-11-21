@@ -9,6 +9,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Get referral code from request body if provided
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const referralCode = body.referralCode || '';
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
@@ -34,7 +38,11 @@ Deno.serve(async (req) => {
       throw new Error('STRAVA_CLIENT_ID not configured');
     }
 
-    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=read,activity:read_all,profile:read_all`;
+    // Include referral code in state parameter if provided
+    const state = referralCode ? encodeURIComponent(JSON.stringify({ ref: referralCode })) : '';
+    const stateParam = state ? `&state=${state}` : '';
+    
+    const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&approval_prompt=force&scope=read,activity:read_all,profile:read_all${stateParam}`;
 
     return new Response(
       JSON.stringify({ authUrl }),
