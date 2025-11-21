@@ -17,7 +17,8 @@ import {
   Shield,
   UserX,
   Megaphone,
-  LogOut
+  LogOut,
+  RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatNumber } from "@/lib/formatters";
@@ -90,6 +91,8 @@ export default function Admin() {
   const [adsToggleLoading, setAdsToggleLoading] = useState(false);
   const [stravaMode, setStravaMode] = useState<'live' | 'test'>('live');
   const [stravaModeLoading, setStravaModeLoading] = useState(false);
+  const [syncRunnerInput, setSyncRunnerInput] = useState("");
+  const [syncLoading, setSyncLoading] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -271,6 +274,54 @@ export default function Admin() {
     } catch (error) {
       console.error('Error deleting user:', error);
       toast.error('Failed to delete user');
+    }
+  };
+
+  const handleSyncRunner = async () => {
+    if (!syncRunnerInput.trim()) {
+      toast.error('Please enter a runner ID or username');
+      return;
+    }
+
+    setSyncLoading(true);
+    try {
+      // First, find the runner
+      let runnerId = syncRunnerInput.trim();
+      
+      // Check if it's a UUID or username
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(runnerId)) {
+        // It's a username, look up the runner ID
+        const { data, error } = await supabase
+          .from('runners')
+          .select('id')
+          .eq('strava_username', runnerId)
+          .maybeSingle();
+
+        if (error || !data) {
+          toast.error('Runner not found');
+          setSyncLoading(false);
+          return;
+        }
+        runnerId = data.id;
+      }
+
+      // Trigger sync
+      const { error } = await supabase.functions.invoke('sync-strava', {
+        body: { runnerId }
+      });
+
+      if (error) throw error;
+
+      toast.success('Sync completed successfully');
+      setSyncRunnerInput("");
+      fetchRunners();
+      fetchAnalytics();
+    } catch (error) {
+      console.error('Error syncing runner:', error);
+      toast.error('Failed to sync runner');
+    } finally {
+      setSyncLoading(false);
     }
   };
 
@@ -601,6 +652,45 @@ export default function Admin() {
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Manual Strava Sync</CardTitle>
+              <CardDescription>
+                Trigger a Strava sync for any runner by entering their runner ID or username
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter runner ID or username..."
+                  value={syncRunnerInput}
+                  onChange={(e) => setSyncRunnerInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSyncRunner()}
+                />
+                <Button 
+                  onClick={handleSyncRunner}
+                  disabled={syncLoading}
+                  className="gap-2"
+                >
+                  {syncLoading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      Sync
+                    </>
+                  )}
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                This will fetch all activities from Strava and update the runner's data
+              </p>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Strava API Configuration</CardTitle>
