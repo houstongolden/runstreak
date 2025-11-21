@@ -19,7 +19,7 @@ export default function AnimatedAIChat() {
   }, []);
 
   return (
-    <div className="w-full max-w-md mx-auto bg-background/60 dark:bg-background/20 backdrop-blur-sm rounded-xl border border-border/50 dark:border-border/20 p-4 shadow-lg">
+    <div className="w-full max-w-md mx-auto bg-background/60 dark:bg-background/20 backdrop-blur-sm rounded-lg border border-border/50 dark:border-border/20 p-4 shadow-lg">
       <div className="space-y-3">
         {messages.slice(0, messageIndex + 1).map((message, idx) => (
           <div

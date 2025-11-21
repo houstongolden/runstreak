@@ -211,7 +211,7 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div className={`max-w-[85%] ${msg.role === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
-                <div className={`px-4 py-2.5 rounded-2xl ${
+                <div className={`px-4 py-2.5 rounded-lg ${
                   msg.role === 'user' 
                     ? 'bg-primary text-primary-foreground rounded-br-sm' 
                     : 'bg-muted text-foreground rounded-bl-sm'
@@ -239,7 +239,7 @@ export default function AICoachChat({ runnerId }: AICoachChatProps) {
           {sending && (
             <div className="flex justify-start">
               <div className="max-w-[85%] items-start flex flex-col">
-                <div className="px-4 py-2.5 rounded-2xl bg-muted text-foreground rounded-bl-sm">
+                <div className="px-4 py-2.5 rounded-lg bg-muted text-foreground rounded-bl-sm">
                   <div className="flex items-center gap-1">
                     <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse"></span>
                     <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse [animation-delay:0.2s]"></span>
