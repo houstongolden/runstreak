@@ -481,7 +481,7 @@ export default function RunnerProfile() {
           <CardContent className="p-4 sm:p-6 lg:p-8 overflow-x-hidden">
             <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 min-w-0">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0">
-                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0">
+                <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0 border-2 border-primary/40 shadow-[0_0_12px_rgba(255,107,53,0.35)]">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
                     {runner.display_name.charAt(0)}

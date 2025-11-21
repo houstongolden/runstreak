@@ -21,7 +21,7 @@ export function UserAvatarHeader() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <Avatar className="h-9 w-9 border border-border/10 hover:border-primary/30 transition-colors cursor-pointer">
+        <Avatar className="h-9 w-9 border-2 border-primary/40 hover:border-primary/60 transition-all cursor-pointer shadow-[0_0_8px_rgba(255,107,53,0.3)]">
           <AvatarImage src={runnerData.avatar_url || undefined} alt={runnerData.display_name} />
           <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
             {initials}
