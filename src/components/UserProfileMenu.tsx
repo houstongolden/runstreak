@@ -48,6 +48,10 @@ export function UserProfileMenu({ runnerId, runnerData, align = "end" }: UserPro
       <DropdownMenuSeparator />
       {runnerData && (
         <>
+          <DropdownMenuItem onClick={() => navigate(`/runner/${runnerId}`)}>
+            <User className="mr-2 h-4 w-4" />
+            View Profile
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleEditProfile}>
             <User className="mr-2 h-4 w-4" />
             Edit Profile
