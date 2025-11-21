@@ -373,7 +373,7 @@ const Index = () => {
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4 relative z-10">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-logo font-semibold flex items-center uppercase" style={{ gap: '0.6em' }}>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-logo font-semibold flex items-center uppercase" style={{ gap: '0.15em' }}>
               <img 
                 src={runstreaksLogo} 
                 alt="RunStreaks Logo"

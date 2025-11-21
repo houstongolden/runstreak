@@ -45,7 +45,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               
-              <Link to="/" className="flex items-center" style={{ gap: '0.6em' }}>
+              <Link to="/" className="flex items-center" style={{ gap: '0.15em' }}>
                 {!isHomepage && (
                   <img 
                     src={runstreaksLogo} 
