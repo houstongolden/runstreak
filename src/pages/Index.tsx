@@ -377,7 +377,7 @@ const Index = () => {
               <img 
                 src={runstreaksLogo} 
                 alt="RunStreaks Logo"
-                className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 object-contain"
+                className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 object-contain transition-all duration-300 hover:animate-logo-glow hover:scale-110"
                 style={{
                   filter: 'drop-shadow(0 0 15px hsl(16 100% 50% / 0.6)) drop-shadow(0 0 25px hsl(16 100% 50% / 0.4))'
                 }}

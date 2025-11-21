@@ -107,11 +107,20 @@ export default {
             "background-position": "-200% 0",
           },
         },
+        "logo-glow": {
+          "0%, 100%": { 
+            filter: "drop-shadow(0 0 12px hsl(16 100% 50% / 0.5)) drop-shadow(0 0 20px hsl(16 100% 50% / 0.3))"
+          },
+          "50%": { 
+            filter: "drop-shadow(0 0 20px hsl(16 100% 50% / 0.8)) drop-shadow(0 0 35px hsl(16 100% 50% / 0.5))"
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "shiny-text": "shiny-text 8s linear infinite",
+        "logo-glow": "logo-glow 2s ease-in-out infinite",
       },
     },
   },
