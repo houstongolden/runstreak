@@ -366,9 +366,9 @@ export default function Settings() {
 
       if (saveError) throw saveError;
 
-      // Use Supabase native phone OTP (not Vonage)
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: formattedPhone,
+      // Use custom Vonage SMS verification edge function
+      const { data, error } = await supabase.functions.invoke('send-verification-sms', {
+        body: { phoneNumber: formattedPhone }
       });
 
       if (error) {
@@ -407,14 +407,17 @@ export default function Settings() {
 
     setVerifyingCode(true);
     try {
-      // Use Supabase native phone OTP verification (not Vonage)
-      const { error } = await supabase.auth.verifyOtp({
-        phone: settings.phone_number,
-        token: verificationCode,
-        type: 'sms'
+      // Use custom Vonage SMS verification edge function
+      const { data, error } = await supabase.functions.invoke('verify-sms-code', {
+        body: { 
+          phoneNumber: settings.phone_number,
+          code: verificationCode
+        }
       });
 
-      if (error) throw error;
+      if (error || !data?.verified) {
+        throw new Error("Invalid or expired code");
+      }
 
       // Update user_settings to mark phone as verified
       const { error: updateError } = await supabase
