@@ -203,26 +203,41 @@ export default function Invite() {
     if (!runnerId) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch all custom codes created by this user
+      const { data: codesData, error: codesError } = await supabase
+        .from('referral_codes')
+        .select('code')
+        .eq('runner_id', runnerId)
+        .order('created_at', { ascending: false });
+
+      if (codesError) throw codesError;
+
+      // Fetch all referrals to count signups per code
+      const { data: referralsData, error: referralsError } = await supabase
         .from('referrals')
         .select('referral_code, signup_completed')
         .eq('referrer_id', runnerId);
 
-      if (error) throw error;
+      if (referralsError) throw referralsError;
 
-      // Group by code and count signups
-      const codeStats = (data || []).reduce((acc: any, ref: any) => {
-        const code = ref.referral_code;
-        if (!acc[code]) {
-          acc[code] = { code, signups: 0 };
+      // Count signups per code
+      const signupCounts = (referralsData || []).reduce((acc: any, ref: any) => {
+        if (!acc[ref.referral_code]) {
+          acc[ref.referral_code] = 0;
         }
         if (ref.signup_completed) {
-          acc[code].signups++;
+          acc[ref.referral_code]++;
         }
         return acc;
       }, {});
 
-      setMyCodes(Object.values(codeStats));
+      // Combine codes with signup counts
+      const codesWithStats = (codesData || []).map(({ code }) => ({
+        code,
+        signups: signupCounts[code] || 0
+      }));
+
+      setMyCodes(codesWithStats);
     } catch (error) {
       console.error('Error fetching my codes:', error);
     }
@@ -250,41 +265,48 @@ export default function Invite() {
 
     setSavingCode(true);
     try {
-      // Check if code is already taken by anyone
-      const { data: existingReferral, error: checkError } = await supabase
-        .from('referrals')
-        .select('referrer_id')
-        .eq('referral_code', newCode.toUpperCase())
-        .maybeSingle();
+      const upperCode = newCode.toUpperCase();
+      
+      // Check if code is already taken by anyone (in referral_codes OR referrals table)
+      const [{ data: existingCode }, { data: existingReferral }] = await Promise.all([
+        supabase
+          .from('referral_codes')
+          .select('runner_id')
+          .eq('code', upperCode)
+          .maybeSingle(),
+        supabase
+          .from('referrals')
+          .select('referrer_id')
+          .eq('referral_code', upperCode)
+          .limit(1)
+          .maybeSingle()
+      ]);
 
-      if (checkError) throw checkError;
-
-      if (existingReferral) {
+      if (existingCode || existingReferral) {
         toast.error('This referral code is already taken. Try another one.');
         setSavingCode(false);
         return;
       }
 
-      // Create a new referral entry with this code
+      // Insert into referral_codes table
       const { error: insertError } = await supabase
-        .from('referrals')
+        .from('referral_codes')
         .insert({
-          referrer_id: runnerId,
-          referral_code: newCode.toUpperCase(),
-          signup_completed: false
+          runner_id: runnerId,
+          code: upperCode
         });
 
       if (insertError) throw insertError;
 
       // If this is their first code, set it as the primary
       if (myCodes.length === 0) {
-        setReferralCode(newCode.toUpperCase());
+        setReferralCode(upperCode);
       }
 
       setCreatingCode(false);
       setNewCode("");
       toast.success('Referral code created successfully!');
-      fetchMyCodes();
+      await fetchMyCodes();
     } catch (error: any) {
       console.error('Error creating referral code:', error);
       toast.error(error.message || 'Failed to create referral code');

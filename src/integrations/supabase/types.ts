@@ -591,6 +591,35 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          runner_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          runner_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          runner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referral_prizes: {
         Row: {
           campaign_name: string
