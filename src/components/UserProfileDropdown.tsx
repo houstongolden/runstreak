@@ -26,7 +26,7 @@ export function UserProfileDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger className="w-full focus:outline-none">
         <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer group">
-          <Avatar className="h-10 w-10 border-2 border-border">
+          <Avatar className="h-10 w-10 border-2 border-primary/40 group-hover:border-primary/60 transition-all shadow-[0_0_8px_rgba(255,107,53,0.3)]">
             <AvatarImage src={avatarUrl || undefined} alt={displayName} />
             <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
               {initials}
