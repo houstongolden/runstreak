@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { runnerId, quickSync, maxPages, skipFirstPage } = await req.json();
+    const { runnerId, quickSync, maxPages, skipFirstPage, beforeTimestamp } = await req.json();
 
     if (!runnerId) {
       throw new Error('Runner ID is required');
@@ -188,22 +188,30 @@ Deno.serve(async (req) => {
     // Fetch all activities for streak calculation (need complete history for accurate streaks)
     // But we'll only fetch detailed activity info for NEW activities when checking PRs
     // Support quick sync (first page only) for fast initial rank calculation
+    // Support beforeTimestamp for resuming incomplete syncs
     let allActivities: any[] = [];
     let page = skipFirstPage ? 2 : 1; // Skip first page if this is a full sync after quick sync
     const perPage = 200;
     const maxPagesToFetch = maxPages || Infinity; // Limit pages for quick sync
     let pagesFetched = 0;
+    let hasMoreActivities = false;
+    let oldestActivityDate: string | null = null;
 
-    console.log(`Starting activity fetch (${quickSync ? 'QUICK' : 'FULL'} sync, starting page ${page}, max pages: ${maxPagesToFetch})...`);
+    console.log(`Starting activity fetch (${quickSync ? 'QUICK' : 'FULL'} sync, starting page ${page}, max pages: ${maxPagesToFetch}, before: ${beforeTimestamp || 'none'})...`);
     
     while (pagesFetched < maxPagesToFetch) {
       pagesFetched++;
       console.log(`Fetching page ${page}...`);
       
-      const activitiesResponse = await fetch(
-        `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}&include_all_efforts=true`,
-        { headers: { 'Authorization': `Bearer ${accessToken}` } }
-      );
+      // Build URL with optional before parameter for resuming
+      let url = `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}&include_all_efforts=true`;
+      if (beforeTimestamp) {
+        url += `&before=${beforeTimestamp}`;
+      }
+      
+      const activitiesResponse = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
 
       if (!activitiesResponse.ok) {
         console.log('Activities fetch failed, stopping pagination');
@@ -220,14 +228,23 @@ Deno.serve(async (req) => {
       allActivities = allActivities.concat(runActivities);
       console.log(`Page ${page}: Found ${runActivities.length} running activities`);
       
+      // Track oldest activity date for resume capability
+      if (activities.length > 0) {
+        const oldestInPage = activities[activities.length - 1];
+        oldestActivityDate = oldestInPage.start_date;
+      }
+      
       if (activities.length < perPage) {
         console.log('Last page reached (fewer than perPage activities)');
+        hasMoreActivities = false;
         break;
+      } else {
+        hasMoreActivities = true;
       }
       page++;
     }
 
-    console.log(`Activity fetch complete: ${allActivities.length} total running activities (${quickSync ? 'QUICK' : 'FULL'} sync)`);
+    console.log(`Activity fetch complete: ${allActivities.length} total running activities (${quickSync ? 'QUICK' : 'FULL'} sync, has more: ${hasMoreActivities})`);
 
     // Determine runner's timezone from coordinates
     let timezone = runner.timezone;
@@ -827,16 +844,22 @@ Provide exactly 3 insights with titles and descriptions.`
       // Don't fail the sync if calculations fail
     }
 
-    return new Response(
-      JSON.stringify({ success: true, message: 'Strava data synced and calculations completed' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
+    return new Response(JSON.stringify({
+      success: true,
+      currentStreakDays,
+      currentStreakMiles,
+      longestStreak,
+      activitiesProcessed: allActivities.length,
+      activitiesSynced: allActivities.length,
+      hasMoreActivities,
+      oldestActivityDate
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
-    console.error('Error syncing Strava data:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    console.error('Error syncing Strava:', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

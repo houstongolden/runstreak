@@ -1124,6 +1124,59 @@ export type Database = {
           },
         ]
       }
+      sync_queue: {
+        Row: {
+          activities_synced: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          next_sync_at: string | null
+          oldest_synced_date: string | null
+          priority: number | null
+          retry_count: number | null
+          runner_id: string
+          status: string
+          total_activities_estimate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          activities_synced?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          next_sync_at?: string | null
+          oldest_synced_date?: string | null
+          priority?: number | null
+          retry_count?: number | null
+          runner_id: string
+          status?: string
+          total_activities_estimate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          activities_synced?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          next_sync_at?: string | null
+          oldest_synced_date?: string | null
+          priority?: number | null
+          retry_count?: number | null
+          runner_id?: string
+          status?: string
+          total_activities_estimate?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_queue_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: true
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_follows: {
         Row: {
           created_at: string
