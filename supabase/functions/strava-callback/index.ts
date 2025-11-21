@@ -766,15 +766,53 @@ Deno.serve(async (req) => {
             });
         }
         
-        console.log('Background sync: Daily activities persisted successfully');
+     console.log('Background sync: Daily activities persisted successfully');
       } catch (error) {
         console.error('Background sync error:', error);
       }
     };
     
-    // Run background sync without awaiting (using EdgeRuntime.waitUntil)
-    EdgeRuntime.waitUntil(backgroundSync());
-    console.log('Background sync started, proceeding with redirect...');
+    // Determine if user has more than 1000 activities that need background processing
+    // Use athlete stats to get total run count
+    const totalRunCount = athleteStats?.all_run_totals?.count || 0;
+    const activitiesFetched = quickActivities.length;
+    const needsBackgroundSync = totalRunCount > 1000;
+    
+    console.log(`Total runs from stats: ${totalRunCount}, Fetched: ${activitiesFetched}, Needs background sync: ${needsBackgroundSync}`);
+    
+    if (needsBackgroundSync) {
+      // Create sync queue entry for background processing
+      const oldestFetchedActivity = quickActivities[quickActivities.length - 1];
+      const oldestDate = oldestFetchedActivity ? oldestFetchedActivity.start_date : null;
+      
+      // Schedule first background sync for 15 minutes from now
+      const nextSyncAt = new Date();
+      nextSyncAt.setMinutes(nextSyncAt.getMinutes() + 15);
+      
+      const { error: queueError } = await supabase
+        .from('sync_queue')
+        .upsert({
+          runner_id: savedRunner.id,
+          status: 'pending',
+          total_activities_estimate: totalRunCount,
+          activities_synced: activitiesFetched,
+          oldest_synced_date: oldestDate,
+          priority: 5, // Normal priority
+          next_sync_at: nextSyncAt.toISOString()
+        }, {
+          onConflict: 'runner_id'
+        });
+      
+      if (queueError) {
+        console.error('Error creating sync queue entry:', queueError);
+      } else {
+        console.log(`Sync queue entry created for runner ${savedRunner.id}, scheduled for ${nextSyncAt}`);
+      }
+    } else {
+      // Run full background sync immediately for users with < 1000 activities
+      EdgeRuntime.waitUntil(backgroundSync());
+      console.log('Background sync started for small activity history, proceeding with redirect...');
+    }
     
     // Determine if this is a new user
     const isNewUser = !existingRunner;
