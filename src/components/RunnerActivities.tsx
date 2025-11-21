@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -199,8 +199,8 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                 const hasBestEffort = bestEffortIds.has(activity.strava_activity_id);
                 
                 return (
-                  <>
-                    <TableRow key={activity.id} className="cursor-pointer hover:bg-muted/50">
+                  <React.Fragment key={activity.id}>
+                    <TableRow className="cursor-pointer hover:bg-muted/50">
                       <TableCell className="py-2" onClick={() => toggleRow(activity.id)}>
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -397,7 +397,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </TableBody>
