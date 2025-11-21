@@ -450,7 +450,7 @@ const Index = () => {
 
         {/* Leaderboard Section */}
         <div className="mb-6 px-4 sm:px-6">
-          <div className="rounded-xl border-0 bg-card/80 backdrop-blur-[40px] p-4 sm:p-6 shadow-xl">
+          <div className="rounded-lg border-0 bg-card/80 backdrop-blur-[40px] p-4 sm:p-6 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3 mb-4 sm:mb-5">
               <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
                 <SelectTrigger className="w-full sm:w-[180px] h-11 sm:h-10 text-sm border border-border/40 bg-muted/30 backdrop-blur-[32px] hover:bg-muted/40">
@@ -622,9 +622,9 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Step 1: Connect with Strava */}
             <div className="group relative" style={{ animationDelay: '0ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
                     1
                   </div>
                 </div>
@@ -652,9 +652,9 @@ const Index = () => {
 
             {/* Step 2: Compete on the Leaderboard */}
             <div className="group relative" style={{ animationDelay: '150ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
                     2
                   </div>
                 </div>
@@ -670,9 +670,9 @@ const Index = () => {
 
             {/* Step 3: Track Your Progress */}
             <div className="group relative" style={{ animationDelay: '300ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
                     3
                   </div>
                 </div>
@@ -688,9 +688,9 @@ const Index = () => {
 
             {/* Step 4: Stay Accountable */}
             <div className="group relative" style={{ animationDelay: '450ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
                     4
                   </div>
                 </div>
@@ -740,9 +740,9 @@ const Index = () => {
 
             {/* Step 5: Chat with Your AI Running Coach */}
             <div className="group relative md:col-span-2" style={{ animationDelay: '600ms' }}>
-              <div className="h-full p-8 rounded-2xl bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
                     5
                   </div>
                 </div>

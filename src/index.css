@@ -297,12 +297,12 @@ All colors MUST be HSL.
 
   /* Premium card styles */
   .card-premium {
-    @apply bg-card rounded-xl border border-border/50 hover-lift;
+    @apply bg-card rounded-lg border border-border/50 hover-lift;
     box-shadow: var(--shadow-md);
   }
 
   .card-glow {
-    @apply bg-card rounded-xl border border-primary/20;
+    @apply bg-card rounded-lg border border-primary/20;
     box-shadow: var(--shadow-glow);
   }
 
