@@ -132,7 +132,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const extractBestEffort = async (activityDate: string) => {
     setExtractingBestEffort(activityDate);
     try {
-      // Fetch strava activities for this date first
+      // First check if strava_activities exist for this date
       const { data: stravaActivities, error: fetchError } = await supabase
         .from('strava_activities')
         .select('*')
@@ -140,19 +140,32 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         .eq('activity_date', activityDate);
 
       if (fetchError) throw fetchError;
+      
+      // If no individual activities exist, we need to trigger a full sync first
       if (!stravaActivities || stravaActivities.length === 0) {
-        throw new Error('No activities found for this date');
+        toast.info('No individual activity data found. Please sync your Strava account first to fetch detailed activity information.');
+        return;
       }
 
       // Store the activities in state
       setIndividualActivities(prev => new Map(prev).set(activityDate, stravaActivities));
 
-      // Process best efforts for the first activity
-      const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
-        body: { strava_activity_id: stravaActivities[0].strava_activity_id, runner_id: runnerId }
-      });
+      // Process best efforts for each activity on this date
+      let totalUpdated = 0;
+      for (const activity of stravaActivities) {
+        const { data, error } = await supabase.functions.invoke('fetch-activity-best-efforts', {
+          body: { strava_activity_id: activity.strava_activity_id, runner_id: runnerId }
+        });
 
-      if (error) throw error;
+        if (error) {
+          console.error(`Error processing activity ${activity.strava_activity_id}:`, error);
+          continue;
+        }
+
+        if (data?.updated_count) {
+          totalUpdated += data.updated_count;
+        }
+      }
 
       // Refresh best efforts
       const { data: bestEffortsData } = await supabase
@@ -169,7 +182,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         setBestEffortDates(dates);
       }
 
-      toast.success(data?.message || 'Best efforts extracted successfully!');
+      // Mark this date as enriched
+      setEnrichedActivityDates(prev => new Set(prev).add(activityDate));
+
+      if (totalUpdated > 0) {
+        toast.success(`Found ${totalUpdated} new best effort${totalUpdated > 1 ? 's' : ''}!`);
+      } else {
+        toast.success('Activity enriched with full details (no new best efforts found)');
+      }
     } catch (error: any) {
       console.error('Error extracting best efforts:', error);
       toast.error(error.message || 'Failed to extract best efforts');
