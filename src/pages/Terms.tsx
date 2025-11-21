@@ -125,6 +125,11 @@ export default function Terms() {
             <p className="mb-4">
               For SMS support, reply <strong>HELP</strong> to any message or email us at support@runstreaks.io.
             </p>
+
+            <h3 className="text-xl font-medium mb-3 mt-4">5.7 Carrier Disclaimer</h3>
+            <p className="mb-4">
+              <strong>Carriers are not liable for delayed or undelivered messages.</strong> Message delivery is dependent on your mobile carrier's network and service availability. While we make every effort to ensure timely delivery of SMS notifications, RunStreaks and mobile carriers cannot guarantee delivery times or that all messages will be successfully delivered. Factors including network congestion, carrier outages, device settings, and signal strength may affect message delivery.
+            </p>
           </section>
 
           <section>
