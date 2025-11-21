@@ -373,17 +373,17 @@ const Index = () => {
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 px-2 sm:px-4 relative z-10">
           <div className="flex items-center justify-center mb-3 sm:mb-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold flex items-center gap-2.5 sm:gap-3">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-logo font-semibold flex items-center uppercase" style={{ gap: '0.6em' }}>
               <img 
                 src={runstreaksLogo} 
                 alt="RunStreaks Logo"
-                className="h-14 w-14 sm:h-16 sm:w-16 lg:h-18 lg:w-18 object-contain"
+                className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 object-contain"
                 style={{
                   filter: 'drop-shadow(0 0 15px hsl(16 100% 50% / 0.6)) drop-shadow(0 0 25px hsl(16 100% 50% / 0.4))'
                 }}
               />
-              <span style={{ marginLeft: '-12px' }}>
-                <ShinyText text="RunStreaks" speed={8} />
+              <span style={{ transform: 'skewX(-6deg)', letterSpacing: '0.01em' }}>
+                <ShinyText text="RUNSTREAKS" speed={8} />
               </span>
             </h1>
           </div>
