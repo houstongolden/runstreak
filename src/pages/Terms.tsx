@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/AppLayout";
+import { Footer } from "@/components/Footer";
 
 export default function Terms() {
   return (
@@ -244,6 +245,7 @@ export default function Terms() {
           </section>
         </div>
       </div>
+      <Footer />
     </AppLayout>
   );
 }

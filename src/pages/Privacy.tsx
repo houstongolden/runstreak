@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/AppLayout";
+import { Footer } from "@/components/Footer";
 
 export default function Privacy() {
   return (
@@ -214,6 +215,7 @@ export default function Privacy() {
           </section>
         </div>
       </div>
+      <Footer />
     </AppLayout>
   );
 }
