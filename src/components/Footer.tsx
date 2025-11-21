@@ -13,7 +13,7 @@ export function Footer() {
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Explore */}
             <div>
               <h3 className="text-sm font-medium mb-3 text-foreground">Explore</h3>
@@ -49,6 +49,14 @@ export function Footer() {
                   <a href="/" className="hover:text-foreground transition-colors">
                     View All Streakers
                   </a>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setIsAdvertiseModalOpen(true)}
+                    className="hover:text-foreground transition-colors text-left"
+                  >
+                    Advertise
+                  </button>
                 </li>
               </ul>
             </div>
@@ -91,24 +99,9 @@ export function Footer() {
                 </li>
               </ul>
             </div>
-
-            {/* Partner With Us */}
-            <div>
-              <h3 className="text-sm font-medium mb-3 text-foreground">Partner With Us</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <button
-                    onClick={() => setIsAdvertiseModalOpen(true)}
-                    className="hover:text-foreground transition-colors text-left"
-                  >
-                    Advertise
-                  </button>
-                </li>
-              </ul>
-            </div>
           </div>
 
-          <div className="pt-8 border-t border-border text-center space-y-3">
+          <div className="pt-8 text-center space-y-3">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} RunStreaks. Built by{" "}
               <a

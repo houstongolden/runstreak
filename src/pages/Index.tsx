@@ -29,6 +29,7 @@ import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
 import AnimatedAIChat from "@/components/AnimatedAIChat";
 import heroRunningBg from "@/assets/hero-running-bg.png";
 import heroDarkBg from "@/assets/hero-dark-bg.jpg";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -760,117 +761,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* App Download Section */}
-      <AppDownloadSection />
-
-      {/* Footer */}
-      <footer className="border-t border-border pt-12 pb-8 bg-background">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-16 xl:px-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {/* Explore */}
-            <div>
-              <h3 className="font-semibold mb-4 text-foreground">Explore</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="/" className="hover:text-foreground transition-colors">
-                    Global Leaderboard
-                  </a>
-                </li>
-                <li>
-                  <a href="/features" className="hover:text-foreground transition-colors">
-                    Platform Features
-                  </a>
-                </li>
-                <li>
-                  <a href="/philosophy" className="hover:text-foreground transition-colors">
-                    The Run Streak Philosophy
-                  </a>
-                </li>
-                <li>
-                  <a href="/badge-docs" className="hover:text-foreground transition-colors">
-                    Embed Your Badge
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Community */}
-            <div>
-              <h3 className="font-semibold mb-4 text-foreground">Community</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="/" className="hover:text-foreground transition-colors">
-                    View All Streakers
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* About */}
-            <div>
-              <h3 className="font-semibold mb-4 text-foreground">About RunStreaks</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="/story" className="hover:text-foreground transition-colors">
-                    Our Origin Story
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://bamf.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Built by BAMF
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Partner With Us */}
-            <div>
-              <h3 className="font-semibold mb-4 text-foreground">Partner With Us</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <button
-                    onClick={() => setIsAdvertiseModalOpen(true)}
-                    className="hover:text-foreground transition-colors text-left"
-                  >
-                    Advertise
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-border text-center space-y-3">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} RunStreaks. Built by{" "}
-              <a
-                href="https://bamf.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                BAMF
-              </a>
-              .
-            </p>
-          </div>
-
-          {/* Large background text */}
-          <div className="relative -mb-16 mt-12 overflow-hidden pointer-events-none">
-            <div className="flex items-center justify-center relative">
-              <h2 className="text-[50px] sm:text-[90px] md:text-[120px] lg:text-[160px] xl:text-[200px] font-bold leading-none tracking-tight bg-gradient-to-r from-orange-500/15 via-orange-600/20 to-orange-500/15 bg-clip-text text-transparent select-none whitespace-nowrap blur-[1px]">
-                RUNSTREAKS
-              </h2>
-              {/* Gradient fade overlay */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background pointer-events-none"></div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Modals */}
       <AdvertiseModal 
