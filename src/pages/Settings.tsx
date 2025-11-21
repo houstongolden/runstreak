@@ -371,9 +371,15 @@ export default function Settings() {
         body: { phoneNumber: formattedPhone }
       });
 
+      console.log("SMS send response:", { data, error });
+
       if (error) {
         console.error("SMS verification error:", error);
         throw new Error(error.message || "Failed to send verification code");
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || "Failed to send verification code");
       }
 
       // Update settings with formatted phone
