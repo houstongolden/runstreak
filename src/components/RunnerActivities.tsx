@@ -247,9 +247,10 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               <TableRow>
                 <TableHead className="text-xs py-2 w-8"></TableHead>
                 <TableHead className="text-xs py-2">Date</TableHead>
-                <TableHead className="text-xs py-2">Name</TableHead>
                 <TableHead className="text-xs py-2 text-right">Distance</TableHead>
                 <TableHead className="text-xs py-2 text-right">Time</TableHead>
+                <TableHead className="text-xs py-2 text-right">Avg Pace</TableHead>
+                <TableHead className="text-xs py-2">Name</TableHead>
                 <TableHead className="text-xs py-2 text-right">Elevation</TableHead>
               </TableRow>
             </TableHeader>
@@ -273,10 +274,17 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           {(() => {
                             const [year, month, day] = activity.activity_date.split('-');
                             const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                            return format(localDate, "MMM d, yy");
+                            return format(localDate, "MMM d, ''yy");
                           })()}
                           {activity.pr_count && activity.pr_count > 0 && (
-                            <Badge variant="default" className="gap-1 text-xs px-1.5 py-0 h-5 bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.4)]">
+                            <Badge 
+                              variant="default" 
+                              className="gap-1 text-xs px-1.5 py-0 h-5 bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.4)] cursor-pointer hover:from-orange-600 hover:to-orange-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                extractBestEffort(activity.id, activity.strava_activity_id);
+                              }}
+                            >
                               <Zap className="h-3 w-3" />
                               PR
                             </Badge>
@@ -295,14 +303,21 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm py-2 max-w-[200px] truncate" onClick={() => toggleRow(activity.id)}>
-                        {activity.name || 'Unnamed Activity'}
-                      </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {formatNumber(activity.distance)} mi
                       </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {Math.floor(activity.moving_time / 60)}m
+                      </TableCell>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
+                        {activity.average_speed ? (
+                          <span className="font-semibold">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm py-2 max-w-[200px] truncate" onClick={() => toggleRow(activity.id)}>
+                        {activity.name || 'Unnamed Activity'}
                       </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {Math.round(activity.elevation_gain)}ft
