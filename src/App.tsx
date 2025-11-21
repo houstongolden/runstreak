@@ -30,6 +30,8 @@ import VerifyAccount from "./pages/VerifyAccount";
 import Features from "./pages/Features";
 import Story from "./pages/Story";
 import Philosophy from "./pages/Philosophy";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import AdCheckout from "./pages/AdCheckout";
 import AdPaymentSuccess from "./pages/AdPaymentSuccess";
@@ -51,6 +53,8 @@ const App = () => (
               <Route path="/features" element={<AppLayout><Features /></AppLayout>} />
               <Route path="/story" element={<AppLayout><Story /></AppLayout>} />
               <Route path="/philosophy" element={<AppLayout><Philosophy /></AppLayout>} />
+              <Route path="/privacy" element={<AppLayout><Privacy /></AppLayout>} />
+              <Route path="/terms" element={<AppLayout><Terms /></AppLayout>} />
               <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
               <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
               
