@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
 
 interface Conversation {
   runner_id: string;
@@ -37,7 +36,10 @@ export default function Inbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [currentRunnerId, setCurrentRunnerId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -57,6 +59,38 @@ export default function Inbox() {
       markMessagesAsRead(selectedRunner.runner_id);
     }
   }, [selectedRunner, currentRunnerId]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    if (!currentRunnerId) return;
+
+    const channel = supabase
+      .channel('inbox-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${currentRunnerId}`
+        },
+        (payload) => {
+          const newMsg = payload.new as Message;
+          if (selectedRunner && (newMsg.sender_id === selectedRunner.runner_id || newMsg.receiver_id === selectedRunner.runner_id)) {
+            setMessages(prev => [...prev, newMsg]);
+          }
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentRunnerId, selectedRunner]);
 
   const fetchCurrentRunner = async () => {
     const { data } = await supabase
@@ -146,8 +180,13 @@ export default function Inbox() {
     fetchConversations();
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedRunner || !currentRunnerId) return;
+  const sendMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!newMessage.trim() || !selectedRunner || !currentRunnerId || sending) return;
+
+    setSending(true);
+    const messageContent = newMessage.trim();
+    setNewMessage("");
 
     try {
       const { error } = await supabase
@@ -155,16 +194,19 @@ export default function Inbox() {
         .insert({
           sender_id: currentRunnerId,
           receiver_id: selectedRunner.runner_id,
-          content: newMessage.trim(),
+          content: messageContent,
         });
 
       if (error) throw error;
 
-      setNewMessage("");
+      // Messages will be added via realtime or manual fetch
       fetchMessages(selectedRunner.runner_id);
       fetchConversations();
     } catch (error: any) {
       toast.error(error.message || "Failed to send message");
+      setNewMessage(messageContent); // Restore message on error
+    } finally {
+      setSending(false);
     }
   };
 
@@ -226,7 +268,7 @@ export default function Inbox() {
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{conv.last_message}</p>
                       <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(conv.last_message_time), { addSuffix: true })}
+                        {new Date(conv.last_message_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>
@@ -237,10 +279,11 @@ export default function Inbox() {
         </Card>
 
         {/* Messages */}
-        <Card className="md:col-span-2 p-4 flex flex-col">
+        <Card className="md:col-span-2 flex flex-col h-[700px] overflow-hidden">
           {selectedRunner ? (
-            <>
-              <div className="flex items-center gap-3 pb-4 border-b mb-4">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={selectedRunner.avatar_url || ""} />
                   <AvatarFallback>{selectedRunner.display_name[0]}</AvatarFallback>
@@ -251,8 +294,18 @@ export default function Inbox() {
                 </div>
               </div>
 
-              <ScrollArea className="flex-1 h-[480px] mb-4">
-                <div className="space-y-4 pr-4">
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+                  {messages.length === 0 && (
+                    <div className="text-center py-12 space-y-4">
+                      <h2 className="text-xl font-semibold">Start a conversation</h2>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        Send a message to {selectedRunner.display_name}
+                      </p>
+                    </div>
+                  )}
+
                   {messages.map((msg) => {
                     const isSender = msg.sender_id === currentRunnerId;
                     return (
@@ -260,36 +313,71 @@ export default function Inbox() {
                         key={msg.id}
                         className={`flex ${isSender ? "justify-end" : "justify-start"}`}
                       >
-                        <div
-                          className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                            isSender
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
-                        >
-                          <p className="text-sm">{msg.content}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                        <div className={`max-w-[85%] ${isSender ? 'items-end' : 'items-start'} flex flex-col`}>
+                          <div className={`px-4 py-2.5 rounded-2xl ${
+                            isSender 
+                              ? 'bg-primary text-primary-foreground rounded-br-sm' 
+                              : 'bg-muted text-foreground rounded-bl-sm'
+                          }`}>
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 px-1">
+                            {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                       </div>
                     );
                   })}
-                </div>
-              </ScrollArea>
 
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                />
-                <Button onClick={sendMessage} size="icon">
-                  <Send className="h-4 w-4" />
-                </Button>
+                  {sending && (
+                    <div className="flex justify-start">
+                      <div className="max-w-[85%] items-start flex flex-col">
+                        <div className="px-4 py-2.5 rounded-2xl bg-muted text-foreground rounded-bl-sm">
+                          <div className="flex items-center gap-1">
+                            <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse"></span>
+                            <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                            <span className="inline-block w-2 h-2 bg-muted-foreground/50 rounded-full animate-pulse [animation-delay:0.4s]"></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </div>
               </div>
-            </>
+
+              {/* Input Area */}
+              <div className="border-t bg-card">
+                <div className="max-w-3xl mx-auto p-4">
+                  <form onSubmit={sendMessage} className="relative">
+                    <Textarea
+                      ref={textareaRef}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage(e);
+                        }
+                      }}
+                      placeholder={`Message ${selectedRunner.display_name}...`}
+                      className="min-h-[52px] max-h-[200px] resize-none pr-12 py-3 text-base border-input focus-visible:ring-1"
+                      style={{ fontSize: '16px' }}
+                      disabled={sending}
+                    />
+                    <Button 
+                      type="submit" 
+                      size="icon"
+                      className="absolute right-2 bottom-2 h-9 w-9 rounded-full"
+                      disabled={sending || !newMessage.trim()}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               Select a conversation to start messaging
