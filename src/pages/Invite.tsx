@@ -53,15 +53,17 @@ export default function Invite() {
   const [loading, setLoading] = useState(true);
   const [generatingMessage, setGeneratingMessage] = useState(false);
   const [aiMessage, setAiMessage] = useState<string>("");
-  const [editingCode, setEditingCode] = useState(false);
-  const [customCode, setCustomCode] = useState<string>("");
+  const [creatingCode, setCreatingCode] = useState(false);
+  const [newCode, setNewCode] = useState<string>("");
   const [savingCode, setSavingCode] = useState(false);
+  const [myCodes, setMyCodes] = useState<Array<{ code: string; signups: number }>>([]);
 
   useEffect(() => {
     if (runnerId) {
       fetchReferralData();
       fetchPrizes();
       fetchLeaderboard();
+      fetchMyCodes();
     }
   }, [runnerId]);
 
@@ -197,34 +199,62 @@ export default function Invite() {
     setTimeout(() => setCopiedMessage(false), 2000);
   };
 
-  const startEditingCode = () => {
-    setCustomCode(referralCode);
-    setEditingCode(true);
+  const fetchMyCodes = async () => {
+    if (!runnerId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('referrals')
+        .select('referral_code, signup_completed')
+        .eq('referrer_id', runnerId);
+
+      if (error) throw error;
+
+      // Group by code and count signups
+      const codeStats = (data || []).reduce((acc: any, ref: any) => {
+        const code = ref.referral_code;
+        if (!acc[code]) {
+          acc[code] = { code, signups: 0 };
+        }
+        if (ref.signup_completed) {
+          acc[code].signups++;
+        }
+        return acc;
+      }, {});
+
+      setMyCodes(Object.values(codeStats));
+    } catch (error) {
+      console.error('Error fetching my codes:', error);
+    }
   };
 
-  const cancelEditingCode = () => {
-    setCustomCode("");
-    setEditingCode(false);
+  const startCreatingCode = () => {
+    setNewCode("");
+    setCreatingCode(true);
   };
 
-  const saveCustomCode = async () => {
-    if (!runnerId || !customCode) return;
+  const cancelCreatingCode = () => {
+    setNewCode("");
+    setCreatingCode(false);
+  };
+
+  const createNewCode = async () => {
+    if (!runnerId || !newCode) return;
 
     // Validate code format (alphanumeric, 4-20 chars)
     const codeRegex = /^[a-zA-Z0-9]{4,20}$/;
-    if (!codeRegex.test(customCode)) {
+    if (!codeRegex.test(newCode)) {
       toast.error('Referral code must be 4-20 alphanumeric characters');
       return;
     }
 
     setSavingCode(true);
     try {
-      // Check if code is already taken
+      // Check if code is already taken by anyone
       const { data: existingReferral, error: checkError } = await supabase
         .from('referrals')
         .select('referrer_id')
-        .eq('referral_code', customCode.toUpperCase())
-        .neq('referrer_id', runnerId)
+        .eq('referral_code', newCode.toUpperCase())
         .maybeSingle();
 
       if (checkError) throw checkError;
@@ -235,21 +265,29 @@ export default function Invite() {
         return;
       }
 
-      // Update all referrals with this runner's ID to use the new code
-      const { error: updateError } = await supabase
+      // Create a new referral entry with this code
+      const { error: insertError } = await supabase
         .from('referrals')
-        .update({ referral_code: customCode.toUpperCase() })
-        .eq('referrer_id', runnerId);
+        .insert({
+          referrer_id: runnerId,
+          referral_code: newCode.toUpperCase(),
+          signup_completed: false
+        });
 
-      if (updateError) throw updateError;
+      if (insertError) throw insertError;
 
-      setReferralCode(customCode.toUpperCase());
-      setEditingCode(false);
-      setCustomCode("");
-      toast.success('Referral code updated successfully!');
+      // If this is their first code, set it as the primary
+      if (myCodes.length === 0) {
+        setReferralCode(newCode.toUpperCase());
+      }
+
+      setCreatingCode(false);
+      setNewCode("");
+      toast.success('Referral code created successfully!');
+      fetchMyCodes();
     } catch (error: any) {
-      console.error('Error updating referral code:', error);
-      toast.error(error.message || 'Failed to update referral code');
+      console.error('Error creating referral code:', error);
+      toast.error(error.message || 'Failed to create referral code');
     } finally {
       setSavingCode(false);
     }
@@ -413,68 +451,76 @@ export default function Invite() {
         </CardContent>
       </Card>
 
-      {/* Referral Link */}
+      {/* Referral Codes */}
       <Card>
         <CardHeader>
-          <CardTitle>Your Referral Link & Code</CardTitle>
+          <CardTitle>Your Referral Codes</CardTitle>
           <CardDescription>
-            Share this link with your running friends. Customize your code to make it memorable!
+            Create multiple codes for different campaigns (friends, founders, influencers, etc.) and track signups per code
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <div className="flex-1 p-3 rounded-md bg-muted font-mono text-sm break-all">
-              https://runstreaks.io/?ref={referralCode}
+          {myCodes.length > 0 && (
+            <div className="space-y-2">
+              {myCodes.map((codeData) => (
+                <div key={codeData.code} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <div className="font-mono text-lg font-semibold">
+                      {codeData.code}
+                    </div>
+                    <Badge variant="secondary">
+                      {codeData.signups} {codeData.signups === 1 ? 'signup' : 'signups'}
+                    </Badge>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`https://runstreaks.io/?ref=${codeData.code}`);
+                        toast.success('Link copied!');
+                      }}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
-            <Button onClick={copyReferralLink} size="icon" variant="outline">
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            </Button>
-          </div>
+          )}
           
           <Separator />
           
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">Your referral code:</p>
-              {!editingCode && (
-                <Button onClick={startEditingCode} variant="ghost" size="sm">
-                  <Edit2 className="h-3 w-3 mr-1" />
-                  Customize
+          {creatingCode ? (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={newCode}
+                  onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+                  placeholder="Enter code (4-20 chars, e.g., FRIENDS)"
+                  maxLength={20}
+                  className="font-mono"
+                />
+                <Button 
+                  onClick={createNewCode} 
+                  size="icon" 
+                  disabled={savingCode || newCode.length < 4}
+                >
+                  <Save className="h-4 w-4" />
                 </Button>
-              )}
+                <Button onClick={cancelCreatingCode} size="icon" variant="outline">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Create memorable codes like FRIENDS, FOUNDERS, or INFLUENCERS for different campaigns
+              </p>
             </div>
-            
-            {editingCode ? (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    value={customCode}
-                    onChange={(e) => setCustomCode(e.target.value.toUpperCase())}
-                    placeholder="Enter custom code (4-20 chars)"
-                    maxLength={20}
-                    className="font-mono"
-                  />
-                  <Button 
-                    onClick={saveCustomCode} 
-                    size="icon" 
-                    disabled={savingCode || customCode.length < 4}
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                  <Button onClick={cancelEditingCode} size="icon" variant="outline">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  4-20 alphanumeric characters. Make it memorable and on-brand!
-                </p>
-              </div>
-            ) : (
-              <div className="p-3 rounded-md bg-muted/50 font-mono text-lg font-semibold text-center">
-                {referralCode}
-              </div>
-            )}
-          </div>
+          ) : (
+            <Button onClick={startCreatingCode} className="w-full">
+              Create New Referral Code
+            </Button>
+          )}
         </CardContent>
       </Card>
 
