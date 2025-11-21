@@ -105,7 +105,7 @@ export function AppSidebar() {
       <SidebarContent className="flex flex-col h-full p-0">
         {/* Logo - Fixed at Top */}
         <div className="px-4 pt-4 pb-4 flex-shrink-0 bg-sidebar">
-          <div className="flex items-center" style={{ gap: '0.6em' }}>
+          <div className="flex items-center" style={{ gap: '0.15em' }}>
             <img 
               src={runstreaksLogo} 
               alt="RunStreaks Logo"
