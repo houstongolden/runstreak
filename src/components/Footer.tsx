@@ -13,7 +13,7 @@ export function Footer() {
       {/* Footer */}
       <footer className="border-t border-border pt-12 pb-8 bg-background relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
             {/* Explore */}
             <div>
               <h3 className="text-sm font-medium mb-3 text-foreground">Explore</h3>
@@ -70,6 +70,23 @@ export function Footer() {
                     className="hover:text-foreground transition-colors"
                   >
                     Built by BAMF
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h3 className="text-sm font-medium mb-3 text-foreground">Legal</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a href="/privacy" className="hover:text-foreground transition-colors">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="/terms" className="hover:text-foreground transition-colors">
+                    Terms & Conditions
                   </a>
                 </li>
               </ul>
