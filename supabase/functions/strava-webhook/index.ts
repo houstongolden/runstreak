@@ -245,6 +245,46 @@ Deno.serve(async (req) => {
 
               const distanceInMiles = activity.distance / 1609.34;
 
+              // Store individual activity to strava_activities with ALL fields from detail endpoint
+              const { error: stravaActivityError } = await supabase
+                .from('strava_activities')
+                .upsert({
+                  runner_id: runner.id,
+                  strava_activity_id: activity.id,
+                  activity_date: localDateStr,
+                  name: activity.name || null,
+                  distance: distanceInMiles,
+                  moving_time: activity.moving_time || 0,
+                  elapsed_time: activity.elapsed_time || 0,
+                  elevation_gain: (activity.total_elevation_gain || 0) * 3.28084, // meters to feet
+                  workout_type: activity.workout_type?.toString() || null,
+                  device_name: activity.device_name || null,
+                  gear_id: activity.gear_id || null,
+                  average_speed: activity.average_speed || null,
+                  max_speed: activity.max_speed || null,
+                  average_cadence: activity.average_cadence || null,
+                  average_heartrate: activity.average_heartrate || null,
+                  max_heartrate: activity.max_heartrate || null,
+                  average_temp: activity.average_temp || null,
+                  calories: activity.calories || null,
+                  suffer_score: activity.suffer_score || null,
+                  achievement_count: activity.achievement_count || null,
+                  kudos_count: activity.kudos_count || null,
+                  comment_count: activity.comment_count || null,
+                  photo_count: activity.photo_count || null,
+                  trainer: activity.trainer || false,
+                  commute: activity.commute || false,
+                }, {
+                  onConflict: 'runner_id,strava_activity_id',
+                  ignoreDuplicates: false,
+                });
+
+              if (stravaActivityError) {
+                console.error('Error storing individual activity to strava_activities:', stravaActivityError);
+              } else {
+                console.log('Individual activity stored to strava_activities');
+              }
+
               // Upsert activity into daily_activities
               const { error: upsertError } = await supabase
                 .from('daily_activities')

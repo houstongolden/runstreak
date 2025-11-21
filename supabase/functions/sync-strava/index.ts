@@ -313,6 +313,44 @@ Deno.serve(async (req) => {
     const avgMilesPerDay = currentStreakDays > 0 ? currentStreakMiles / currentStreakDays : 0;
     const streakStatus = currentStreakDays > 0 ? 'active' : 'broken';
 
+    // Store INDIVIDUAL activities to strava_activities table with ALL fields from list endpoint
+    for (const activity of allActivities) {
+      const dateStr = convertToLocalDateStr(activity.start_date, timezone);
+      
+      await supabase
+        .from('strava_activities')
+        .upsert({
+          runner_id: runnerId,
+          strava_activity_id: activity.id,
+          activity_date: dateStr,
+          name: activity.name || null,
+          distance: activity.distance / 1609.34, // meters to miles
+          moving_time: activity.moving_time || 0,
+          elapsed_time: activity.elapsed_time || 0,
+          elevation_gain: (activity.total_elevation_gain || 0) * 3.28084, // meters to feet
+          workout_type: activity.workout_type?.toString() || null,
+          device_name: activity.device_name || null,
+          gear_id: activity.gear_id || null,
+          average_speed: activity.average_speed || null,
+          max_speed: activity.max_speed || null,
+          average_cadence: activity.average_cadence || null,
+          average_heartrate: activity.average_heartrate || null,
+          max_heartrate: activity.max_heartrate || null,
+          average_temp: activity.average_temp || null,
+          calories: activity.calories || null,
+          suffer_score: activity.suffer_score || null,
+          achievement_count: activity.achievement_count || null,
+          kudos_count: activity.kudos_count || null,
+          comment_count: activity.comment_count || null,
+          photo_count: activity.photo_count || null,
+          trainer: activity.trainer || false,
+          commute: activity.commute || false,
+        }, {
+          onConflict: 'runner_id,strava_activity_id',
+          ignoreDuplicates: false,
+        });
+    }
+
     // Store daily activities with comprehensive data using runner's timezone
     const dailyActivitiesMap = new Map<string, any>();
 
