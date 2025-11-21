@@ -178,7 +178,9 @@ export default function Invite() {
       });
 
       if (error) throw error;
-      setAiMessage(data.message);
+      const referralLink = `https://runstreaks.io/?ref=${referralCode}`;
+      const messageWithLink = `${data.message}\n\nJoin me: ${referralLink}`;
+      setAiMessage(messageWithLink);
       toast.success('Invite message generated!');
     } catch (error: any) {
       console.error('Error generating message:', error);
@@ -189,9 +191,7 @@ export default function Invite() {
   };
 
   const copyFullInviteMessage = () => {
-    const referralLink = `https://runstreaks.io/?ref=${referralCode}`;
-    const fullMessage = `${aiMessage}\n\nJoin me: ${referralLink}`;
-    navigator.clipboard.writeText(fullMessage);
+    navigator.clipboard.writeText(aiMessage);
     setCopiedMessage(true);
     toast.success('Invite message copied! Ready to share via SMS/WhatsApp');
     setTimeout(() => setCopiedMessage(false), 2000);
@@ -406,7 +406,7 @@ export default function Invite() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Your referral link will be automatically added when you copy
+                Edit the message above or copy as-is. Your referral link is already included!
               </p>
             </div>
           )}
