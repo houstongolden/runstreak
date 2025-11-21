@@ -68,6 +68,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
   const [bestEffortIds, setBestEffortIds] = useState<Set<number>>(new Set());
   const [bulkEnriching, setBulkEnriching] = useState(false);
+  const [hasValidStravaConnection, setHasValidStravaConnection] = useState(false);
   
   const isOwnProfile = currentUserRunnerId === runnerId;
   
@@ -107,6 +108,20 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Check if runner has valid Strava connection
+        const { data: runnerData, error: runnerError } = await supabase
+          .from('runners')
+          .select('strava_access_token, token_expires_at')
+          .eq('id', runnerId)
+          .single();
+
+        if (!runnerError && runnerData) {
+          const hasToken = !!runnerData.strava_access_token;
+          const tokenNotExpired = runnerData.token_expires_at && 
+            new Date(runnerData.token_expires_at) > new Date();
+          setHasValidStravaConnection(hasToken && tokenNotExpired);
+        }
+
         // Fetch individual strava activities
         const { data: activitiesData, error: activitiesError } = await supabase
           .from('strava_activities')
@@ -254,7 +269,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               <span className="font-semibold text-foreground">{activitiesWithPRs}</span>
             </div>
           </div>
-          {isOwnProfile && activitiesWithPRs > 0 && (
+          {isOwnProfile && hasValidStravaConnection && activitiesWithPRs > 0 && (
             <Button
               onClick={bulkEnrichPRActivities}
               disabled={bulkEnriching}
@@ -489,7 +504,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                                 </div>
                               )}
                             </div>
-                            {isOwnProfile && (
+                            {isOwnProfile && hasValidStravaConnection && (
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
