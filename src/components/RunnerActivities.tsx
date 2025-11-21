@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/lib/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ChevronDown, ChevronUp, Timer, Trophy } from "lucide-react";
+import { ChevronDown, ChevronUp, Timer, Trophy, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -67,8 +67,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
   const [bestEffortIds, setBestEffortIds] = useState<Set<number>>(new Set());
+  const [bulkEnriching, setBulkEnriching] = useState(false);
   
   const isOwnProfile = currentUserRunnerId === runnerId;
+  
+  // Calculate stats
+  const totalActivities = activities.length;
+  const activitiesWithPRs = activities.filter(a => a.pr_count && a.pr_count > 0).length;
+  const prActivities = activities.filter(a => a.pr_count && a.pr_count > 0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -158,6 +164,34 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     }
   };
 
+  const bulkEnrichPRActivities = async () => {
+    setBulkEnriching(true);
+    try {
+      // Determine batch size based on total PR activities
+      const batchSize = prActivities.length <= 10 ? prActivities.length : Math.min(10, prActivities.length);
+      const activitiesToEnrich = prActivities.slice(0, batchSize);
+      
+      toast.success(`Starting enrichment of ${activitiesToEnrich.length} PR activities...`);
+      
+      let successCount = 0;
+      for (const activity of activitiesToEnrich) {
+        try {
+          await extractBestEffort(activity.id, activity.strava_activity_id);
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to enrich activity ${activity.id}:`, error);
+        }
+      }
+      
+      toast.success(`Enriched ${successCount} of ${activitiesToEnrich.length} PR activities!`);
+    } catch (error: any) {
+      console.error('Error bulk enriching:', error);
+      toast.error('Failed to bulk enrich activities');
+    } finally {
+      setBulkEnriching(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -180,7 +214,33 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
 
   return (
     <Card>
-      <CardContent className="p-0">
+      <CardContent className="p-4">
+        {/* Stats Section */}
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-border/50">
+          <div className="flex items-center gap-6">
+            <div className="text-sm">
+              <span className="text-muted-foreground">Total Activities: </span>
+              <span className="font-semibold text-foreground">{totalActivities}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-muted-foreground">Activities with PRs: </span>
+              <span className="font-semibold text-foreground">{activitiesWithPRs}</span>
+            </div>
+          </div>
+          {isOwnProfile && activitiesWithPRs > 0 && (
+            <Button
+              onClick={bulkEnrichPRActivities}
+              disabled={bulkEnriching}
+              variant="default"
+              size="sm"
+              className="gap-2"
+            >
+              <Zap className={`h-4 w-4 ${bulkEnriching ? 'animate-pulse' : ''}`} />
+              {bulkEnriching ? "Enriching..." : `Enrich ${Math.min(10, prActivities.length)} PR Activities`}
+            </Button>
+          )}
+        </div>
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -215,6 +275,12 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                             const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
                             return format(localDate, "MMM d, yy");
                           })()}
+                          {activity.pr_count && activity.pr_count > 0 && (
+                            <Badge variant="default" className="gap-1 text-xs px-1.5 py-0 h-5 bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.4)]">
+                              <Zap className="h-3 w-3" />
+                              PR
+                            </Badge>
+                          )}
                           {hasBestEffort && (
                             <TooltipProvider>
                               <Tooltip>
