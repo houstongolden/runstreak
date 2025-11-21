@@ -54,10 +54,25 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get API mode from app_settings to determine which credentials to use
+    const { data: settingData } = await supabaseClient
+      .from('app_settings')
+      .select('setting_value')
+      .eq('setting_key', 'strava_api_mode')
+      .maybeSingle();
+    
+    const apiMode = (settingData?.setting_value as 'live' | 'test') || 'live';
+    const stravaClientId = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_ID_2')
+      : Deno.env.get('STRAVA_CLIENT_ID');
+    const stravaClientSecret = apiMode === 'test'
+      ? Deno.env.get('STRAVA_CLIENT_SECRET_2')
+      : Deno.env.get('STRAVA_CLIENT_SECRET');
+
     // Verify the runner belongs to the authenticated user
     const { data: runner, error: runnerError } = await supabaseClient
       .from('runners')
-      .select('id, strava_access_token, user_id')
+      .select('id, strava_access_token, strava_refresh_token, token_expires_at, user_id')
       .eq('id', runner_id)
       .single();
 
@@ -75,6 +90,48 @@ Deno.serve(async (req) => {
       });
     }
 
+    let accessToken = runner.strava_access_token;
+
+    // Check if token needs refresh
+    const tokenExpiresAt = new Date(runner.token_expires_at);
+    if (tokenExpiresAt <= new Date()) {
+      console.log('Refreshing access token...');
+      const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: stravaClientId,
+          client_secret: stravaClientSecret,
+          grant_type: 'refresh_token',
+          refresh_token: runner.strava_refresh_token,
+        }),
+      });
+
+      if (!tokenResponse.ok) {
+        return new Response(JSON.stringify({ 
+          error: 'Failed to refresh Strava token. Please reconnect your Strava account.' 
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const tokenData = await tokenResponse.json();
+      accessToken = tokenData.access_token;
+
+      // Update tokens in database
+      await supabaseClient
+        .from('runners')
+        .update({
+          strava_access_token: accessToken,
+          strava_refresh_token: tokenData.refresh_token,
+          token_expires_at: new Date(tokenData.expires_at * 1000).toISOString(),
+        })
+        .eq('id', runner_id);
+      
+      console.log('Access token refreshed successfully');
+    }
+
     console.log(`Extracting best efforts for activity ${strava_activity_id}`);
 
     // Fetch detailed activity data from Strava API
@@ -82,7 +139,7 @@ Deno.serve(async (req) => {
       `https://www.strava.com/api/v3/activities/${strava_activity_id}`,
       {
         headers: {
-          'Authorization': `Bearer ${runner.strava_access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
       }
     );
