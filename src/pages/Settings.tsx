@@ -366,20 +366,14 @@ export default function Settings() {
 
       if (saveError) throw saveError;
 
-      // Use custom Vonage SMS verification edge function
-      const { data, error } = await supabase.functions.invoke('send-verification-sms', {
-        body: { phoneNumber: formattedPhone }
+      // Use Supabase native phone verification (carrier-approved)
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
       });
-
-      console.log("SMS send response:", { data, error });
 
       if (error) {
         console.error("SMS verification error:", error);
         throw new Error(error.message || "Failed to send verification code");
-      }
-
-      if (!data?.success) {
-        throw new Error(data?.error || "Failed to send verification code");
       }
 
       // Update settings with formatted phone
@@ -413,17 +407,14 @@ export default function Settings() {
 
     setVerifyingCode(true);
     try {
-      // Use custom Vonage SMS verification edge function
-      const { data, error } = await supabase.functions.invoke('verify-sms-code', {
-        body: { 
-          phoneNumber: settings.phone_number,
-          code: verificationCode
-        }
+      // Use Supabase native phone verification
+      const { error } = await supabase.auth.verifyOtp({
+        phone: settings.phone_number,
+        token: verificationCode,
+        type: 'sms'
       });
 
-      if (error || !data?.verified) {
-        throw new Error("Invalid or expired code");
-      }
+      if (error) throw error;
 
       // Update user_settings to mark phone as verified
       const { error: updateError } = await supabase
