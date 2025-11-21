@@ -413,16 +413,25 @@ export type Database = {
           distance: number
           elevation_gain: number
           gear_ids: Json | null
+          has_flagged: boolean | null
+          has_manual: boolean | null
+          has_private: boolean | null
           id: string
           kudos_count: number | null
+          location_cities: Json | null
+          location_countries: Json | null
+          location_states: Json | null
           max_heartrate: number | null
           max_speed: number | null
           moving_time: number
           photo_count: number | null
           run_count: number
           runner_id: string
+          sport_types: Json | null
           suffer_score: number | null
+          timezones: Json | null
           trainer: boolean | null
+          types: Json | null
           updated_at: string
           workout_types: Json | null
         }
@@ -441,16 +450,25 @@ export type Database = {
           distance?: number
           elevation_gain?: number
           gear_ids?: Json | null
+          has_flagged?: boolean | null
+          has_manual?: boolean | null
+          has_private?: boolean | null
           id?: string
           kudos_count?: number | null
+          location_cities?: Json | null
+          location_countries?: Json | null
+          location_states?: Json | null
           max_heartrate?: number | null
           max_speed?: number | null
           moving_time?: number
           photo_count?: number | null
           run_count?: number
           runner_id: string
+          sport_types?: Json | null
           suffer_score?: number | null
+          timezones?: Json | null
           trainer?: boolean | null
+          types?: Json | null
           updated_at?: string
           workout_types?: Json | null
         }
@@ -469,16 +487,25 @@ export type Database = {
           distance?: number
           elevation_gain?: number
           gear_ids?: Json | null
+          has_flagged?: boolean | null
+          has_manual?: boolean | null
+          has_private?: boolean | null
           id?: string
           kudos_count?: number | null
+          location_cities?: Json | null
+          location_countries?: Json | null
+          location_states?: Json | null
           max_heartrate?: number | null
           max_speed?: number | null
           moving_time?: number
           photo_count?: number | null
           run_count?: number
           runner_id?: string
+          sport_types?: Json | null
           suffer_score?: number | null
+          timezones?: Json | null
           trainer?: boolean | null
+          types?: Json | null
           updated_at?: string
           workout_types?: Json | null
         }
@@ -744,6 +771,115 @@ export type Database = {
         }
         Relationships: []
       }
+      segment_efforts: {
+        Row: {
+          created_at: string | null
+          distance: number
+          elapsed_time: number
+          id: string
+          kom_rank: number | null
+          moving_time: number
+          pr_rank: number | null
+          runner_id: string
+          segment_id: number
+          segment_name: string
+          strava_activity_id: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          distance: number
+          elapsed_time: number
+          id?: string
+          kom_rank?: number | null
+          moving_time: number
+          pr_rank?: number | null
+          runner_id: string
+          segment_id: number
+          segment_name: string
+          strava_activity_id: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          distance?: number
+          elapsed_time?: number
+          id?: string
+          kom_rank?: number | null
+          moving_time?: number
+          pr_rank?: number | null
+          runner_id?: string
+          segment_id?: number
+          segment_name?: string
+          strava_activity_id?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "segment_efforts_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      splits: {
+        Row: {
+          average_speed: number | null
+          created_at: string | null
+          distance: number
+          elapsed_time: number
+          elevation_difference: number | null
+          id: string
+          moving_time: number
+          pace_zone: number | null
+          runner_id: string
+          split_number: number
+          strava_activity_id: number
+          unit: string
+          updated_at: string | null
+        }
+        Insert: {
+          average_speed?: number | null
+          created_at?: string | null
+          distance: number
+          elapsed_time: number
+          elevation_difference?: number | null
+          id?: string
+          moving_time: number
+          pace_zone?: number | null
+          runner_id: string
+          split_number: number
+          strava_activity_id: number
+          unit: string
+          updated_at?: string | null
+        }
+        Update: {
+          average_speed?: number | null
+          created_at?: string | null
+          distance?: number
+          elapsed_time?: number
+          elevation_difference?: number | null
+          id?: string
+          moving_time?: number
+          pace_zone?: number | null
+          runner_id?: string
+          split_number?: number
+          strava_activity_id?: number
+          unit?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "splits_runner_id_fkey"
+            columns: ["runner_id"]
+            isOneToOne: false
+            referencedRelation: "runners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strava_activities: {
         Row: {
           achievement_count: number | null
@@ -752,27 +888,59 @@ export type Database = {
           average_heartrate: number | null
           average_speed: number | null
           average_temp: number | null
+          average_watts: number | null
           calories: number | null
           comment_count: number | null
           commute: boolean | null
           created_at: string
+          description: string | null
           device_name: string | null
+          device_watts: boolean | null
           distance: number
           elapsed_time: number
+          elev_high: number | null
+          elev_low: number | null
           elevation_gain: number
+          end_latlng: string | null
+          external_id: string | null
+          flagged: boolean | null
+          from_accepted_tag: boolean | null
           gear_id: string | null
+          has_heartrate: boolean | null
+          hide_from_home: boolean | null
           id: string
+          kilojoules: number | null
           kudos_count: number | null
+          location_city: string | null
+          location_country: string | null
+          location_state: string | null
+          manual: boolean | null
+          map_id: string | null
           max_heartrate: number | null
           max_speed: number | null
+          max_watts: number | null
           moving_time: number
           name: string | null
+          perceived_exertion: number | null
           photo_count: number | null
+          pr_count: number | null
+          private: boolean | null
           runner_id: string
+          sport_type: string | null
+          start_date: string | null
+          start_date_local: string | null
+          start_latlng: string | null
           strava_activity_id: number
           suffer_score: number | null
+          summary_polyline: string | null
+          timezone: string | null
+          total_photo_count: number | null
           trainer: boolean | null
+          type: string | null
           updated_at: string
+          upload_id: number | null
+          visibility: string | null
+          weighted_average_watts: number | null
           workout_type: string | null
         }
         Insert: {
@@ -782,27 +950,59 @@ export type Database = {
           average_heartrate?: number | null
           average_speed?: number | null
           average_temp?: number | null
+          average_watts?: number | null
           calories?: number | null
           comment_count?: number | null
           commute?: boolean | null
           created_at?: string
+          description?: string | null
           device_name?: string | null
+          device_watts?: boolean | null
           distance?: number
           elapsed_time?: number
+          elev_high?: number | null
+          elev_low?: number | null
           elevation_gain?: number
+          end_latlng?: string | null
+          external_id?: string | null
+          flagged?: boolean | null
+          from_accepted_tag?: boolean | null
           gear_id?: string | null
+          has_heartrate?: boolean | null
+          hide_from_home?: boolean | null
           id?: string
+          kilojoules?: number | null
           kudos_count?: number | null
+          location_city?: string | null
+          location_country?: string | null
+          location_state?: string | null
+          manual?: boolean | null
+          map_id?: string | null
           max_heartrate?: number | null
           max_speed?: number | null
+          max_watts?: number | null
           moving_time?: number
           name?: string | null
+          perceived_exertion?: number | null
           photo_count?: number | null
+          pr_count?: number | null
+          private?: boolean | null
           runner_id: string
+          sport_type?: string | null
+          start_date?: string | null
+          start_date_local?: string | null
+          start_latlng?: string | null
           strava_activity_id: number
           suffer_score?: number | null
+          summary_polyline?: string | null
+          timezone?: string | null
+          total_photo_count?: number | null
           trainer?: boolean | null
+          type?: string | null
           updated_at?: string
+          upload_id?: number | null
+          visibility?: string | null
+          weighted_average_watts?: number | null
           workout_type?: string | null
         }
         Update: {
@@ -812,27 +1012,59 @@ export type Database = {
           average_heartrate?: number | null
           average_speed?: number | null
           average_temp?: number | null
+          average_watts?: number | null
           calories?: number | null
           comment_count?: number | null
           commute?: boolean | null
           created_at?: string
+          description?: string | null
           device_name?: string | null
+          device_watts?: boolean | null
           distance?: number
           elapsed_time?: number
+          elev_high?: number | null
+          elev_low?: number | null
           elevation_gain?: number
+          end_latlng?: string | null
+          external_id?: string | null
+          flagged?: boolean | null
+          from_accepted_tag?: boolean | null
           gear_id?: string | null
+          has_heartrate?: boolean | null
+          hide_from_home?: boolean | null
           id?: string
+          kilojoules?: number | null
           kudos_count?: number | null
+          location_city?: string | null
+          location_country?: string | null
+          location_state?: string | null
+          manual?: boolean | null
+          map_id?: string | null
           max_heartrate?: number | null
           max_speed?: number | null
+          max_watts?: number | null
           moving_time?: number
           name?: string | null
+          perceived_exertion?: number | null
           photo_count?: number | null
+          pr_count?: number | null
+          private?: boolean | null
           runner_id?: string
+          sport_type?: string | null
+          start_date?: string | null
+          start_date_local?: string | null
+          start_latlng?: string | null
           strava_activity_id?: number
           suffer_score?: number | null
+          summary_polyline?: string | null
+          timezone?: string | null
+          total_photo_count?: number | null
           trainer?: boolean | null
+          type?: string | null
           updated_at?: string
+          upload_id?: number | null
+          visibility?: string | null
+          weighted_average_watts?: number | null
           workout_type?: string | null
         }
         Relationships: [

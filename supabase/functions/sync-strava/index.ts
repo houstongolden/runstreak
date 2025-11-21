@@ -345,6 +345,45 @@ Deno.serve(async (req) => {
           photo_count: activity.photo_count || null,
           trainer: activity.trainer || false,
           commute: activity.commute || false,
+          
+          // NEW FIELDS - Activity Classification
+          type: activity.type || null,
+          sport_type: activity.sport_type || null,
+          
+          // NEW FIELDS - Timing
+          start_date: activity.start_date || null,
+          start_date_local: activity.start_date_local || null,
+          timezone: activity.timezone || null,
+          
+          // NEW FIELDS - Location
+          location_city: activity.location_city || null,
+          location_state: activity.location_state || null,
+          location_country: activity.location_country || null,
+          start_latlng: activity.start_latlng ? JSON.stringify(activity.start_latlng) : null,
+          end_latlng: activity.end_latlng ? JSON.stringify(activity.end_latlng) : null,
+          
+          // NEW FIELDS - Elevation Details
+          elev_high: activity.elev_high || null,
+          elev_low: activity.elev_low || null,
+          
+          // NEW FIELDS - Activity Properties
+          has_heartrate: activity.has_heartrate || false,
+          manual: activity.manual || false,
+          private: activity.private || false,
+          visibility: activity.visibility || null,
+          flagged: activity.flagged || false,
+          hide_from_home: activity.hide_from_home || false,
+          from_accepted_tag: activity.from_accepted_tag || false,
+          
+          // NEW FIELDS - IDs & References
+          upload_id: activity.upload_id || null,
+          external_id: activity.external_id || null,
+          map_id: activity.map?.id || null,
+          summary_polyline: activity.map?.summary_polyline || null,
+          
+          // NEW FIELDS - Stats
+          pr_count: activity.pr_count || 0,
+          total_photo_count: activity.total_photo_count || null,
         }, {
           onConflict: 'runner_id,strava_activity_id',
           ignoreDuplicates: false,

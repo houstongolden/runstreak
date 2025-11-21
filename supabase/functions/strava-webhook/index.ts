@@ -274,6 +274,54 @@ Deno.serve(async (req) => {
                   photo_count: activity.photo_count || null,
                   trainer: activity.trainer || false,
                   commute: activity.commute || false,
+                  
+                  // Activity Classification
+                  type: activity.type || null,
+                  sport_type: activity.sport_type || null,
+                  
+                  // Timing
+                  start_date: activity.start_date || null,
+                  start_date_local: activity.start_date_local || null,
+                  timezone: activity.timezone || null,
+                  
+                  // Location
+                  location_city: activity.location_city || null,
+                  location_state: activity.location_state || null,
+                  location_country: activity.location_country || null,
+                  start_latlng: activity.start_latlng ? JSON.stringify(activity.start_latlng) : null,
+                  end_latlng: activity.end_latlng ? JSON.stringify(activity.end_latlng) : null,
+                  
+                  // Elevation Details
+                  elev_high: activity.elev_high || null,
+                  elev_low: activity.elev_low || null,
+                  
+                  // Activity Properties
+                  has_heartrate: activity.has_heartrate || false,
+                  manual: activity.manual || false,
+                  private: activity.private || false,
+                  visibility: activity.visibility || null,
+                  flagged: activity.flagged || false,
+                  hide_from_home: activity.hide_from_home || false,
+                  from_accepted_tag: activity.from_accepted_tag || false,
+                  
+                  // IDs & References
+                  upload_id: activity.upload_id || null,
+                  external_id: activity.external_id || null,
+                  map_id: activity.map?.id || null,
+                  summary_polyline: activity.map?.summary_polyline || null,
+                  
+                  // Stats
+                  pr_count: activity.pr_count || 0,
+                  total_photo_count: activity.total_photo_count || null,
+                  
+                  // DETAIL ENDPOINT ONLY FIELDS
+                  description: activity.description || null,
+                  device_watts: activity.device_watts || null,
+                  average_watts: activity.average_watts || null,
+                  weighted_average_watts: activity.weighted_average_watts || null,
+                  kilojoules: activity.kilojoules || null,
+                  max_watts: activity.max_watts || null,
+                  perceived_exertion: activity.perceived_exertion || null,
                 }, {
                   onConflict: 'runner_id,strava_activity_id',
                   ignoreDuplicates: false,
@@ -283,6 +331,72 @@ Deno.serve(async (req) => {
                 console.error('Error storing individual activity to strava_activities:', stravaActivityError);
               } else {
                 console.log('Individual activity stored to strava_activities');
+              }
+
+              // Store segment efforts
+              if (activity.segment_efforts && activity.segment_efforts.length > 0) {
+                for (const effort of activity.segment_efforts) {
+                  await supabase.from('segment_efforts').upsert({
+                    runner_id: runner.id,
+                    strava_activity_id: activity.id,
+                    segment_id: effort.segment.id,
+                    segment_name: effort.segment.name,
+                    elapsed_time: effort.elapsed_time,
+                    moving_time: effort.moving_time,
+                    distance: effort.distance / 1609.34, // meters to miles
+                    pr_rank: effort.pr_rank || null,
+                    kom_rank: effort.kom_rank || null,
+                  }, {
+                    onConflict: 'runner_id,strava_activity_id,segment_id',
+                    ignoreDuplicates: false,
+                  });
+                }
+                console.log(`Stored ${activity.segment_efforts.length} segment efforts`);
+              }
+
+              // Store splits (both metric and imperial)
+              if (activity.splits_metric && activity.splits_metric.length > 0) {
+                for (let i = 0; i < activity.splits_metric.length; i++) {
+                  const split = activity.splits_metric[i];
+                  await supabase.from('splits').upsert({
+                    runner_id: runner.id,
+                    strava_activity_id: activity.id,
+                    split_number: i + 1,
+                    unit: 'metric',
+                    distance: split.distance / 1000, // meters to km
+                    elapsed_time: split.elapsed_time,
+                    moving_time: split.moving_time,
+                    elevation_difference: split.elevation_difference || null,
+                    average_speed: split.average_speed || null,
+                    pace_zone: split.pace_zone || null,
+                  }, {
+                    onConflict: 'runner_id,strava_activity_id,split_number,unit',
+                    ignoreDuplicates: false,
+                  });
+                }
+                console.log(`Stored ${activity.splits_metric.length} metric splits`);
+              }
+
+              if (activity.splits_standard && activity.splits_standard.length > 0) {
+                for (let i = 0; i < activity.splits_standard.length; i++) {
+                  const split = activity.splits_standard[i];
+                  await supabase.from('splits').upsert({
+                    runner_id: runner.id,
+                    strava_activity_id: activity.id,
+                    split_number: i + 1,
+                    unit: 'imperial',
+                    distance: split.distance / 1609.34, // meters to miles
+                    elapsed_time: split.elapsed_time,
+                    moving_time: split.moving_time,
+                    elevation_difference: split.elevation_difference || null,
+                    average_speed: split.average_speed || null,
+                    pace_zone: split.pace_zone || null,
+                  }, {
+                    onConflict: 'runner_id,strava_activity_id,split_number,unit',
+                    ignoreDuplicates: false,
+                  });
+                }
+                console.log(`Stored ${activity.splits_standard.length} imperial splits`);
               }
 
               // Upsert activity into daily_activities
