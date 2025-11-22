@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Referral {
   id: string;
@@ -57,6 +58,7 @@ export default function Invite() {
   const [newCode, setNewCode] = useState<string>("");
   const [savingCode, setSavingCode] = useState(false);
   const [myCodes, setMyCodes] = useState<Array<{ code: string; signups: number }>>([]);
+  const [selectedCodeForMessage, setSelectedCodeForMessage] = useState<string>("");
 
   useEffect(() => {
     if (runnerId) {
@@ -173,6 +175,9 @@ export default function Invite() {
   const generateInviteMessage = async () => {
     if (!runnerId) return;
     
+    // Use selected code or fall back to first custom code or default referral code
+    const codeToUse = selectedCodeForMessage || (myCodes.length > 0 ? myCodes[0].code : referralCode);
+    
     setGeneratingMessage(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-invite-message', {
@@ -180,7 +185,7 @@ export default function Invite() {
       });
 
       if (error) throw error;
-      const referralLink = `https://runstreaks.io/?ref=${referralCode}`;
+      const referralLink = `https://runstreaks.io/?ref=${codeToUse}`;
       const messageWithLink = `${data.message}\n\nJoin me: ${referralLink}`;
       setAiMessage(messageWithLink);
       toast.success('Invite message generated!');
@@ -238,6 +243,11 @@ export default function Invite() {
       }));
 
       setMyCodes(codesWithStats);
+      
+      // Set first code as default selection if not already selected
+      if (codesWithStats.length > 0 && !selectedCodeForMessage) {
+        setSelectedCodeForMessage(codesWithStats[0].code);
+      }
     } catch (error) {
       console.error('Error fetching my codes:', error);
     }
@@ -410,23 +420,42 @@ export default function Invite() {
         </CardHeader>
         <CardContent className="space-y-4">
           {!aiMessage ? (
-            <Button 
-              onClick={generateInviteMessage} 
-              disabled={generatingMessage}
-              className="w-full"
-            >
-              {generatingMessage ? (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Generate Invite Message
-                </>
+            <div className="space-y-3">
+              {myCodes.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Select Referral Code for Message</label>
+                  <Select value={selectedCodeForMessage} onValueChange={setSelectedCodeForMessage}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={`Use first code (${myCodes[0]?.code})`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {myCodes.map((code) => (
+                        <SelectItem key={code.code} value={code.code}>
+                          {code.code} ({code.signups} {code.signups === 1 ? 'signup' : 'signups'})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
-            </Button>
+              <Button 
+                onClick={generateInviteMessage} 
+                disabled={generatingMessage}
+                className="w-full"
+              >
+                {generatingMessage ? (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Invite Message
+                  </>
+                )}
+              </Button>
+            </div>
           ) : (
             <div className="space-y-3">
               <Textarea
