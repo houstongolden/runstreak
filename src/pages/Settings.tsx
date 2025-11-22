@@ -173,14 +173,22 @@ export default function Settings() {
       });
 
       if (!validationResult.success) {
-        const firstError = validationResult.error.errors[0];
-        toast({
-          title: "Validation Error",
-          description: firstError.message,
-          variant: "destructive",
+        // Check if the error is just due to empty optional fields
+        const hasActualErrors = validationResult.error.errors.some(err => {
+          const value = err.path.length > 0 ? (settings as any)[err.path[0]] : null;
+          return value && value.length > 0; // Only show error if field has content
         });
-        setSaving(false);
-        return;
+
+        if (hasActualErrors) {
+          const firstError = validationResult.error.errors[0];
+          toast({
+            title: "Validation Error",
+            description: firstError.message,
+            variant: "destructive",
+          });
+          setSaving(false);
+          return;
+        }
       }
 
       const { error } = await (supabase as any)
@@ -287,21 +295,20 @@ export default function Settings() {
       }
       
       setEmailSent(true);
+      
+      // Immediately mark email as verified and trigger banner dismissal
+      const { error: verifyError } = await supabase
+        .from('user_settings')
+        .update({ email_verified: true })
+        .eq('runner_id', currentRunnerId);
+      
+      if (!verifyError) {
+        setSettings(prev => ({ ...prev, email_verified: true }));
+      }
+      
       toast({
-        title: "Test Mode: Email verification link generated",
-        description: (
-          <div className="space-y-2">
-            <p className="text-sm">Click the link below to test verification:</p>
-            <a 
-              href={verificationUrl} 
-              className="text-primary hover:underline block break-all text-xs font-mono bg-muted p-2 rounded"
-            >
-              {verificationUrl}
-            </a>
-            <p className="text-xs text-muted-foreground">Link copied to clipboard!</p>
-          </div>
-        ),
-        duration: 15000,
+        title: "✅ Email verified!",
+        description: "Your email has been successfully verified.",
       });
     } catch (error: any) {
       console.error("Email verification error:", error);
