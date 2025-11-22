@@ -79,13 +79,11 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const formatActivityDate = (dateString: string): string => {
     const [year, month, day] = dateString.split('-');
     const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    const formatted = format(localDate, "MMM d, yy");
-    // Ensure year is always 2 digits by taking last 2 characters after the last comma
-    const parts = formatted.split(', ');
-    if (parts.length === 2 && parts[1].length > 2) {
-      parts[1] = parts[1].slice(-2);
-    }
-    return parts.join(', ');
+    const monthDay = format(localDate, "MMM d");
+    // Explicitly get last 2 digits of year
+    const yearStr = localDate.getFullYear().toString();
+    const shortYear = yearStr.slice(-2);
+    return `${monthDay}, ${shortYear}`;
   };
   
   const getDeviceIcon = (deviceName: string | null, isManual: boolean | null) => {
