@@ -41,7 +41,6 @@ export default function Settings() {
   const { runnerId: currentRunnerId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const [sendingEmailVerification, setSendingEmailVerification] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
@@ -68,48 +67,6 @@ export default function Settings() {
   useEffect(() => {
     if (currentRunnerId) {
       fetchSettings();
-    }
-  }, [currentRunnerId]);
-
-  // Handle custom verification link callback (doesn't touch auth session)
-  useEffect(() => {
-    const handleVerificationCallback = async () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const verifyToken = searchParams.get('verify_email');
-      const verifyRunnerId = searchParams.get('runner_id');
-
-      if (verifyToken && verifyRunnerId && currentRunnerId === verifyRunnerId) {
-        console.log('Email verification link detected...');
-        
-        // Update database with verified email (no session changes)
-        const { error: updateError } = await supabase
-          .from('user_settings')
-          .update({ email_verified: true })
-          .eq('runner_id', verifyRunnerId);
-        
-        if (!updateError) {
-          setSettings(prev => ({ ...prev, email_verified: true }));
-          
-          toast({
-            title: "✅ Email verified!",
-            description: "Your email has been successfully verified.",
-          });
-        } else {
-          toast({
-            title: "Verification failed",
-            description: "Could not verify email. Please try again.",
-            variant: "destructive",
-          });
-        }
-        
-        // Clean up URL without reload
-        window.history.replaceState(null, '', window.location.pathname);
-        fetchSettings();
-      }
-    };
-
-    if (currentRunnerId) {
-      handleVerificationCallback();
     }
   }, [currentRunnerId]);
 
@@ -237,75 +194,33 @@ export default function Settings() {
 
     setSendingEmailVerification(true);
     try {
-      // Special handling for admin email (houston@bamf.com)
-      const isAdminEmail = settings.user_email === 'houston@bamf.com';
-      
-      if (isAdminEmail) {
-        // Admin email - just mark as verified in database
-        const { error: dbError } = await supabase
-          .from('user_settings')
-          .upsert({ 
-            runner_id: currentRunnerId,
-            user_email: settings.user_email,
-            email: settings.user_email,
-            email_verified: true 
-          }, {
-            onConflict: 'runner_id'
-          });
-
-        if (dbError) throw dbError;
-
-        setSettings(prev => ({ 
-          ...prev, 
-          user_email: settings.user_email,
-          email: settings.user_email,
-          email_verified: true 
-        }));
-
-        toast({
-          title: "✓ Registered and synced with admin profile",
-          description: "Restricted one time only.",
-        });
-        setSendingEmailVerification(false);
-        return;
-      }
-
-      // Save email to database first (unverified)
+      // Auto-verify: Save email directly to database as verified
       const { error: saveError } = await supabase
         .from('user_settings')
         .upsert({ 
           runner_id: currentRunnerId,
           user_email: settings.user_email,
-          email_verified: false
+          email: settings.user_email,
+          email_verified: true 
         }, {
           onConflict: 'runner_id'
         });
 
       if (saveError) throw saveError;
 
-      // Generate test verification link (doesn't touch auth session)
-      const verificationUrl = `${window.location.origin}/settings?verify_email=test_token&runner_id=${currentRunnerId}`;
-      
-      // For testing: Copy link to clipboard and show in toast
-      try {
-        await navigator.clipboard.writeText(verificationUrl);
-      } catch (e) {
-        // Clipboard API might not be available
-        console.log('Could not copy to clipboard:', e);
-      }
-      
-      setEmailSent(true);
-      
-      // Immediately mark email as verified and trigger banner dismissal
-      const { error: verifyError } = await supabase
-        .from('user_settings')
-        .update({ email_verified: true })
-        .eq('runner_id', currentRunnerId);
-      
-      if (!verifyError) {
-        setSettings(prev => ({ ...prev, email_verified: true }));
-      }
-      
+      // Also update runners table
+      await supabase
+        .from('runners')
+        .update({ email: settings.user_email })
+        .eq('id', currentRunnerId);
+
+      setSettings(prev => ({ 
+        ...prev, 
+        user_email: settings.user_email,
+        email: settings.user_email,
+        email_verified: true 
+      }));
+
       toast({
         title: "✅ Email verified!",
         description: "Your email has been successfully verified.",
@@ -314,7 +229,7 @@ export default function Settings() {
       console.error("Email verification error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send verification email",
+        description: error.message || "Failed to verify email",
         variant: "destructive",
       });
     } finally {
@@ -602,7 +517,6 @@ export default function Settings() {
                     value={settings.user_email || ""}
                     onChange={(e) => {
                       setSettings({ ...settings, user_email: e.target.value });
-                      setEmailSent(false);
                     }}
                     placeholder="your@email.com"
                     disabled={settings.email_verified && !!settings.user_email}
@@ -620,7 +534,7 @@ export default function Settings() {
                       disabled={!settings.user_email || sendingEmailVerification}
                     >
                       {sendingEmailVerification && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {sendingEmailVerification ? "Sending..." : "Verify"}
+                      {sendingEmailVerification ? "Verifying..." : "Verify"}
                     </Button>
                   )}
                 </div>
@@ -628,19 +542,6 @@ export default function Settings() {
                   Used for email/password login and notifications
                 </p>
               </div>
-
-              {emailSent && !settings.email_verified && (
-                <Alert className="border-orange-500/20 bg-orange-500/10">
-                  <Mail className="h-4 w-4 text-orange-500" />
-                  <AlertDescription className="text-sm">
-                    <p className="font-medium mb-2">Verification email sent!</p>
-                    <p className="text-muted-foreground">
-                      Check your inbox and click the link to verify your email. 
-                      The link will automatically verify your account.
-                    </p>
-                  </AlertDescription>
-                </Alert>
-              )}
 
               <div className="space-y-2 opacity-60">
                 <Label htmlFor="phone" className="flex items-center gap-2">
