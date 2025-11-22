@@ -68,6 +68,8 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [extractingBestEffort, setExtractingBestEffort] = useState<string | null>(null);
   const [bestEffortIds, setBestEffortIds] = useState<Set<number>>(new Set());
   const [bulkEnriching, setBulkEnriching] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [lastCount, setLastCount] = useState(0);
   
   const isOwnProfile = currentUserRunnerId === runnerId;
   
@@ -116,6 +118,17 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
           .limit(200);
 
         if (activitiesError) throw activitiesError;
+        
+        const currentCount = activitiesData?.length || 0;
+        
+        // Check if activities are still being synced
+        if (currentCount > 0 && currentCount !== lastCount) {
+          setIsScanning(true);
+          setLastCount(currentCount);
+        } else if (currentCount > 0 && currentCount === lastCount) {
+          setIsScanning(false);
+        }
+        
         setActivities(activitiesData || []);
 
         // Fetch best efforts to identify which activities have PRs
@@ -141,7 +154,35 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     };
 
     fetchData();
-  }, [runnerId]);
+  }, [runnerId, lastCount]);
+
+  // Poll for new activities while scanning
+  useEffect(() => {
+    if (!isScanning) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data: activitiesData } = await supabase
+          .from('strava_activities')
+          .select('id')
+          .eq('runner_id', runnerId);
+
+        const currentCount = activitiesData?.length || 0;
+        
+        if (currentCount === lastCount) {
+          // No new activities, scanning complete
+          setIsScanning(false);
+          window.location.reload();
+        } else {
+          setLastCount(currentCount);
+        }
+      } catch (error) {
+        console.error('Error polling activities:', error);
+      }
+    }, 2000);
+
+    return () => clearInterval(pollInterval);
+  }, [isScanning, runnerId, lastCount]);
 
   const toggleRow = (activityId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -195,7 +236,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     setBulkEnriching(true);
     try {
       // Determine batch size based on total PR activities
-      const batchSize = prActivities.length <= 10 ? prActivities.length : Math.min(10, prActivities.length);
+      const batchSize = prActivities.length <= 20 ? prActivities.length : Math.min(20, prActivities.length);
       const activitiesToEnrich = prActivities.slice(0, batchSize);
       
       toast.success(`Starting enrichment of ${activitiesToEnrich.length} PR activities...`);
@@ -219,13 +260,50 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     }
   };
 
-  if (loading) {
+  if (loading || isScanning) {
     return (
-      <div className="space-y-4">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} className="h-24 w-full" />
-        ))}
-      </div>
+      <Card>
+        <CardContent className="py-12">
+          <div className="space-y-6">
+            {/* Animated Message */}
+            <div className="text-center">
+              <p className="text-lg font-semibold text-foreground animate-fade-in">
+                Scanning all your activities...
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {lastCount > 0 ? `${lastCount} activities scanned` : 'Loading...'}
+              </p>
+            </div>
+
+            {/* Activity Heatmap Mockup with Scanning Animation */}
+            <div className="relative overflow-hidden rounded-lg border border-primary/20 bg-muted/30 p-6 h-64 max-w-2xl mx-auto">
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground mb-4">Activity Map</p>
+                <div className="grid grid-cols-12 gap-1.5">
+                  {Array.from({ length: 84 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-5 w-5 rounded transition-all duration-300 ${
+                        i < Math.floor((lastCount / 200) * 84) ? 'bg-primary/70 scale-110' : 
+                        i % 4 === 0 ? 'bg-primary/40' : 
+                        i % 3 === 0 ? 'bg-primary/20' : 
+                        'bg-muted'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              {/* Scanning Bar Animation */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-[slide-in-right_2s_ease-in-out_infinite]" />
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent animate-[slide-in-right_2.5s_ease-in-out_infinite]" 
+                     style={{ animationDelay: '0.5s' }} />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -263,7 +341,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               className="gap-2"
             >
               <Zap className={`h-4 w-4 ${bulkEnriching ? 'animate-pulse' : ''}`} />
-              {bulkEnriching ? "Enriching..." : `Enrich ${Math.min(10, prActivities.length)} PR Activities`}
+              {bulkEnriching ? "Enriching..." : `Enrich ${Math.min(20, prActivities.length)} PR Activities`}
             </Button>
           )}
         </div>
