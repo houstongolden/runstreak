@@ -75,6 +75,19 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   
   const isOwnProfile = currentUserRunnerId === runnerId;
   
+  // Helper to format date and ensure year is always 2 digits
+  const formatActivityDate = (dateString: string): string => {
+    const [year, month, day] = dateString.split('-');
+    const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const formatted = format(localDate, "MMM d, yy");
+    // Ensure year is always 2 digits by taking last 2 characters after the last comma
+    const parts = formatted.split(', ');
+    if (parts.length === 2 && parts[1].length > 2) {
+      parts[1] = parts[1].slice(-2);
+    }
+    return parts.join(', ');
+  };
+  
   const getDeviceIcon = (deviceName: string | null, isManual: boolean | null) => {
     if (isManual) {
       return <Hand className="h-3 w-3 text-muted-foreground" />;
@@ -389,11 +402,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                       </TableCell>
                       <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
                         <div className="flex items-center gap-2">
-                          {(() => {
-                            const [year, month, day] = activity.activity_date.split('-');
-                            const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                            return format(localDate, "MMM d, yy");
-                          })()}
+                          {formatActivityDate(activity.activity_date)}
                           {activity.pr_count && activity.pr_count > 0 && (
                             <Badge 
                               variant="default" 
