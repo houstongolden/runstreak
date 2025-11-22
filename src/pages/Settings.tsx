@@ -556,7 +556,7 @@ export default function Settings() {
     );
   }
 
-  const canClaimFreeMonth = settings.email_verified && settings.phone_verified && !settings.free_month_claimed;
+  const canClaimFreeMonth = false; // Disabled until SMS verification is active
 
   return (
     <div className="min-h-screen bg-background">
@@ -635,82 +635,30 @@ export default function Settings() {
                 </Alert>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+              <div className="space-y-2 opacity-60">
+                <Label htmlFor="phone" className="flex items-center gap-2">
+                  Phone Number
+                  <Badge variant="outline" className="text-xs">Coming Soon</Badge>
+                </Label>
                 <div className="flex gap-2">
                   <Input
                     id="phone"
                     type="tel"
                     value={settings.phone_number}
-                    onChange={(e) => {
-                      setSettings({ ...settings, phone_number: e.target.value });
-                      setShowCodeInput(false);
-                      setVerificationCode("");
-                    }}
                     placeholder="e.g., +12025551234 or 2025551234"
-                    disabled={settings.phone_verified}
+                    disabled={true}
                   />
-                
-                  {settings.phone_verified ? (
-                    <Badge variant="secondary" className="flex items-center gap-1 whitespace-nowrap">
-                      <CheckCircle className="h-3 w-3" />
-                      Verified
-                    </Badge>
-                  ) : (
-                    <Button 
-                      onClick={handleVerifyPhone} 
-                      variant="outline" 
-                      size="sm"
-                      disabled={sendingCode || !settings.phone_number}
-                    >
-                      {sendingCode ? "Sending..." : "Verify"}
-                    </Button>
-                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={true}
+                  >
+                    Verify
+                  </Button>
                 </div>
-                {!settings.phone_verified && (
-                  <p className="text-xs text-muted-foreground">
-                    Enter with country code (e.g., +12025551234) or without (+1 will be added for US/Canada)
-                  </p>
-                )}
-                
-                {showCodeInput && !settings.phone_verified && (
-                  <div className="space-y-3 pt-2">
-                    <Label htmlFor="verification-code">Enter 6-digit code</Label>
-                    <div className="flex items-center gap-2">
-                      <InputOTP
-                        maxLength={6}
-                        value={verificationCode}
-                        onChange={setVerificationCode}
-                      >
-                        <InputOTPGroup>
-                          <InputOTPSlot index={0} />
-                          <InputOTPSlot index={1} />
-                          <InputOTPSlot index={2} />
-                          <InputOTPSlot index={3} />
-                          <InputOTPSlot index={4} />
-                          <InputOTPSlot index={5} />
-                        </InputOTPGroup>
-                      </InputOTP>
-                      <Button 
-                        onClick={handleVerifyCode}
-                        disabled={verifyingCode || verificationCode.length !== 6}
-                        size="sm"
-                      >
-                        {verifyingCode ? "Verifying..." : "Verify Code"}
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Didn't receive the code?{" "}
-                      <button
-                        onClick={handleVerifyPhone}
-                        disabled={sendingCode}
-                        className="text-primary hover:underline"
-                      >
-                        Resend
-                      </button>
-                    </p>
-                  </div>
-                )}
+                <p className="text-xs text-muted-foreground">
+                  SMS verification will be available once our compliance campaigns are approved
+                </p>
               </div>
 
               <Separator />
@@ -775,12 +723,13 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* AI Coach Settings */}
-          <Card>
+          {/* AI Coach Settings - Coming Soon */}
+          <Card className="opacity-60">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
                 AI SMS Coach
+                <Badge variant="outline" className="text-xs">Coming Soon</Badge>
               </CardTitle>
               <CardDescription>
                 Get personalized daily reminders to stay on track with your streak goals
@@ -796,101 +745,14 @@ export default function Settings() {
                 </div>
                 <Switch
                   id="ai-coach-enabled"
-                  checked={settings.ai_coach_enabled}
-                  onCheckedChange={(checked) => 
-                    setSettings({ ...settings, ai_coach_enabled: checked })
-                  }
-                  disabled={!settings.phone_verified}
+                  checked={false}
+                  disabled={true}
                 />
               </div>
 
-              {settings.phone_verified && (
-                <Button
-                  onClick={handleSendTestMessage}
-                  disabled={sendingTestMessage}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {sendingTestMessage ? "Sending..." : "Send Test Message & Chat"}
-                </Button>
-              )}
-
-              {settings.ai_coach_enabled && (
-                <>
-                  <Separator />
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="frequency">Message Frequency</Label>
-                    <Select
-                      value={settings.ai_coach_frequency}
-                      onValueChange={(value) => 
-                        setSettings({ ...settings, ai_coach_frequency: value })
-                      }
-                    >
-                      <SelectTrigger id="frequency">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="every_other_day">Every Other Day</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="time">Preferred Time</Label>
-                    <Select
-                      value={settings.ai_coach_time}
-                      onValueChange={(value) => 
-                        setSettings({ ...settings, ai_coach_time: value })
-                      }
-                    >
-                      <SelectTrigger id="time">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="06:00">6:00 AM</SelectItem>
-                        <SelectItem value="09:00">9:00 AM</SelectItem>
-                        <SelectItem value="12:00">12:00 PM</SelectItem>
-                        <SelectItem value="15:00">3:00 PM</SelectItem>
-                        <SelectItem value="18:00">6:00 PM</SelectItem>
-                        <SelectItem value="21:00">9:00 PM</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="style">Coaching Style</Label>
-                    <Select
-                      value={settings.ai_coach_style}
-                      onValueChange={(value) => 
-                        setSettings({ ...settings, ai_coach_style: value })
-                      }
-                    >
-                      <SelectTrigger id="style">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="motivational">Motivational</SelectItem>
-                        <SelectItem value="accountability">Accountability</SelectItem>
-                        <SelectItem value="friendly">Friendly</SelectItem>
-                        <SelectItem value="no_nonsense">No-Nonsense</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      Choose the tone that resonates with you
-                    </p>
-                  </div>
-                </>
-              )}
-
-              {!settings.phone_verified && (
-                <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-                  Verify your phone number above to enable AI SMS Coach
-                </div>
-              )}
+              <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
+                SMS features will be available once our compliance campaigns are approved. Stay tuned!
+              </div>
             </CardContent>
           </Card>
 
