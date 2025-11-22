@@ -392,7 +392,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           {(() => {
                             const [year, month, day] = activity.activity_date.split('-');
                             const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                            return format(localDate, "MMM d, ''yy");
+                            return format(localDate, "MMM d, 'yy");
                           })()}
                           {activity.pr_count && activity.pr_count > 0 && (
                             <Badge 
