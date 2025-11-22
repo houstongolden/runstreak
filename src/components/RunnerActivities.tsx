@@ -397,11 +397,11 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                           {activity.pr_count && activity.pr_count > 0 && (
                             <Badge 
                               variant="default" 
-                              className="gap-1 text-xs px-1.5 py-0 h-5 bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.4)] cursor-pointer hover:from-orange-600 hover:to-orange-700"
-                              onClick={(e) => {
+                              className={`gap-1 text-xs px-1.5 py-0 h-5 bg-gradient-to-r from-orange-500 to-orange-600 shadow-[0_0_10px_rgba(249,115,22,0.4)] ${isOwnProfile ? 'cursor-pointer hover:from-orange-600 hover:to-orange-700' : ''}`}
+                              onClick={isOwnProfile ? (e) => {
                                 e.stopPropagation();
                                 extractBestEffort(activity.id, activity.strava_activity_id);
-                              }}
+                              } : undefined}
                             >
                               <Zap className="h-3 w-3" />
                               PR
