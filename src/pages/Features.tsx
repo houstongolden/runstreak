@@ -1,4 +1,5 @@
 import { Bot, MessageSquare, Users, TrendingUp, Award, Activity } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -41,6 +42,16 @@ const Features = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Features - RunStreaks | AI Coach, Analytics, Accountability</title>
+        <meta name="description" content="Discover RunStreaks features: AI running coach, SMS accountability reminders, performance analytics, best efforts tracking, and social engagement for daily runners." />
+        <meta property="og:title" content="RunStreaks Features - Everything You Need to Run Every Day" />
+        <meta property="og:description" content="AI coach, SMS reminders, analytics, streak tracking, and community features to help you build and maintain your running streak." />
+        <meta property="og:url" content="https://runstreaks.io/features" />
+        <meta name="twitter:title" content="RunStreaks Features" />
+        <meta name="twitter:description" content="Powerful features designed to help you build and maintain your running streak." />
+        <link rel="canonical" href="https://runstreaks.io/features" />
+      </Helmet>
       {/* Header */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

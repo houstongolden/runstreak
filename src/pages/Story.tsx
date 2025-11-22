@@ -1,4 +1,5 @@
 import { Flame } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import houstonGolden from "@/assets/houston-golden.jpeg";
@@ -9,6 +10,16 @@ export default function Story() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Our Story - Why RunStreaks Exists</title>
+        <meta name="description" content="Learn why RunStreaks was built by founder Houston Golden. Connect your Strava, verify your daily running streak, and join the leaderboard of dedicated runners." />
+        <meta property="og:title" content="Why RunStreaks Exists - Our Story" />
+        <meta property="og:description" content="Built for runners who don't just talk about consistency—they prove it every single day." />
+        <meta property="og:url" content="https://runstreaks.io/story" />
+        <meta name="twitter:title" content="Why RunStreaks Exists" />
+        <meta name="twitter:description" content="Built for runners who prove their consistency every single day." />
+        <link rel="canonical" href="https://runstreaks.io/story" />
+      </Helmet>
       {/* Header */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

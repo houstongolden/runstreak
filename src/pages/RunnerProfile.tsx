@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import confetti from "canvas-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { Runner } from "@/types";
@@ -412,6 +413,19 @@ export default function RunnerProfile() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{runner.display_name} - RunStreaks Profile</title>
+        <meta name="description" content={`View ${runner.display_name}'s running streak on RunStreaks. Current streak: ${runner.current_streak_days || 0} days. Total miles: ${formatNumber(runner.all_time_distance ? runner.all_time_distance / 1609.34 : 0)} miles.`} />
+        <meta property="og:title" content={`${runner.display_name} - RunStreaks Profile`} />
+        <meta property="og:description" content={`${runner.display_name} has a ${runner.current_streak_days || 0} day running streak on RunStreaks. Join the leaderboard of dedicated runners.`} />
+        <meta property="og:url" content={`https://runstreaks.io/runner/${runner.username || runner.id}`} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:image" content={runner.avatar_url || "https://runstreaks.io/images/runstreaks-logo-share.png"} />
+        <meta name="twitter:title" content={`${runner.display_name} - RunStreaks`} />
+        <meta name="twitter:description" content={`${runner.current_streak_days || 0} day streak · ${formatNumber(runner.all_time_distance ? runner.all_time_distance / 1609.34 : 0)} miles`} />
+        <meta name="twitter:image" content={runner.avatar_url || "https://runstreaks.io/images/runstreaks-logo-share.png"} />
+        <link rel="canonical" href={`https://runstreaks.io/runner/${runner.username || runner.id}`} />
+      </Helmet>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 lg:pt-6 pb-6 sm:pb-8 lg:pb-12">
         {/* Header with Back Button and Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">

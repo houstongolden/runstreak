@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -286,7 +287,16 @@ export default function SocialFeed() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-3xl space-y-4">
+    <>
+      <Helmet>
+        <title>Streak Feed - RunStreaks | See Who's Keeping Their Streak</title>
+        <meta name="description" content="Follow runners you care about. See who kept their streak alive and who broke theirs. Stay connected and motivated with the RunStreaks community." />
+        <meta property="og:title" content="Streak Feed - Stay Connected with Runners" />
+        <meta property="og:description" content="Follow runners, see who kept their streak, and stay motivated together." />
+        <meta property="og:url" content="https://runstreaks.io/feed" />
+        <link rel="canonical" href="https://runstreaks.io/feed" />
+      </Helmet>
+      <div className="container mx-auto p-4 sm:p-6 max-w-3xl space-y-4">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "feed" | "discover")} className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h1 className="text-xl font-semibold flex items-center gap-2">
@@ -535,5 +545,6 @@ export default function SocialFeed() {
         </TabsContent>
       </Tabs>
     </div>
+    </>
   );
 }
