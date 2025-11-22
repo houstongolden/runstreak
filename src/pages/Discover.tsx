@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -157,7 +158,16 @@ export default function Discover() {
   }
 
   return (
-    <div className="container py-8">
+    <>
+      <Helmet>
+        <title>Discover Runners - RunStreaks | Find Runners Near You</title>
+        <meta name="description" content="Find runners near you, with similar goals, or leading the leaderboard. Connect with your running community on RunStreaks." />
+        <meta property="og:title" content="Discover Runners - Find Your Running Community" />
+        <meta property="og:description" content="Find runners near you and with similar goals on RunStreaks." />
+        <meta property="og:url" content="https://runstreaks.io/discover" />
+        <link rel="canonical" href="https://runstreaks.io/discover" />
+      </Helmet>
+      <div className="container py-8">
       <div className="mb-8">
         <h1 className="text-4xl font-instrument font-medium mb-2">Discover Runners</h1>
         <p className="text-muted-foreground">Find runners near you and with similar goals</p>
@@ -301,5 +311,6 @@ export default function Discover() {
         </TabsContent>
       </Tabs>
     </div>
+    </>
   );
 }

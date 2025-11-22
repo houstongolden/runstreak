@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -136,7 +137,15 @@ export default function Activities() {
   }
 
   return (
-    <div className="container py-8">
+    <>
+      <Helmet>
+        <title>Activities - RunStreaks | Your Running History</title>
+        <meta name="description" content="View your complete running activity history synced from Strava. Track distance, pace, elevation, and best efforts across all your runs." />
+        <meta property="og:title" content="Activities - Your Running History on RunStreaks" />
+        <meta property="og:description" content="Complete running activity history with distance, pace, elevation, and best efforts tracking." />
+        <link rel="canonical" href="https://runstreaks.io/activities" />
+      </Helmet>
+      <div className="container py-8">
       <div className="mb-8">
         <h1 className="text-4xl font-instrument font-medium mb-2">Activities</h1>
         <p className="text-muted-foreground">
@@ -252,5 +261,6 @@ export default function Activities() {
         ))}
       </div>
     </div>
+    </>
   );
 }

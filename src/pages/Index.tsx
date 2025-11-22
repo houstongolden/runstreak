@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -327,6 +328,17 @@ const Index = () => {
 
   return (
     <AppLayout>
+      <Helmet>
+        <title>RunStreaks - The Verified Leaderboard for Daily Runners</title>
+        <meta name="description" content="Track your daily running streak on the verified leaderboard. Connect your Strava, prove you run every day, and compete with dedicated runners worldwide." />
+        <meta property="og:title" content="RunStreaks - Daily Running Leaderboard" />
+        <meta property="og:description" content="Connect your Strava. Prove you run every day. Join the leaderboard of dedicated runners keeping their streak alive." />
+        <meta property="og:url" content="https://runstreaks.io/" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content="RunStreaks - Daily Running Leaderboard" />
+        <meta name="twitter:description" content="Track your running streak and compete with runners worldwide on the verified leaderboard." />
+        <link rel="canonical" href="https://runstreaks.io/" />
+      </Helmet>
       <div className="min-h-screen dark:bg-background">
         {/* Desktop Ad Sidebars */}
         {adsEnabled && (
