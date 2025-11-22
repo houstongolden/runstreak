@@ -40,6 +40,10 @@ export default function UnverifiedAccountBanner() {
         // Show banner if settings don't exist OR email is not verified (phone not required for now)
         if (!settings || !settings.email_verified) {
           setShowBanner(true);
+        } else {
+          // Auto-dismiss if verified
+          setShowBanner(false);
+          setIsDismissed(false);
         }
       } catch (error) {
         console.error('Error checking verification status:', error);
@@ -48,8 +52,8 @@ export default function UnverifiedAccountBanner() {
 
     checkVerificationStatus();
     
-    // Re-check periodically in case user verifies in another tab
-    const interval = setInterval(checkVerificationStatus, 30000);
+    // Re-check more frequently to catch verification changes quickly
+    const interval = setInterval(checkVerificationStatus, 5000);
     return () => clearInterval(interval);
   }, [runnerId]);
 

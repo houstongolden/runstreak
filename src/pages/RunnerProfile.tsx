@@ -582,11 +582,11 @@ export default function RunnerProfile() {
                        )}
                      </div>
                      
-                     {runner.joined_runstreak_at && (
-                       <div className="text-xs text-muted-foreground text-center sm:text-left">
-                         RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                       </div>
-                     )}
+                      {runner.joined_runstreak_at && (
+                        <div className="text-xs text-muted-foreground text-center sm:text-left">
+                          RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                      )}
                    </div>
                 </div>
               </div>
