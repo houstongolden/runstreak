@@ -70,6 +70,8 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [bulkEnriching, setBulkEnriching] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [lastCount, setLastCount] = useState(0);
+  const [pollCount, setPollCount] = useState(0);
+  const [stableCountChecks, setStableCountChecks] = useState(0);
   
   const isOwnProfile = currentUserRunnerId === runnerId;
   
@@ -121,12 +123,19 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         
         const currentCount = activitiesData?.length || 0;
         
-        // Check if activities are still being synced
-        if (currentCount > 0 && currentCount !== lastCount) {
-          setIsScanning(true);
-          setLastCount(currentCount);
-        } else if (currentCount > 0 && currentCount === lastCount) {
-          setIsScanning(false);
+        // Start scanning if we have activities and this is first load or count changed
+        if (currentCount > 0) {
+          if (lastCount === 0) {
+            // First load - start scanning
+            setIsScanning(true);
+            setLastCount(currentCount);
+            setStableCountChecks(0);
+          } else if (currentCount !== lastCount) {
+            // Count changed - still syncing
+            setIsScanning(true);
+            setLastCount(currentCount);
+            setStableCountChecks(0);
+          }
         }
         
         setActivities(activitiesData || []);
@@ -154,7 +163,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     };
 
     fetchData();
-  }, [runnerId, lastCount]);
+  }, [runnerId, pollCount]);
 
   // Poll for new activities while scanning
   useEffect(() => {
@@ -170,11 +179,20 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         const currentCount = activitiesData?.length || 0;
         
         if (currentCount === lastCount) {
-          // No new activities, scanning complete
-          setIsScanning(false);
-          window.location.reload();
+          // Count stable - increment stable checks
+          const newStableChecks = stableCountChecks + 1;
+          setStableCountChecks(newStableChecks);
+          
+          // Only stop scanning after count has been stable for 3 consecutive checks (6 seconds)
+          if (newStableChecks >= 3) {
+            setIsScanning(false);
+            window.location.reload();
+          }
         } else {
+          // Count changed - reset stable checks and update count
+          setStableCountChecks(0);
           setLastCount(currentCount);
+          setPollCount(prev => prev + 1); // Trigger re-fetch
         }
       } catch (error) {
         console.error('Error polling activities:', error);
@@ -182,7 +200,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     }, 2000);
 
     return () => clearInterval(pollInterval);
-  }, [isScanning, runnerId, lastCount]);
+  }, [isScanning, runnerId, lastCount, stableCountChecks]);
 
   const toggleRow = (activityId: string) => {
     const newExpanded = new Set(expandedRows);
