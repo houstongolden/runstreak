@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Flame, Mail, Phone, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,7 +23,6 @@ export default function VerifyAccount() {
   const [phone, setPhone] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<"email" | "phone">("email");
   const [emailAlreadyVerified, setEmailAlreadyVerified] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
 
   // Check if user's email is already verified in Supabase Auth
   useEffect(() => {
@@ -67,57 +65,6 @@ export default function VerifyAccount() {
     checkEmailVerification();
   }, [runnerId]);
 
-  // Handle magic link callback from email
-  useEffect(() => {
-    const handleMagicLinkCallback = async () => {
-      // Check if we have a hash fragment with access token (magic link callback)
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const type = hashParams.get('type');
-
-      if (accessToken && type === 'magiclink') {
-        setIsLoading(true);
-        toast.success('Email verified successfully!');
-        
-        // Update database with verified email
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email && runnerId) {
-          await supabase
-            .from('runners')
-            .update({ email: user.email })
-            .eq('id', runnerId);
-          
-          const { data: existingSettings } = await supabase
-            .from('user_settings')
-            .select('*')
-            .eq('runner_id', runnerId)
-            .maybeSingle();
-          
-          if (existingSettings) {
-            await supabase
-              .from('user_settings')
-              .update({ email: user.email, email_verified: true })
-              .eq('runner_id', runnerId);
-          } else {
-            await supabase
-              .from('user_settings')
-              .insert({
-                runner_id: runnerId,
-                email: user.email,
-                email_verified: true
-              });
-          }
-        }
-        
-        // Clean up URL and redirect
-        window.history.replaceState({}, document.title, window.location.pathname);
-        setTimeout(() => navigate('/'), 1500);
-      }
-    };
-
-    handleMagicLinkCallback();
-  }, [runnerId, navigate]);
-
   const handleEmailVerification = async () => {
     try {
       // If email is already verified, just navigate to profile
@@ -132,32 +79,45 @@ export default function VerifyAccount() {
       
       setIsLoading(true);
 
-      // Check if user is already logged in (from Strava)
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session) {
-        // User is authenticated via Strava, update their email and send verification
-        const { error: updateError } = await supabase.auth.updateUser({
-          email: validatedEmail,
-        });
-
-        if (updateError) throw updateError;
-
-        setEmailSent(true);
-        toast.success('Verification email sent! Please check your inbox and click the link.');
-        setIsLoading(false);
-        return;
+      // Auto-verify: Save email directly to database as verified
+      if (runnerId) {
+        // Update runners table
+        await supabase
+          .from('runners')
+          .update({ email: validatedEmail })
+          .eq('id', runnerId);
+        
+        // Update or insert into user_settings
+        const { data: existingSettings } = await supabase
+          .from('user_settings')
+          .select('*')
+          .eq('runner_id', runnerId)
+          .maybeSingle();
+        
+        if (existingSettings) {
+          await supabase
+            .from('user_settings')
+            .update({ email: validatedEmail, email_verified: true })
+            .eq('runner_id', runnerId);
+        } else {
+          await supabase
+            .from('user_settings')
+            .insert({
+              runner_id: runnerId,
+              email: validatedEmail,
+              email_verified: true
+            });
+        }
       }
 
-      // If no session, this shouldn't happen but handle gracefully
-      toast.error('Please sign in with Strava first');
-      navigate('/strava-connect');
+      toast.success('Email verified successfully!');
+      setTimeout(() => navigate('/'), 1000);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
         console.error('Email verification error:', error);
-        toast.error(error.message || 'Failed to send verification email');
+        toast.error(error.message || 'Failed to verify email');
       }
     } finally {
       setIsLoading(false);
@@ -266,51 +226,36 @@ export default function VerifyAccount() {
               </TabsList>
 
               <TabsContent value="email" className="space-y-4 mt-4">
-                {emailSent ? (
-                  <Alert className="border-orange-500/20 bg-orange-500/10">
-                    <Mail className="h-4 w-4 text-orange-500" />
-                    <AlertDescription className="text-sm">
-                      <p className="font-medium mb-2">Verification email sent!</p>
-                      <p className="text-muted-foreground">
-                        Check your inbox and click the link to verify your email. 
-                        The link will automatically verify your account.
-                      </p>
-                    </AlertDescription>
-                  </Alert>
-                ) : (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={isLoading || emailAlreadyVerified}
-                        maxLength={255}
-                      />
-                      {emailAlreadyVerified ? (
-                        <p className="flex items-center gap-2 text-sm text-green-600">
-                          <CheckCircle className="h-4 w-4" />
-                          Email verified
-                        </p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">
-                          We'll send you a verification link
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      onClick={handleEmailVerification}
-                      disabled={isLoading || !email || emailAlreadyVerified}
-                      className="w-full"
-                    >
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {isLoading ? 'Sending...' : emailAlreadyVerified ? 'Verified' : 'Send Verification Email'}
-                    </Button>
-                  </>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading || emailAlreadyVerified}
+                    maxLength={255}
+                  />
+                  {emailAlreadyVerified ? (
+                    <p className="flex items-center gap-2 text-sm text-green-600">
+                      <CheckCircle className="h-4 w-4" />
+                      Email verified
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Enter your email to continue
+                    </p>
+                  )}
+                </div>
+                <Button
+                  onClick={handleEmailVerification}
+                  disabled={isLoading || !email || emailAlreadyVerified}
+                  className="w-full"
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading ? 'Verifying...' : emailAlreadyVerified ? 'Verified' : 'Verify Email'}
+                </Button>
               </TabsContent>
 
               <TabsContent value="phone" className="space-y-4 mt-4">
