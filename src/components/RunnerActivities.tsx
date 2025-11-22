@@ -79,11 +79,12 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const formatActivityDate = (dateString: string): string => {
     const [year, month, day] = dateString.split('-');
     const localDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    const monthDay = format(localDate, "MMM d");
-    // Explicitly get last 2 digits of year
-    const yearStr = localDate.getFullYear().toString();
-    const shortYear = yearStr.slice(-2);
-    return `${monthDay}, ${shortYear}`;
+    return format(localDate, "MMM d");
+  };
+
+  const getActivityYear = (dateString: string): string => {
+    const [year] = dateString.split('-');
+    return `'${year.slice(-2)}`;
   };
   
   const getDeviceIcon = (deviceName: string | null, isManual: boolean | null) => {
@@ -376,6 +377,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               <TableRow>
                 <TableHead className="text-xs py-2 w-8"></TableHead>
                 <TableHead className="text-xs py-2">Date</TableHead>
+                <TableHead className="text-xs py-2">Year</TableHead>
                 <TableHead className="text-xs py-2 text-right">Distance</TableHead>
                 <TableHead className="text-xs py-2 text-right">Time</TableHead>
                 <TableHead className="text-xs py-2 text-right">Avg Pace</TableHead>
@@ -399,8 +401,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                         )}
                       </TableCell>
                       <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
-                        <div className="flex items-center gap-2">
-                          {formatActivityDate(activity.activity_date)}
+                        {formatActivityDate(activity.activity_date)}
+                      </TableCell>
+                      <TableCell className="text-sm py-2 text-muted-foreground whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
+                        {getActivityYear(activity.activity_date)}
+                      </TableCell>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
+                        <div className="flex items-center justify-end gap-2">
+                          {formatNumber(activity.distance)} mi
                           {activity.pr_count && activity.pr_count > 0 && (
                             <Badge 
                               variant="default" 
@@ -427,9 +435,6 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                             </TooltipProvider>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
-                        {formatNumber(activity.distance)} mi
                       </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {Math.floor(activity.moving_time / 60)}m
