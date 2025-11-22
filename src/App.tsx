@@ -33,6 +33,7 @@ import Story from "./pages/Story";
 import Philosophy from "./pages/Philosophy";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 import AdCheckout from "./pages/AdCheckout";
 import AdPaymentSuccess from "./pages/AdPaymentSuccess";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/philosophy" element={<AppLayout><Philosophy /></AppLayout>} />
               <Route path="/privacy" element={<AppLayout><Privacy /></AppLayout>} />
               <Route path="/terms" element={<AppLayout><Terms /></AppLayout>} />
+              <Route path="/support" element={<AppLayout><Support /></AppLayout>} />
               <Route path="/discover" element={<AppLayout><Discover /></AppLayout>} />
               <Route path="/runner/:id" element={<AppLayout><RunnerProfile /></AppLayout>} />
               
