@@ -377,12 +377,12 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
               <TableRow>
                 <TableHead className="text-xs py-2 w-8"></TableHead>
                 <TableHead className="text-xs py-2">Date</TableHead>
-                <TableHead className="text-xs py-2">Year</TableHead>
                 <TableHead className="text-xs py-2 text-right">Distance</TableHead>
-                <TableHead className="text-xs py-2 text-right">Time</TableHead>
                 <TableHead className="text-xs py-2 text-right">Avg Pace</TableHead>
+                <TableHead className="text-xs py-2 text-right">Time</TableHead>
                 <TableHead className="text-xs py-2">Name</TableHead>
                 <TableHead className="text-xs py-2 text-right">Elevation</TableHead>
+                <TableHead className="text-xs py-2">Year</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -402,9 +402,6 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                       </TableCell>
                       <TableCell className="text-sm py-2 font-medium whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
                         {formatActivityDate(activity.activity_date)}
-                      </TableCell>
-                      <TableCell className="text-sm py-2 text-muted-foreground whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
-                        {getActivityYear(activity.activity_date)}
                       </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         <div className="flex items-center justify-end gap-2">
@@ -437,14 +434,14 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
-                        {Math.floor(activity.moving_time / 60)}m
-                      </TableCell>
-                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {activity.average_speed ? (
                           <span className="font-semibold">{Math.floor(26.8224 / activity.average_speed)}:{String(Math.round((26.8224 / activity.average_speed % 1) * 60)).padStart(2, '0')}/mi</span>
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
+                      </TableCell>
+                      <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
+                        {Math.floor(activity.moving_time / 60)}m
                       </TableCell>
                       <TableCell className="text-sm py-2 max-w-[200px] truncate" onClick={() => toggleRow(activity.id)}>
                         {activity.name || 'Unnamed Activity'}
@@ -452,10 +449,13 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                       <TableCell className="text-sm py-2 text-right" onClick={() => toggleRow(activity.id)}>
                         {Math.round(activity.elevation_gain)}ft
                       </TableCell>
+                      <TableCell className="text-sm py-2 text-muted-foreground whitespace-nowrap" onClick={() => toggleRow(activity.id)}>
+                        {getActivityYear(activity.activity_date)}
+                      </TableCell>
                     </TableRow>
                     {isExpanded && (
                       <TableRow key={`${activity.id}-expanded`}>
-                        <TableCell colSpan={6} className="bg-muted/30 p-4">
+                        <TableCell colSpan={8} className="bg-muted/30 p-4">
                           <div className="space-y-4">
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
                               <div>
