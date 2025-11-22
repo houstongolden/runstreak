@@ -792,7 +792,7 @@ Deno.serve(async (req) => {
         
         console.log(`Background sync: Persisting ${dailyActivitiesMap.size} days of activities...`);
         
-        // Persist to database
+        // Persist daily activities to database
         for (const [dateStr, data] of dailyActivitiesMap.entries()) {
           const avgHR = data.heartrates.length > 0 ? data.heartrates.reduce((a: number, b: number) => a + b, 0) / data.heartrates.length : null;
           const avgCadence = data.cadences.length > 0 ? data.cadences.reduce((a: number, b: number) => a + b, 0) / data.cadences.length : null;
@@ -829,7 +829,80 @@ Deno.serve(async (req) => {
             });
         }
         
-     console.log('Background sync: Daily activities persisted successfully');
+        console.log('Background sync: Daily activities persisted successfully');
+        
+        // Also persist individual strava_activities
+        console.log(`Background sync: Persisting ${runActivities.length} individual activities...`);
+        
+        for (const activity of runActivities) {
+          const activityDate = convertToLocalDateStr(activity.start_date, timezone);
+          
+          await supabase
+            .from('strava_activities')
+            .upsert({
+              runner_id: savedRunner.id,
+              strava_activity_id: activity.id,
+              activity_date: activityDate,
+              name: activity.name,
+              distance: activity.distance / 1609.34, // Convert to miles
+              moving_time: activity.moving_time,
+              elapsed_time: activity.elapsed_time,
+              elevation_gain: activity.total_elevation_gain * 3.28084, // Convert to feet
+              type: activity.type,
+              sport_type: activity.sport_type,
+              start_date: activity.start_date,
+              start_date_local: activity.start_date_local,
+              timezone: activity.timezone,
+              start_latlng: activity.start_latlng ? JSON.stringify(activity.start_latlng) : null,
+              end_latlng: activity.end_latlng ? JSON.stringify(activity.end_latlng) : null,
+              location_city: activity.location_city,
+              location_state: activity.location_state,
+              location_country: activity.location_country,
+              average_speed: activity.average_speed,
+              max_speed: activity.max_speed,
+              average_cadence: activity.average_cadence,
+              average_heartrate: activity.average_heartrate,
+              max_heartrate: activity.max_heartrate,
+              average_temp: activity.average_temp,
+              calories: activity.calories,
+              suffer_score: activity.suffer_score,
+              has_heartrate: activity.has_heartrate || false,
+              average_watts: activity.average_watts,
+              weighted_average_watts: activity.weighted_average_watts,
+              kilojoules: activity.kilojoules,
+              device_watts: activity.device_watts,
+              max_watts: activity.max_watts,
+              elev_high: activity.elev_high,
+              elev_low: activity.elev_low,
+              pr_count: activity.pr_count || 0,
+              achievement_count: activity.achievement_count || 0,
+              kudos_count: activity.kudos_count || 0,
+              comment_count: activity.comment_count || 0,
+              photo_count: activity.photo_count,
+              total_photo_count: activity.total_photo_count,
+              trainer: activity.trainer || false,
+              commute: activity.commute || false,
+              manual: activity.manual || false,
+              private: activity.private || false,
+              flagged: activity.flagged || false,
+              workout_type: activity.workout_type,
+              upload_id: activity.upload_id,
+              external_id: activity.external_id,
+              gear_id: activity.gear_id,
+              device_name: activity.device_name,
+              visibility: activity.visibility,
+              description: activity.description,
+              perceived_exertion: activity.perceived_exertion,
+              from_accepted_tag: activity.from_accepted_tag,
+              summary_polyline: activity.map?.summary_polyline,
+              map_id: activity.map?.id,
+              hide_from_home: activity.hide_from_home,
+            }, {
+              onConflict: 'runner_id,strava_activity_id'
+            });
+        }
+        
+        console.log('Background sync: Individual activities persisted successfully');
       } catch (error) {
         console.error('Background sync error:', error);
       }
