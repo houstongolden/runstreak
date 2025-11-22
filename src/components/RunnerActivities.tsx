@@ -69,9 +69,9 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
   const [bestEffortIds, setBestEffortIds] = useState<Set<number>>(new Set());
   const [bulkEnriching, setBulkEnriching] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [lastCount, setLastCount] = useState(0);
-  const [pollCount, setPollCount] = useState(0);
-  const [stableCountChecks, setStableCountChecks] = useState(0);
+  const [scanStartTime, setScanStartTime] = useState<number | null>(null);
+  const [stableCount, setStableCount] = useState(0);
+  const [lastActivityCount, setLastActivityCount] = useState(0);
   
   const isOwnProfile = currentUserRunnerId === runnerId;
   
@@ -123,19 +123,12 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
         
         const currentCount = activitiesData?.length || 0;
         
-        // Start scanning if we have activities and this is first load or count changed
-        if (currentCount > 0) {
-          if (lastCount === 0) {
-            // First load - start scanning
-            setIsScanning(true);
-            setLastCount(currentCount);
-            setStableCountChecks(0);
-          } else if (currentCount !== lastCount) {
-            // Count changed - still syncing
-            setIsScanning(true);
-            setLastCount(currentCount);
-            setStableCountChecks(0);
-          }
+        // Start scanning if we have activities
+        if (currentCount > 0 && !isScanning) {
+          setIsScanning(true);
+          setScanStartTime(Date.now());
+          setLastActivityCount(currentCount);
+          setStableCount(0);
         }
         
         setActivities(activitiesData || []);
@@ -163,11 +156,11 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     };
 
     fetchData();
-  }, [runnerId, pollCount]);
+  }, [runnerId, isScanning]);
 
   // Poll for new activities while scanning
   useEffect(() => {
-    if (!isScanning) return;
+    if (!isScanning || !scanStartTime) return;
 
     const pollInterval = setInterval(async () => {
       try {
@@ -177,22 +170,23 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
           .eq('runner_id', runnerId);
 
         const currentCount = activitiesData?.length || 0;
+        const minScanTime = 5000; // Minimum 5 seconds of scanning
+        const timeElapsed = Date.now() - scanStartTime;
         
-        if (currentCount === lastCount) {
-          // Count stable - increment stable checks
-          const newStableChecks = stableCountChecks + 1;
-          setStableCountChecks(newStableChecks);
+        if (currentCount === lastActivityCount) {
+          // Count is stable - increment stable counter
+          const newStableCount = stableCount + 1;
+          setStableCount(newStableCount);
           
-          // Only stop scanning after count has been stable for 3 consecutive checks (6 seconds)
-          if (newStableChecks >= 3) {
+          // Only stop if: enough time has passed AND count has been stable for 5 checks (10 seconds)
+          if (timeElapsed >= minScanTime && newStableCount >= 5) {
             setIsScanning(false);
             window.location.reload();
           }
         } else {
-          // Count changed - reset stable checks and update count
-          setStableCountChecks(0);
-          setLastCount(currentCount);
-          setPollCount(prev => prev + 1); // Trigger re-fetch
+          // Count changed - reset stable counter and update count
+          setStableCount(0);
+          setLastActivityCount(currentCount);
         }
       } catch (error) {
         console.error('Error polling activities:', error);
@@ -200,7 +194,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
     }, 2000);
 
     return () => clearInterval(pollInterval);
-  }, [isScanning, runnerId, lastCount, stableCountChecks]);
+  }, [isScanning, runnerId, lastActivityCount, stableCount, scanStartTime]);
 
   const toggleRow = (activityId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -289,7 +283,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                 Scanning all your activities...
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                {lastCount > 0 ? `${lastCount} activities scanned` : 'Loading...'}
+                {lastActivityCount > 0 ? `${lastActivityCount} activities scanned` : 'Loading...'}
               </p>
             </div>
 
@@ -302,7 +296,7 @@ export function RunnerActivities({ runnerId }: RunnerActivitiesProps) {
                     <div
                       key={i}
                       className={`h-5 w-5 rounded transition-all duration-300 ${
-                        i < Math.floor((lastCount / 200) * 84) ? 'bg-primary/70 scale-110' : 
+                        i < Math.floor((lastActivityCount / 200) * 84) ? 'bg-primary/70 scale-110' : 
                         i % 4 === 0 ? 'bg-primary/40' : 
                         i % 3 === 0 ? 'bg-primary/20' : 
                         'bg-muted'
