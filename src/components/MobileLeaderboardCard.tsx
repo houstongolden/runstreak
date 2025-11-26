@@ -39,7 +39,11 @@ export function MobileLeaderboardCard({ runner, rank }: MobileLeaderboardCardPro
           </div>
         </div>
         
-        <div className="flex justify-center">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
+            <span className="text-xs text-muted-foreground">days</span>
+          </div>
           <Badge variant={runner.streak_status === "active" ? "default" : "secondary"} className="gap-1.5">
             {runner.streak_status === "active" ? (
               <>

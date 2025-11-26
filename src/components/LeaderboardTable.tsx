@@ -46,13 +46,14 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
     return (
       <div className="rounded-lg border-0 bg-transparent backdrop-blur-0 overflow-hidden shadow-none">
         <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
-              <TableHead className="w-[80px]">Rank</TableHead>
-              <TableHead>Runner</TableHead>
-              <TableHead className="text-right">Streak Status</TableHead>
-            </TableRow>
-          </TableHeader>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
+            <TableHead className="w-[80px]">Rank</TableHead>
+            <TableHead>Runner</TableHead>
+            <TableHead className="text-right">Days</TableHead>
+            <TableHead className="text-right">Streak Status</TableHead>
+          </TableRow>
+        </TableHeader>
           <TableBody>
             {fiveDayRunners.map((runner, index) => {
               const streakActive = runner.streak_status === "active";
@@ -83,23 +84,29 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                           @{runner.strava_username}
                         </div>
                       </div>
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Link to={`/runner/${runner.id}`}>
-                      <Badge variant={streakActive ? "default" : "secondary"} className="gap-1.5">
-                        {streakActive ? (
-                          <>
-                            <Flame className="h-4 w-4" />
-                            Streak Active ✓
-                          </>
-                        ) : (
-                          "Streak Broken"
-                        )}
-                      </Badge>
-                    </Link>
-                  </TableCell>
-                </TableRow>
+                  </Link>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Link to={`/runner/${runner.id}`} className="flex items-center justify-end gap-1.5">
+                    <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
+                    <span className="text-sm text-muted-foreground">days</span>
+                  </Link>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Link to={`/runner/${runner.id}`}>
+                    <Badge variant={streakActive ? "default" : "secondary"} className="gap-1.5">
+                      {streakActive ? (
+                        <>
+                          <Flame className="h-4 w-4" />
+                          Streak Active ✓
+                        </>
+                      ) : (
+                        "Streak Broken"
+                      )}
+                    </Badge>
+                  </Link>
+                </TableCell>
+              </TableRow>
               );
             })}
           </TableBody>
@@ -127,6 +134,7 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
           <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
             <TableHead className="w-[80px]">Rank</TableHead>
             <TableHead>Runner</TableHead>
+            <TableHead className="text-right">Days</TableHead>
             <TableHead className="text-right">Streak Status</TableHead>
           </TableRow>
         </TableHeader>
@@ -160,23 +168,29 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                         @{runner.strava_username}
                       </div>
                     </div>
-                  </Link>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link to={`/runner/${runner.id}`}>
-                    <Badge variant={streakActive ? "default" : "secondary"} className="gap-1.5">
-                      {streakActive ? (
-                        <>
-                          <Flame className="h-4 w-4" />
-                          Streak Active ✓
-                        </>
-                      ) : (
-                        "Streak Broken"
-                      )}
-                    </Badge>
-                  </Link>
-                </TableCell>
-              </TableRow>
+                </Link>
+              </TableCell>
+              <TableCell className="text-right">
+                <Link to={`/runner/${runner.id}`} className="flex items-center justify-end gap-1.5">
+                  <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
+                  <span className="text-sm text-muted-foreground">days</span>
+                </Link>
+              </TableCell>
+              <TableCell className="text-right">
+                <Link to={`/runner/${runner.id}`}>
+                  <Badge variant={streakActive ? "default" : "secondary"} className="gap-1.5">
+                    {streakActive ? (
+                      <>
+                        <Flame className="h-4 w-4" />
+                        Streak Active ✓
+                      </>
+                    ) : (
+                      "Streak Broken"
+                    )}
+                  </Badge>
+                </Link>
+              </TableCell>
+            </TableRow>
             );
           })}
         </TableBody>
