@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { AppDownloadSection } from "@/components/AppDownloadSection";
 import { AdvertiseModal } from "@/components/AdvertiseModal";
+import { useAdmin } from "@/hooks/useAdmin";
 
 export function Footer() {
   const [isAdvertiseModalOpen, setIsAdvertiseModalOpen] = useState(false);
+  const { isAdmin } = useAdmin();
 
   return (
     <>
@@ -33,11 +35,6 @@ export function Footer() {
                     The Run Streak Philosophy
                   </a>
                 </li>
-                <li>
-                  <a href="/badge-docs" className="hover:text-foreground transition-colors">
-                    Embed Your Badge
-                  </a>
-                </li>
               </ul>
             </div>
 
@@ -50,14 +47,16 @@ export function Footer() {
                     View All Streakers
                   </a>
                 </li>
-                <li>
-                  <button
-                    onClick={() => setIsAdvertiseModalOpen(true)}
-                    className="hover:text-foreground transition-colors text-left"
-                  >
-                    Advertise
-                  </button>
-                </li>
+                {isAdmin && (
+                  <li>
+                    <button
+                      onClick={() => setIsAdvertiseModalOpen(true)}
+                      className="hover:text-foreground transition-colors text-left"
+                    >
+                      Advertise
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
 
