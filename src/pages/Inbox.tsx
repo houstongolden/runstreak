@@ -221,15 +221,16 @@ export default function Inbox() {
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
       <div className="mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={() => navigate("/")}
-          className="mb-4"
+          className="group flex items-center gap-2 text-foreground font-medium transition-colors hover:text-foreground relative pb-1 mb-4"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Leaderboard
-        </Button>
+          <ArrowLeft className="h-4 w-4" />
+          <span className="relative">
+            Back to Leaderboard
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </span>
+        </button>
         <h1 className="text-3xl font-instrument font-medium">Inbox</h1>
         <p className="text-muted-foreground">Message runners you follow</p>
       </div>

@@ -40,14 +40,16 @@ const NotFound = () => {
         </div>
 
         {/* CTA Button */}
-        <Button
+        <button
           onClick={() => navigate("/")}
-          size="lg"
-          className="gap-2 animate-scale-in"
+          className="group flex items-center gap-2 text-foreground font-medium text-lg transition-colors hover:text-foreground relative pb-1 animate-scale-in"
         >
-          <Home className="h-4 w-4" />
-          Back to Leaderboard
-        </Button>
+          <Home className="h-5 w-5" />
+          <span className="relative">
+            Back to Leaderboard
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+          </span>
+        </button>
       </div>
     </div>
   );
