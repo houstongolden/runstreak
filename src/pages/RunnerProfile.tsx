@@ -524,25 +524,27 @@ export default function RunnerProfile() {
                     </p>
                   )}
 
-                   {/* Follower/Following & Key Stats */}
-                   <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
-                     <div className="text-center">
-                       <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
-                       <div className="text-xs text-muted-foreground">Followers</div>
+                   {/* Follower/Following */}
+                   {isOwnProfile && (
+                     <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
+                       <div className="text-center">
+                         <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
+                         <div className="text-xs text-muted-foreground">Followers</div>
+                       </div>
+                       <div className="text-center">
+                         <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
+                         <div className="text-xs text-muted-foreground">Following</div>
+                       </div>
+                       <div className="text-center">
+                         <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
+                         <div className="text-xs text-muted-foreground">Total Runs</div>
+                       </div>
+                       <div className="text-center">
+                         <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
+                         <div className="text-xs text-muted-foreground">Longest Streak</div>
+                       </div>
                      </div>
-                     <div className="text-center">
-                       <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
-                       <div className="text-xs text-muted-foreground">Following</div>
-                     </div>
-                     <div className="text-center">
-                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
-                       <div className="text-xs text-muted-foreground">Total Runs</div>
-                     </div>
-                     <div className="text-center">
-                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
-                       <div className="text-xs text-muted-foreground">Longest Streak</div>
-                     </div>
-                   </div>
+                   )}
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
@@ -566,10 +568,10 @@ export default function RunnerProfile() {
                          {streakActive ? (
                            <>
                              <Flame className="h-4 w-4 mr-1" />
-                             {runner.current_streak_days} {runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak
+                             {isOwnProfile ? `${runner.current_streak_days} ${runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak` : 'Streak Active ✓'}
                            </>
                          ) : (
-                           "No Active Streak"
+                           "Streak Broken"
                          )}
                        </Badge>
                        
@@ -592,7 +594,7 @@ export default function RunnerProfile() {
               </div>
               
               <div className="w-full lg:w-auto lg:max-w-[420px] overflow-hidden flex-shrink-0 min-w-0">
-                <ActivityHeatmap runnerId={runner.id} />
+                <ActivityHeatmap runnerId={runner.id} isOwnProfile={isOwnProfile} />
               </div>
             </div>
           </CardContent>
@@ -622,53 +624,69 @@ export default function RunnerProfile() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {/* Current Streak */}
-            <CurrentStreakCard
-              streakDays={runner.current_streak_days || 0}
-              streakMiles={runner.current_streak_miles || 0}
-              streakStatus={runner.streak_status}
-              avgMilesPerDay={runner.average_miles_per_day || 0}
-              streakStartDate={runner.streak_start_date}
-              lastActivityDate={runner.last_activity_date}
-            />
+            {isOwnProfile ? (
+              <>
+                {/* Current Streak */}
+                <CurrentStreakCard
+                  streakDays={runner.current_streak_days || 0}
+                  streakMiles={runner.current_streak_miles || 0}
+                  streakStatus={runner.streak_status}
+                  avgMilesPerDay={runner.average_miles_per_day || 0}
+                  streakStartDate={runner.streak_start_date}
+                  lastActivityDate={runner.last_activity_date}
+                />
 
-            {/* Days on Streak - Primary Metric */}
-            <DaysOnStreakCard
-              daysOnStreak30={runner.days_on_streak_last_30 || 0}
-              daysOnStreak60={runner.days_on_streak_last_60 || 0}
-              daysOnStreak90={runner.days_on_streak_last_90 || 0}
-              daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
-              totalDaysSinceJoining={runner.total_days_since_joining || 0}
-              daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
-              totalDaysBeforeJoining={runner.total_days_before_joining || 0}
-              joinedAt={runner.joined_runstreak_at}
-            />
+                {/* Days on Streak - Primary Metric */}
+                <DaysOnStreakCard
+                  daysOnStreak30={runner.days_on_streak_last_30 || 0}
+                  daysOnStreak60={runner.days_on_streak_last_60 || 0}
+                  daysOnStreak90={runner.days_on_streak_last_90 || 0}
+                  daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
+                  totalDaysSinceJoining={runner.total_days_since_joining || 0}
+                  daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
+                  totalDaysBeforeJoining={runner.total_days_before_joining || 0}
+                  joinedAt={runner.joined_runstreak_at}
+                />
 
-            {/* Streak History Section */}
-            <StreakHistory runnerId={runner.id} />
+                {/* Streak History Section */}
+                <StreakHistory runnerId={runner.id} />
 
-            {/* Accountability Partners Section - Only on own profile */}
-            {isOwnProfile && (
-              <AccountabilityPartnersSection runnerId={runner.id} />
+                {/* Accountability Partners Section */}
+                <AccountabilityPartnersSection runnerId={runner.id} />
+
+                {/* Best Efforts Section */}
+                <BestEfforts 
+                  runnerId={runner.id} 
+                  isOwnProfile={isOwnProfile}
+                  onCalculate={handleCalculateBestEfforts}
+                  isCalculating={isCalculatingBestEfforts}
+                />
+
+                {/* AI Analysis Section */}
+                <div>
+                  <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
+                  <AIAnalysisCards runner={runner} />
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  This runner's detailed stats are private. Connect with them to follow their journey!
+                </p>
+              </div>
             )}
-
-            {/* Best Efforts Section */}
-            <BestEfforts 
-              runnerId={runner.id} 
-              isOwnProfile={isOwnProfile}
-              onCalculate={handleCalculateBestEfforts}
-              isCalculating={isCalculatingBestEfforts}
-            />
-
-            {/* AI Analysis Section */}
-            <div>
-              <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
-              <AIAnalysisCards runner={runner} />
-            </div>
           </TabsContent>
 
           <TabsContent value="activities" className="mt-6">
-            <RunnerActivities runnerId={id!} />
+            {isOwnProfile ? (
+              <RunnerActivities runnerId={id!} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  This runner's activity feed is private.
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
