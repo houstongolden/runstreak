@@ -1,4 +1,4 @@
-import { Bot, MessageSquare, Users, TrendingUp, Award, Activity } from "lucide-react";
+import { Activity } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,47 +9,22 @@ const Features = () => {
   const navigate = useNavigate();
   const features = [
     {
-      icon: Bot,
-      title: "AI Running Coach",
-      description: "Get personalized AI insights and chat directly with your Strava and running data. Tired of pasting screenshots into ChatGPT? This is your solution—deep analysis of your training, form, recovery, and progress all in one place."
-    },
-    {
-      icon: MessageSquare,
-      title: "SMS Accountability",
-      description: "Receive daily AI-powered SMS reminders to keep your streak alive. Your personal running coach in your pocket, helping you stay consistent and motivated every single day."
-    },
-    {
-      icon: Users,
-      title: "Accountability Partners",
-      description: "Connect with other runners to stay motivated and keep your streak going. Share progress, celebrate wins, and push each other to maintain consistency through good days and bad."
-    },
-    {
-      icon: TrendingUp,
-      title: "Performance Analytics",
-      description: "Track your best efforts across all distances. See your progress over time with detailed metrics on pace, distance, elevation, and heart rate data—all synced automatically from Strava."
-    },
-    {
       icon: Activity,
       title: "Streak Tracking",
-      description: "Monitor your current streak, longest streak ever, and days on streak percentage. Visual heatmaps show your consistency at a glance, celebrating every single run that keeps your streak alive."
-    },
-    {
-      icon: Award,
-      title: "Social Engagement",
-      description: "Give kudos, leave encouraging comments, and build a supportive running community. Share your journey with others who understand the commitment it takes to run every day."
+      description: "Monitor your current streak and track your consistency. Visual heatmaps show your daily running activity at a glance, celebrating every single run that keeps your streak alive."
     }
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>Features - RunStreaks | AI Coach, Analytics, Accountability</title>
-        <meta name="description" content="Discover RunStreaks features: AI running coach, SMS accountability reminders, performance analytics, best efforts tracking, and social engagement for daily runners." />
-        <meta property="og:title" content="RunStreaks Features - Everything You Need to Run Every Day" />
-        <meta property="og:description" content="AI coach, SMS reminders, analytics, streak tracking, and community features to help you build and maintain your running streak." />
+        <title>Features - RunStreaks | Personal Streak Tracking</title>
+        <meta name="description" content="Track your personal running streak with RunStreaks. Monitor your consistency with visual heatmaps and stay accountable to your daily running goals." />
+        <meta property="og:title" content="RunStreaks Features - Personal Streak Tracking" />
+        <meta property="og:description" content="Track your running streak with visual heatmaps and stay accountable to your daily running goals." />
         <meta property="og:url" content="https://runstreaks.io/features" />
         <meta name="twitter:title" content="RunStreaks Features" />
-        <meta name="twitter:description" content="Powerful features designed to help you build and maintain your running streak." />
+        <meta name="twitter:description" content="Personal streak tracking designed to help you build and maintain your running streak." />
         <link rel="canonical" href="https://runstreaks.io/features" />
       </Helmet>
       {/* Header */}
@@ -69,14 +44,14 @@ const Features = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="max-w-3xl mx-auto mb-12">
           <h1 className="text-4xl sm:text-5xl font-instrument font-medium text-center mb-6 tracking-tight">
-            Everything You Need to Run Every Day
+            Personal Streak Tracking
           </h1>
           <p className="text-base sm:text-lg text-foreground/90 text-center leading-relaxed">
-            Powerful features designed to help you build and maintain your running streak, stay motivated, and become a better runner.
+            Track your running streak with visual consistency tracking to help you stay motivated and build lasting habits.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 max-w-md mx-auto gap-6">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
