@@ -671,22 +671,35 @@ export default function RunnerProfile() {
                 </div>
               </>
             ) : (
-              <div className="text-center py-12 space-y-4">
-                <p className="text-muted-foreground mb-4">
-                  This runner's detailed stats are private.
-                </p>
-                {runner.strava_user_id && (
+              <div className="text-center py-12 space-y-6 max-w-md mx-auto">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Runner's detailed stats are private</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Connect your Strava to track your own streak and get detailed insights on your running performance.
+                  </p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {runner.strava_user_id && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => window.open(`https://www.strava.com/athletes/${runner.strava_user_id}`, '_blank')}
+                      className="gap-2"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                      </svg>
+                      Follow on Strava
+                    </Button>
+                  )}
                   <Button 
                     variant="default"
-                    onClick={() => window.open(`https://www.strava.com/athletes/${runner.strava_user_id}`, '_blank')}
+                    onClick={() => navigate("/")}
                     className="gap-2"
                   >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                    </svg>
-                    Follow on Strava
+                    Connect Your Strava
                   </Button>
-                )}
+                </div>
               </div>
             )}
           </TabsContent>
