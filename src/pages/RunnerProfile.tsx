@@ -493,8 +493,8 @@ export default function RunnerProfile() {
         {/* Profile Header */}
         <Card className="mb-6 sm:mb-8 overflow-hidden">
           <CardContent className="p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-            <div className="flex flex-col lg:flex-row items-start gap-6 lg:gap-8 min-w-0">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 flex-1 w-full min-w-0">
+            <div className={`flex flex-col items-center gap-6 lg:gap-8 min-w-0 ${isOwnProfile ? 'lg:flex-row lg:items-start' : 'max-w-3xl mx-auto'}`}>
+              <div className={`flex flex-col items-center gap-4 sm:gap-6 flex-1 w-full min-w-0 ${isOwnProfile ? 'sm:flex-row sm:items-start' : ''}`}>
                 <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0 border-2 border-primary/40 shadow-[0_0_12px_rgba(255,107,53,0.35)]">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
@@ -502,7 +502,7 @@ export default function RunnerProfile() {
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 text-center sm:text-left w-full min-w-0">
+                <div className={`flex-1 text-center w-full min-w-0 ${isOwnProfile ? 'sm:text-left' : ''}`}>
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-instrument font-medium mb-2 sm:mb-3 break-words">{runner.display_name}</h1>
                   
                   {runner.bio && (
@@ -510,7 +510,7 @@ export default function RunnerProfile() {
                   )}
                   
                   {(runner.city || runner.state || runner.country) && (
-                    <p className="text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center sm:justify-start">
+                    <p className={`text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center ${isOwnProfile ? 'sm:justify-start' : ''}`}>
                       {runner.country && (
                         <img 
                           src={`https://flagcdn.com/16x12/${getCountryCode(runner.country)}.png`}
@@ -548,7 +548,7 @@ export default function RunnerProfile() {
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
-                    <div className="flex gap-2 mb-3 sm:mb-4 flex-wrap justify-center sm:justify-start">
+                    <div className="flex gap-2 mb-3 sm:mb-4 flex-wrap justify-center">
                       <FollowButton
                         targetRunnerId={runner.id}
                         currentRunnerId={currentRunnerId}
@@ -562,8 +562,8 @@ export default function RunnerProfile() {
                     </div>
                   )}
                   
-                   <div className="flex flex-col gap-2 items-center sm:items-start">
-                     <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                   <div className={`flex flex-col gap-2 items-center ${isOwnProfile ? 'sm:items-start' : ''}`}>
+                     <div className={`flex items-center gap-2 flex-wrap justify-center ${isOwnProfile ? 'sm:justify-start' : ''}`}>
                        <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
                          {streakActive ? (
                            <>
@@ -585,7 +585,7 @@ export default function RunnerProfile() {
                      </div>
                      
                       {runner.joined_runstreak_at && (
-                        <div className="text-xs text-muted-foreground text-center sm:text-left">
+                        <div className={`text-xs text-muted-foreground text-center ${isOwnProfile ? 'sm:text-left' : ''}`}>
                           RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                       )}
@@ -618,10 +618,12 @@ export default function RunnerProfile() {
 
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="activities">Activities</TabsTrigger>
-          </TabsList>
+          {isOwnProfile && (
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="activities">Activities</TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="overview" className="space-y-6 mt-6">
             {isOwnProfile ? (
@@ -669,10 +671,22 @@ export default function RunnerProfile() {
                 </div>
               </>
             ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  This runner's detailed stats are private. Connect with them to follow their journey!
+              <div className="text-center py-12 space-y-4">
+                <p className="text-muted-foreground mb-4">
+                  This runner's detailed stats are private.
                 </p>
+                {runner.strava_user_id && (
+                  <Button 
+                    variant="default"
+                    onClick={() => window.open(`https://www.strava.com/athletes/${runner.strava_user_id}`, '_blank')}
+                    className="gap-2"
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                    </svg>
+                    Follow on Strava
+                  </Button>
+                )}
               </div>
             )}
           </TabsContent>

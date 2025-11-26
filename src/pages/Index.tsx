@@ -467,9 +467,7 @@ const Index = () => {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
-                  <SelectItem value="streak">Longest streak</SelectItem>
-                  <SelectItem value="miles">Most miles</SelectItem>
-                  <SelectItem value="pace">Fastest pace</SelectItem>
+                  <SelectItem value="streak">Active streaks</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={timePeriod} onValueChange={(value: any) => setTimePeriod(value)}>
