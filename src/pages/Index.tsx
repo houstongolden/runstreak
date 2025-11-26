@@ -20,7 +20,6 @@ import runstreaksLogo from "@/assets/runstreaks-logo.png";
 import { toast } from "@/hooks/use-toast";
 import ShinyText from "@/components/ui/shiny-text";
 
-import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 import { AppDownloadSection } from "@/components/AppDownloadSection";
 import { OnboardingModal } from "@/components/OnboardingModal";
 import { useAuth } from "@/contexts/AuthContext";
@@ -614,9 +613,6 @@ const Index = () => {
         open={isAdvertiseModalOpen}
         onOpenChange={setIsAdvertiseModalOpen}
       />
-
-      {/* Aggregate Stats */}
-      <AggregateStatsCard />
 
       {/* How It Works Section */}
       <section className="py-24 bg-muted/30 relative overflow-hidden">
