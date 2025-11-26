@@ -397,7 +397,15 @@ export default function RunnerProfile() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-instrument font-medium mb-4">Runner not found</h2>
-          <Button onClick={() => navigate("/")}>Back to Leaderboard</Button>
+          <button
+            onClick={() => navigate("/")}
+            className="group flex items-center gap-2 text-foreground font-medium transition-colors hover:text-foreground relative pb-1"
+          >
+            <span className="relative">
+              Back to Leaderboard
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+            </span>
+          </button>
         </div>
       </div>
     );
@@ -429,14 +437,16 @@ export default function RunnerProfile() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 lg:pt-6 pb-6 sm:pb-8 lg:pb-12">
         {/* Header with Back Button and Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-          <Button
-            variant="ghost"
+          <button
             onClick={() => navigate("/")}
-            className="hover:bg-accent"
+            className="group flex items-center gap-2 text-foreground font-medium transition-colors hover:text-foreground relative pb-1"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Leaderboard
-          </Button>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="relative">
+              Back to Leaderboard
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+            </span>
+          </button>
           <div className="flex items-center gap-2">
             {isOwnProfile && (
               <Button 
