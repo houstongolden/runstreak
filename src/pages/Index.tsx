@@ -705,28 +705,28 @@ const Index = () => {
                 <p className="text-muted-foreground leading-relaxed mb-6">
                   Never miss a day with our accountability tools designed to keep your streak alive.
                 </p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg bg-background/50 border border-border/50 hover:bg-background/70 transition-colors">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
                       <p className="text-sm font-semibold text-foreground">Countdown Clock</p>
-                      <p className="text-xs text-muted-foreground">Real-time timer showing hours until your streak breaks</p>
                     </div>
+                    <p className="text-xs text-muted-foreground">Real-time timer showing hours until your streak breaks</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                      </svg>
-                    </div>
-                    <div>
+                  <div className="p-4 rounded-lg bg-background/50 border border-border/50 hover:bg-background/70 transition-colors">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                      </div>
                       <p className="text-sm font-semibold text-foreground">SMS Reminders</p>
-                      <p className="text-xs text-muted-foreground">Daily text messages to remind you to complete your mile</p>
                     </div>
+                    <p className="text-xs text-muted-foreground">Daily text messages to remind you to complete your mile</p>
                   </div>
                 </div>
               </div>
