@@ -170,7 +170,7 @@ export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: Acti
   const monthLabelPositions = getMonthLabelPositions();
 
   return (
-    <div className="w-full min-w-0 max-w-[350px]" onClick={() => setClickedDay(null)}>
+    <div className="w-full min-w-0" onClick={() => setClickedDay(null)}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold">Activity Heatmap</h3>
         <div className="flex gap-1">
@@ -201,7 +201,7 @@ export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: Acti
               {heatmapData.map((week, weekIndex) => {
                 const monthLabel = monthLabelPositions.find(pos => pos.weekIndex === weekIndex);
                 return (
-                  <div key={weekIndex} className="w-3 sm:w-3.5 shrink-0 text-[10px] sm:text-xs text-muted-foreground">
+                  <div key={weekIndex} className="w-3 sm:w-3.5 md:w-4 shrink-0 text-[10px] sm:text-xs text-muted-foreground">
                     {monthLabel ? monthLabel.month : ""}
                   </div>
                 );
@@ -212,13 +212,13 @@ export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: Acti
             <div className="flex gap-[2px]">
               {/* Day labels */}
               <div className="flex flex-col gap-[2px] text-[10px] sm:text-xs text-muted-foreground pr-2 sm:pr-3 w-6 sm:w-8 shrink-0">
-                <div className="h-3 sm:h-3.5">Mon</div>
-                <div className="h-3 sm:h-3.5"></div>
-                <div className="h-3 sm:h-3.5">Wed</div>
-                <div className="h-3 sm:h-3.5"></div>
-                <div className="h-3 sm:h-3.5">Fri</div>
-                <div className="h-3 sm:h-3.5"></div>
-                <div className="h-3 sm:h-3.5">Sun</div>
+                <div className="h-3 sm:h-3.5 md:h-4">Mon</div>
+                <div className="h-3 sm:h-3.5 md:h-4"></div>
+                <div className="h-3 sm:h-3.5 md:h-4">Wed</div>
+                <div className="h-3 sm:h-3.5 md:h-4"></div>
+                <div className="h-3 sm:h-3.5 md:h-4">Fri</div>
+                <div className="h-3 sm:h-3.5 md:h-4"></div>
+                <div className="h-3 sm:h-3.5 md:h-4">Sun</div>
               </div>
 
               {/* Activity squares */}
@@ -227,7 +227,7 @@ export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: Acti
                   <div key={weekIndex} className="flex flex-col gap-[2px] shrink-0">
                     {week.map((day, dayIndex) => {
                       if (!day) {
-                        return <div key={dayIndex} className="w-3 sm:w-3.5 h-3 sm:h-3.5" />;
+                        return <div key={dayIndex} className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4" />;
                       }
 
                       const dayKey = `${weekIndex}-${dayIndex}`;
@@ -237,7 +237,7 @@ export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: Acti
                         <Tooltip key={dayIndex} open={isOwnProfile && isOpen ? true : undefined}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm transition-colors ${
+                              className={`w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm transition-colors ${
                                 isOwnProfile ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''
                               } ${getIntensityClass(day.distance)}`}
                               onClick={(e) => {
@@ -286,12 +286,12 @@ export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: Acti
         <div className="flex items-center justify-end gap-2 mt-4 text-[10px] sm:text-xs text-muted-foreground">
           <span>Less</span>
           <div className="flex gap-1">
-            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-muted/20" />
-            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(25_80%_85%)]" />
-            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(25_90%_70%)]" />
-            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(22_95%_60%)]" />
-            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(20_100%_52%)]" />
-            <div className="w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm bg-[hsl(15_100%_45%)]" />
+            <div className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm bg-muted/20" />
+            <div className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm bg-[hsl(25_80%_85%)]" />
+            <div className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm bg-[hsl(25_90%_70%)]" />
+            <div className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm bg-[hsl(22_95%_60%)]" />
+            <div className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm bg-[hsl(20_100%_52%)]" />
+            <div className="w-3 sm:w-3.5 md:w-4 h-3 sm:h-3.5 md:h-4 rounded-sm bg-[hsl(15_100%_45%)]" />
           </div>
           <span>More</span>
         </div>
