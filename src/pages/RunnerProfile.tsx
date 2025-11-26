@@ -685,7 +685,7 @@ export default function RunnerProfile() {
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Runner's detailed stats are private</h3>
                   <p className="text-muted-foreground text-sm">
-                    Connect your Strava to track your own streak and get detailed insights on your running performance.
+                    Connect your Strava to get detailed tracking of your own streak, stay accountable on your daily streak goals, and get detailed insights on your running performance.
                   </p>
                 </div>
                 
