@@ -21,17 +21,17 @@ export function AppDownloadSection() {
           <div className="space-y-4">
             <Smartphone className="h-16 w-16 mx-auto text-primary" />
             <h2 className="text-3xl sm:text-4xl font-instrument font-medium">
-              Download the App Today
+              Bookmark the App Today
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Add RunStreaks to your phone's home screen for quick access to your streak stats
+              Add RunStreaks to your phone&apos;s home screen for quick access to your streak stats
             </p>
             <Button
               size="lg"
               onClick={() => setShowInstructions(true)}
               className="text-lg px-8 py-6"
             >
-              Get the App
+              Bookmark Now
             </Button>
           </div>
         </div>
