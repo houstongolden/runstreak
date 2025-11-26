@@ -23,13 +23,15 @@ export default function Story() {
       {/* Header */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Button
-            variant="ghost"
+          <button
             onClick={() => navigate("/")}
-            className="mb-4"
+            className="group flex items-center gap-2 text-foreground font-medium transition-colors hover:text-foreground relative pb-1 mb-4"
           >
-            ← Back to Leaderboard
-          </Button>
+            <span className="relative">
+              ← Back to Leaderboard
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+            </span>
+          </button>
         </div>
       </div>
 
