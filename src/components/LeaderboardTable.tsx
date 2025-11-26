@@ -1,5 +1,5 @@
 import { Runner } from "@/types";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableBody,
@@ -23,6 +23,7 @@ interface LeaderboardTableProps {
 
 export function LeaderboardTable({ runners, view, sortBy = "streak" }: LeaderboardTableProps) {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   // Runners are already sorted from parent, use as-is
   const sortedRunners = runners;
@@ -60,18 +61,19 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
               return (
                 <TableRow
                   key={runner.id}
+                  onClick={() => navigate(`/runner/${runner.id}`)}
                   className="hover:bg-orange-500/5 hover:backdrop-blur-md transition-all duration-200 cursor-pointer border-b border-border/10 bg-muted/0"
                 >
                   <TableCell className="font-medium">
-                    <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       {index === 0 && <span className="text-2xl">🥇</span>}
                       {index === 1 && <span className="text-2xl">🥈</span>}
                       {index === 2 && <span className="text-2xl">🥉</span>}
                       {index > 2 && <span className="text-muted-foreground">#{index + 1}</span>}
-                    </Link>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/runner/${runner.id}`} className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={runner.avatar_url || undefined} />
                         <AvatarFallback>
@@ -84,16 +86,15 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                           @{runner.strava_username}
                         </div>
                       </div>
-                  </Link>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link to={`/runner/${runner.id}`} className="flex items-center justify-end gap-1.5">
-                    <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
-                    <span className="text-sm text-muted-foreground">days</span>
-                  </Link>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Link to={`/runner/${runner.id}`}>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
+                      <span className="text-sm text-muted-foreground">days</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
                     <Badge variant={streakActive ? "default" : "secondary"} className="gap-1.5">
                       {streakActive ? (
                         <>
@@ -104,9 +105,8 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                         "Streak Broken"
                       )}
                     </Badge>
-                  </Link>
-                </TableCell>
-              </TableRow>
+                  </TableCell>
+                </TableRow>
               );
             })}
           </TableBody>
@@ -144,18 +144,19 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
             return (
               <TableRow
                 key={runner.id}
+                onClick={() => navigate(`/runner/${runner.id}`)}
                 className="hover:bg-orange-500/5 hover:backdrop-blur-md transition-all duration-200 cursor-pointer border-b border-border/10 bg-muted/0"
               >
                 <TableCell className="font-medium">
-                  <Link to={`/runner/${runner.id}`} className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     {index === 0 && <span className="text-2xl">🥇</span>}
                     {index === 1 && <span className="text-2xl">🥈</span>}
                     {index === 2 && <span className="text-2xl">🥉</span>}
                     {index > 2 && <span className="text-muted-foreground">#{index + 1}</span>}
-                  </Link>
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Link to={`/runner/${runner.id}`} className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={runner.avatar_url || undefined} />
                       <AvatarFallback>
@@ -168,16 +169,15 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                         @{runner.strava_username}
                       </div>
                     </div>
-                </Link>
-              </TableCell>
-              <TableCell className="text-right">
-                <Link to={`/runner/${runner.id}`} className="flex items-center justify-end gap-1.5">
-                  <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
-                  <span className="text-sm text-muted-foreground">days</span>
-                </Link>
-              </TableCell>
-              <TableCell className="text-right">
-                <Link to={`/runner/${runner.id}`}>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-1.5">
+                    <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
+                    <span className="text-sm text-muted-foreground">days</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
                   <Badge variant={streakActive ? "default" : "secondary"} className="gap-1.5">
                     {streakActive ? (
                       <>
@@ -188,9 +188,8 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                       "Streak Broken"
                     )}
                   </Badge>
-                </Link>
-              </TableCell>
-            </TableRow>
+                </TableCell>
+              </TableRow>
             );
           })}
         </TableBody>
