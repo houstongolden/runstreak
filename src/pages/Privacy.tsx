@@ -61,10 +61,9 @@ export default function Privacy() {
             <p className="mb-4">We use the information we collect to:</p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Calculate and display your daily run streak</li>
-              <li>Display you on our leaderboard rankings</li>
-              <li>Provide personalized running insights and AI coaching</li>
+              <li>Provide personalized running insights and analytics</li>
               <li>Send you account notifications and service updates</li>
-              <li>Send SMS messages for streak reminders and accountability (if you opt-in)</li>
+              <li>Send SMS messages for streak reminders (if you opt-in)</li>
               <li>Improve and optimize our Service</li>
               <li>Respond to your inquiries and support requests</li>
               <li>Detect and prevent fraud or abuse</li>
@@ -90,9 +89,7 @@ export default function Privacy() {
             <p className="mb-4">You may receive the following types of messages:</p>
             <ul className="list-disc pl-6 space-y-2 mb-4">
               <li><strong>Streak reminders:</strong> Notifications about time remaining to complete your daily run</li>
-              <li><strong>Performance insights:</strong> Personalized AI-generated coaching messages about your running performance</li>
-              <li><strong>Accountability notifications:</strong> Updates when your accountability partners complete their runs</li>
-              <li><strong>Milestone celebrations:</strong> Congratulations on streak achievements and personal records</li>
+              <li><strong>Milestone celebrations:</strong> Congratulations on streak achievements</li>
               <li><strong>Account notifications:</strong> Important updates about your account or the Service</li>
             </ul>
 
@@ -131,7 +128,7 @@ export default function Privacy() {
             
             <h3 className="text-xl font-medium mb-3 mt-4">5.1 Public Profile Information</h3>
             <p className="mb-4">
-              Your profile information (name, profile picture, location, current streak, and running statistics) is publicly visible on our leaderboard and your profile page. This is essential to the Service's core functionality.
+              Your basic profile information (name and profile picture) may be visible to other users. Your detailed running statistics and activity data are private and only visible to you. This privacy-first approach ensures your fitness data remains under your control.
             </p>
 
             <h3 className="text-xl font-medium mb-3 mt-4">5.2 Service Providers</h3>

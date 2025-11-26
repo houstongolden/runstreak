@@ -27,12 +27,9 @@ export default function Terms() {
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Automated tracking of your daily running activities via Strava integration</li>
-              <li>Public leaderboard displaying runners' current streak rankings</li>
               <li>Personal profile pages with running statistics and achievements</li>
               <li>Activity heatmaps and performance analytics</li>
-              <li>AI-powered running coach and personalized insights</li>
-              <li>SMS notifications and accountability features (optional)</li>
-              <li>Social features to follow and support other runners</li>
+              <li>SMS notifications for streak reminders (optional)</li>
             </ul>
           </section>
 
@@ -88,12 +85,10 @@ export default function Terms() {
 
             <h3 className="text-xl font-medium mb-3 mt-4">5.2 Message Content</h3>
             <p className="mb-4">
-              You will receive transactional and personalized messages including:
+              You will receive transactional messages including:
             </p>
             <ul className="list-disc pl-6 space-y-2 mb-4">
               <li>Streak countdown reminders</li>
-              <li>AI-generated running insights and coaching</li>
-              <li>Accountability partner notifications</li>
               <li>Milestone achievements</li>
               <li>Account-related notifications</li>
             </ul>

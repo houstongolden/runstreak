@@ -64,11 +64,11 @@ export default function Story() {
               </p>
               
               <p>
-                I wanted a way to track my progress that wouldn't make me feel like a failure when life happens. A tool that celebrates improvement over time, not just perfect streaks. A community that keeps me accountable through friendly competition and daily AI motivation messages via SMS.
+                I wanted a way to track my progress that wouldn&apos;t make me feel like a failure when life happens. A tool that celebrates improvement over time, not just perfect streaks. A personal accountability system that helps me stay consistent through daily reminders.
               </p>
               
               <p>
-                All my running data is public on RunStreaks—you can <a href="/runner/houston" className="text-primary hover:underline font-medium">check my profile</a> and see exactly where I'm at. Some days I nail it, some days I don't. But I keep showing up, and that's what RunStreaks is all about.
+                I&apos;m using RunStreaks to track my own running streak. Some days I nail it, some days I don&apos;t. But I keep showing up, and that&apos;s what RunStreaks is all about.
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function Story() {
             </p>
             
             <p>
-              Connect your Strava account. We automatically verify your daily running streak and display it on a public leaderboard. No screenshots. No manual logging. Just pure, verified commitment.
+              Connect your Strava account. We automatically verify your daily running streak. No screenshots. No manual logging. Just pure, verified commitment to show up every single day.
             </p>
             
             <p>
