@@ -27,7 +27,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { AnimatedHeatmap } from "@/components/AnimatedHeatmap";
 import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
-import AnimatedAIChat from "@/components/AnimatedAIChat";
 import heroRunningBg from "@/assets/hero-running-bg.png";
 import heroDarkBg from "@/assets/hero-dark-bg.jpg";
 import { Footer } from "@/components/Footer";
@@ -747,24 +746,6 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Step 5: Chat with Your AI Running Coach */}
-            <div className="group relative md:col-span-2" style={{ animationDelay: '600ms' }}>
-              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
-                <div className="relative mb-6">
-                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
-                    5
-                  </div>
-                </div>
-                <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
-                  Chat with Your AI Running Coach
-                </h3>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  No more uploading screenshots to ChatGPT. Chat with your RunStreak AI agent who already has full access to all your running data, training patterns, and performance history.
-                </p>
-                <AnimatedAIChat />
               </div>
             </div>
           </div>

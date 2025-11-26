@@ -12,9 +12,10 @@ interface DailyActivity {
 
 interface ActivityHeatmapProps {
   runnerId: string;
+  isOwnProfile?: boolean;
 }
 
-export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
+export default function ActivityHeatmap({ runnerId, isOwnProfile = false }: ActivityHeatmapProps) {
   const [activities, setActivities] = useState<DailyActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -233,40 +234,44 @@ export default function ActivityHeatmap({ runnerId }: ActivityHeatmapProps) {
                       const isOpen = clickedDay === dayKey;
                       
                       return (
-                        <Tooltip key={dayIndex} open={isOpen ? true : undefined}>
+                        <Tooltip key={dayIndex} open={isOwnProfile && isOpen ? true : undefined}>
                           <TooltipTrigger asChild>
                             <div
-                              className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm transition-colors hover:ring-2 hover:ring-primary cursor-pointer ${getIntensityClass(
-                                day.distance
-                              )}`}
+                              className={`w-3 sm:w-3.5 h-3 sm:h-3.5 rounded-sm transition-colors ${
+                                isOwnProfile ? 'hover:ring-2 hover:ring-primary cursor-pointer' : ''
+                              } ${getIntensityClass(day.distance)}`}
                               onClick={(e) => {
-                                e.stopPropagation();
-                                setClickedDay(isOpen ? null : dayKey);
+                                if (isOwnProfile) {
+                                  e.stopPropagation();
+                                  setClickedDay(isOpen ? null : dayKey);
+                                }
                               }}
                             />
                           </TooltipTrigger>
-                          <TooltipContent>
-                            <div className="text-sm">
-                              <div className="font-semibold">
-                                {(() => {
-                                  // Parse date string as local date to avoid timezone conversion
-                                  const [year, month, dayNum] = day.dateStr.split('-').map(Number);
-                                  const localDate = new Date(year, month - 1, dayNum);
-                                  return format(localDate, "MMM d, yyyy");
-                                })()}
+                          {isOwnProfile && (
+                            <TooltipContent>
+                              <div className="text-sm">
+                                <div className="font-semibold">
+                                  {(() => {
+                                    // Parse date string as local date to avoid timezone conversion
+                                    const [year, month, dayNum] = day.dateStr.split('-').map(Number);
+                                    const localDate = new Date(year, month - 1, dayNum);
+                                    return format(localDate, "MMM d, yyyy");
+                                  })()}
+                                </div>
+                                <div>
+                                  {day.runCount > 0 ? (
+                                    <>
+                                      <div>{day.runCount} run{day.runCount > 1 ? "s" : ""}</div>
+                                      <div>{day.distance.toFixed(1)} miles</div>
+                                    </>
+                                  ) : (
+                                    "No runs"
+                                  )}
+                                </div>
                               </div>
-                              <div>
-                                {day.runCount > 0 ? (
-                                  <>
-                                    <div>{day.runCount} run{day.runCount > 1 ? "s" : ""}</div>
-                                    <div>{day.distance.toFixed(1)} miles</div>
-                                  </>
-                                ) : (
-                                  "No runs"
-                                )}
-                              </div>
-                            </div>
-                          </TooltipContent>
+                            </TooltipContent>
+                          )}
                         </Tooltip>
                       );
                     })}
