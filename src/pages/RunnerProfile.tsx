@@ -593,7 +593,7 @@ export default function RunnerProfile() {
                 </div>
               </div>
               
-              <div className="w-full lg:w-auto lg:max-w-[420px] overflow-hidden flex-shrink-0 min-w-0">
+              <div className={`w-full overflow-hidden flex-shrink-0 min-w-0 ${isOwnProfile ? 'lg:w-auto lg:max-w-[500px]' : ''}`}>
                 <ActivityHeatmap runnerId={runner.id} isOwnProfile={isOwnProfile} />
               </div>
             </div>
