@@ -319,12 +319,15 @@ export function AppSidebar() {
                 </SidebarGroupContent>
               </SidebarGroup>
 
-              {/* AI Coach Section */}
-              <SidebarGroup>
+              {/* AI Coach Section - Admin Only */}
+              <SidebarGroup className="opacity-50">
                 <div className="px-2 mb-2">
                   <div className="flex items-center gap-2 mb-2">
                     <SidebarGroupLabel>AI Coach</SidebarGroupLabel>
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/20 text-primary">BETA</span>
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">ADMIN ONLY</span>
+                  </div>
+                  <div className="text-[10px] text-muted-foreground mb-2 px-1">
+                    Visible to houston@bamf.com only
                   </div>
                   <button
                     onClick={handleNewChat}
