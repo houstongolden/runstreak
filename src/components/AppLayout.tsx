@@ -83,7 +83,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               <Button
                 onClick={handleStravaConnect}
                 size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm sm:text-base px-3 sm:px-4 shrink-0"
+                className="bg-primary hover:bg-primary/90 dark:bg-[hsl(16_100%_50%)] dark:hover:bg-[hsl(16_100%_45%)] text-primary-foreground font-medium text-sm sm:text-base px-3 sm:px-4 shrink-0"
               >
                 <img 
                   src="https://www.google.com/s2/favicons?domain=strava.com&sz=32" 
