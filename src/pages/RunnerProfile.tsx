@@ -512,7 +512,7 @@ export default function RunnerProfile() {
                   </AvatarFallback>
                 </Avatar>
 
-                <div className={`flex-1 text-center w-full min-w-0 ${isOwnProfile ? 'sm:text-left' : ''}`}>
+                <div className="flex-1 text-center w-full min-w-0 sm:text-left">
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-instrument font-medium mb-2 sm:mb-3 break-words">{runner.display_name}</h1>
                   
                   {runner.bio && (
