@@ -534,8 +534,8 @@ export default function RunnerProfile() {
                     </p>
                   )}
 
-                   {/* Follower/Following */}
-                   <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
+                   {/* Follower/Following — public stats, hidden in Strava-safe mode */}
+                   <div className="compliance-full-only flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
                      <div className="text-center">
                        <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
                        <div className="text-xs text-muted-foreground">Followers</div>
@@ -624,8 +624,8 @@ export default function RunnerProfile() {
         )}
 
 
-        {/* Tabs for different sections */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        {/* Tabs for different sections — detailed analytics, hidden on public profiles in Strava-safe mode */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className={`mb-6 ${isOwnProfile ? '' : 'compliance-full-only'}`}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>

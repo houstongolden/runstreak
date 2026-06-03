@@ -26,6 +26,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { AnimatedHeatmap } from "@/components/AnimatedHeatmap";
 import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
+import AnimatedAIChat from "@/components/AnimatedAIChat";
 import heroRunningBg from "@/assets/hero-running-bg.png";
 import heroDarkBg from "@/assets/hero-dark-bg.jpg";
 import { Footer } from "@/components/Footer";
@@ -468,6 +469,8 @@ const Index = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-popover backdrop-blur-[32px] border-0 z-50">
                   <SelectItem value="streak">Active streaks</SelectItem>
+                  <SelectItem value="miles" className="compliance-full-only">Total miles</SelectItem>
+                  <SelectItem value="pace" className="compliance-full-only">Average pace</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={timePeriod} onValueChange={(value: any) => setTimePeriod(value)}>
@@ -728,7 +731,36 @@ const Index = () => {
                     </div>
                     <p className="text-xs text-muted-foreground">Daily text messages to remind you to complete your mile</p>
                   </div>
+                  <div className="p-4 rounded-lg bg-background/50 border border-border/50 hover:bg-background/70 transition-colors compliance-full-only sm:col-span-2">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-semibold text-foreground">Accountability Partners</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Get notified when your partner completes their daily run</p>
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Step 5: Chat with Your AI Running Coach */}
+            <div className="group relative md:col-span-2 compliance-full-only" style={{ animationDelay: '600ms' }}>
+              <div className="h-full p-8 rounded-lg bg-card/60 backdrop-blur-[40px] border-0 hover:bg-card/80 transition-all duration-300 animate-fade-in">
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+                    5
+                  </div>
+                </div>
+                <h3 className="text-2xl font-instrument font-semibold text-foreground mb-3">
+                  Chat with Your AI Running Coach
+                </h3>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  No more uploading screenshots to ChatGPT. Chat with your RunStreak AI agent who already has full access to all your running data, training patterns, and performance history.
+                </p>
+                <AnimatedAIChat />
               </div>
             </div>
           </div>

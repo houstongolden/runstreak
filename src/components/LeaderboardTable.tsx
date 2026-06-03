@@ -134,6 +134,8 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
           <TableRow className="hover:bg-transparent border-b border-border/10 bg-muted/5">
             <TableHead className="w-[80px]">Rank</TableHead>
             <TableHead>Runner</TableHead>
+            {sortBy === "miles" && <TableHead className="text-right compliance-full-only">Miles</TableHead>}
+            {sortBy === "pace" && <TableHead className="text-right compliance-full-only">Avg Pace</TableHead>}
             <TableHead className="text-right">Days</TableHead>
             <TableHead className="text-right">Streak Status</TableHead>
           </TableRow>
@@ -171,6 +173,20 @@ export function LeaderboardTable({ runners, view, sortBy = "streak" }: Leaderboa
                     </div>
                   </div>
                 </TableCell>
+                {sortBy === "miles" && (
+                  <TableCell className="text-right compliance-full-only">
+                    <span className="text-lg font-semibold">{(runner as any).period_distance?.toFixed(1) || '0.0'}</span>
+                  </TableCell>
+                )}
+                {sortBy === "pace" && (
+                  <TableCell className="text-right compliance-full-only">
+                    <span className="text-lg font-semibold">
+                      {(runner as any).period_pace && (runner as any).period_pace < 999999
+                        ? `${Math.floor((runner as any).period_pace)}:${String(Math.round(((runner as any).period_pace % 1) * 60)).padStart(2, '0')}`
+                        : 'N/A'}
+                    </span>
+                  </TableCell>
+                )}
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1.5">
                     <span className="text-lg font-bold text-primary">{runner.current_streak_days || 0}</span>
