@@ -26,6 +26,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { AnimatedHeatmap } from "@/components/AnimatedHeatmap";
 import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
+import AnimatedAIChat from "@/components/AnimatedAIChat";
 import heroRunningBg from "@/assets/hero-running-bg.png";
 import heroDarkBg from "@/assets/hero-dark-bg.jpg";
 import { Footer } from "@/components/Footer";
