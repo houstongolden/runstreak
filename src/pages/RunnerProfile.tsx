@@ -570,8 +570,8 @@ export default function RunnerProfile() {
                     </div>
                   )}
                   
-                   <div className={`flex flex-col gap-2 items-center ${isOwnProfile ? 'sm:items-start' : ''}`}>
-                     <div className={`flex items-center gap-2 flex-wrap justify-center ${isOwnProfile ? 'sm:justify-start' : ''}`}>
+                   <div className="flex flex-col gap-2 items-center sm:items-start">
+                     <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                        <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
                          {streakActive ? (
                            <>
@@ -582,26 +582,26 @@ export default function RunnerProfile() {
                            "Streak Broken"
                          )}
                        </Badge>
-                       
+
                        {!isOwnProfile && runner.timezone && streakActive && (
-                         <RunnerStreakStatus 
+                         <RunnerStreakStatus
                            lastActivityDate={runner.last_activity_date}
                            timezone={runner.timezone}
                            country={runner.country}
                          />
                        )}
                      </div>
-                     
+
                       {runner.joined_runstreak_at && (
-                        <div className={`text-xs text-muted-foreground text-center ${isOwnProfile ? 'sm:text-left' : ''}`}>
+                        <div className="text-xs text-muted-foreground text-center sm:text-left">
                           RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                       )}
                    </div>
                 </div>
               </div>
-              
-              <div className={`w-full overflow-hidden flex-shrink-0 min-w-0 ${isOwnProfile ? 'lg:w-auto lg:max-w-[500px]' : ''}`}>
+
+              <div className="w-full overflow-hidden flex-shrink-0 min-w-0 lg:w-auto lg:max-w-[500px]">
                 <ActivityHeatmap runnerId={runner.id} isOwnProfile={isOwnProfile} />
               </div>
             </div>
