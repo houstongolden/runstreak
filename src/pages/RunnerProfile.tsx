@@ -626,102 +626,57 @@ export default function RunnerProfile() {
 
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          {isOwnProfile && (
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="activities">Activities</TabsTrigger>
-            </TabsList>
-          )}
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activities">Activities</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {isOwnProfile ? (
-              <>
-                {/* Current Streak */}
-                <CurrentStreakCard
-                  streakDays={runner.current_streak_days || 0}
-                  streakMiles={runner.current_streak_miles || 0}
-                  streakStatus={runner.streak_status}
-                  avgMilesPerDay={runner.average_miles_per_day || 0}
-                  streakStartDate={runner.streak_start_date}
-                  lastActivityDate={runner.last_activity_date}
-                />
+            {/* Current Streak */}
+            <CurrentStreakCard
+              streakDays={runner.current_streak_days || 0}
+              streakMiles={runner.current_streak_miles || 0}
+              streakStatus={runner.streak_status}
+              avgMilesPerDay={runner.average_miles_per_day || 0}
+              streakStartDate={runner.streak_start_date}
+              lastActivityDate={runner.last_activity_date}
+            />
 
-                {/* Days on Streak - Primary Metric */}
-                <DaysOnStreakCard
-                  daysOnStreak30={runner.days_on_streak_last_30 || 0}
-                  daysOnStreak60={runner.days_on_streak_last_60 || 0}
-                  daysOnStreak90={runner.days_on_streak_last_90 || 0}
-                  daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
-                  totalDaysSinceJoining={runner.total_days_since_joining || 0}
-                  daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
-                  totalDaysBeforeJoining={runner.total_days_before_joining || 0}
-                  joinedAt={runner.joined_runstreak_at}
-                />
+            {/* Days on Streak - Primary Metric */}
+            <DaysOnStreakCard
+              daysOnStreak30={runner.days_on_streak_last_30 || 0}
+              daysOnStreak60={runner.days_on_streak_last_60 || 0}
+              daysOnStreak90={runner.days_on_streak_last_90 || 0}
+              daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
+              totalDaysSinceJoining={runner.total_days_since_joining || 0}
+              daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
+              totalDaysBeforeJoining={runner.total_days_before_joining || 0}
+              joinedAt={runner.joined_runstreak_at}
+            />
 
-                {/* Streak History Section */}
-                <StreakHistory runnerId={runner.id} />
+            {/* Streak History Section */}
+            <StreakHistory runnerId={runner.id} />
 
-                {/* Accountability Partners Section */}
-                <AccountabilityPartnersSection runnerId={runner.id} />
+            {/* Accountability Partners Section */}
+            {isOwnProfile && <AccountabilityPartnersSection runnerId={runner.id} />}
 
-                {/* Best Efforts Section */}
-                <BestEfforts 
-                  runnerId={runner.id} 
-                  isOwnProfile={isOwnProfile}
-                  onCalculate={handleCalculateBestEfforts}
-                  isCalculating={isCalculatingBestEfforts}
-                />
+            {/* Best Efforts Section */}
+            <BestEfforts
+              runnerId={runner.id}
+              isOwnProfile={isOwnProfile}
+              onCalculate={handleCalculateBestEfforts}
+              isCalculating={isCalculatingBestEfforts}
+            />
 
-                {/* AI Analysis Section */}
-                <div>
-                  <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
-                  <AIAnalysisCards runner={runner} />
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-12 space-y-6 max-w-md mx-auto">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Runner's detailed stats are private</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Connect your Strava to get detailed tracking of your own streak, stay accountable on your daily streak goals, and get detailed insights on your running performance.
-                  </p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  {runner.strava_user_id && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => window.open(`https://www.strava.com/athletes/${runner.strava_user_id}`, '_blank')}
-                      className="gap-2"
-                    >
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                      </svg>
-                      Follow on Strava
-                    </Button>
-                  )}
-                  <Button 
-                    variant="default"
-                    onClick={() => navigate("/")}
-                    className="gap-2"
-                  >
-                    Connect Your Strava
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* AI Analysis Section */}
+            <div>
+              <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
+              <AIAnalysisCards runner={runner} />
+            </div>
           </TabsContent>
 
           <TabsContent value="activities" className="mt-6">
-            {isOwnProfile ? (
-              <RunnerActivities runnerId={id!} />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  This runner's activity feed is private.
-                </p>
-              </div>
-            )}
+            <RunnerActivities runnerId={id!} />
           </TabsContent>
         </Tabs>
 
