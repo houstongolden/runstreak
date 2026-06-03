@@ -358,4 +358,22 @@ All colors MUST be HSL.
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* ===========================================================
+     Strava Compliance Mode Toggle
+     -----------------------------------------------------------
+     Default = FULL mode (all features visible).
+     To enable Strava-compliant SAFE mode, add the class
+     `compliance-safe` to the <html> element:
+
+         document.documentElement.classList.add('compliance-safe')
+
+     Then any element tagged `.compliance-full-only` will be
+     hidden, and any element tagged `.compliance-safe-only`
+     will become visible. Use these classes on any feature
+     that displays public stats/distances/PRs/AI chat etc.
+     =========================================================== */
+  .compliance-safe-only { display: none !important; }
+  html.compliance-safe .compliance-safe-only { display: revert !important; }
+  html.compliance-safe .compliance-full-only { display: none !important; }
 }
