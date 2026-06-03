@@ -503,8 +503,8 @@ export default function RunnerProfile() {
         {/* Profile Header */}
         <Card className="mb-6 sm:mb-8 overflow-hidden">
           <CardContent className="p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-            <div className={`flex flex-col items-center gap-6 lg:gap-8 min-w-0 ${isOwnProfile ? 'lg:flex-row lg:items-start' : 'max-w-3xl mx-auto'}`}>
-              <div className={`flex flex-col items-center gap-4 sm:gap-6 flex-1 w-full min-w-0 ${isOwnProfile ? 'sm:flex-row sm:items-start' : ''}`}>
+            <div className="flex flex-col items-center gap-6 lg:gap-8 min-w-0 lg:flex-row lg:items-start">
+              <div className="flex flex-col items-center gap-4 sm:gap-6 flex-1 w-full min-w-0 sm:flex-row sm:items-start">
                 <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0 border-2 border-primary/40 shadow-[0_0_12px_rgba(255,107,53,0.35)]">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
@@ -512,7 +512,7 @@ export default function RunnerProfile() {
                   </AvatarFallback>
                 </Avatar>
 
-                <div className={`flex-1 text-center w-full min-w-0 ${isOwnProfile ? 'sm:text-left' : ''}`}>
+                <div className="flex-1 text-center w-full min-w-0 sm:text-left">
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-instrument font-medium mb-2 sm:mb-3 break-words">{runner.display_name}</h1>
                   
                   {runner.bio && (
@@ -520,7 +520,7 @@ export default function RunnerProfile() {
                   )}
                   
                   {(runner.city || runner.state || runner.country) && (
-                    <p className={`text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center ${isOwnProfile ? 'sm:justify-start' : ''}`}>
+                    <p className="text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center sm:justify-start">
                       {runner.country && (
                         <img 
                           src={`https://flagcdn.com/16x12/${getCountryCode(runner.country)}.png`}
@@ -535,26 +535,24 @@ export default function RunnerProfile() {
                   )}
 
                    {/* Follower/Following */}
-                   {isOwnProfile && (
-                     <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
-                         <div className="text-xs text-muted-foreground">Followers</div>
-                       </div>
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
-                         <div className="text-xs text-muted-foreground">Following</div>
-                       </div>
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
-                         <div className="text-xs text-muted-foreground">Total Runs</div>
-                       </div>
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
-                         <div className="text-xs text-muted-foreground">Longest Streak</div>
-                       </div>
+                   <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
+                       <div className="text-xs text-muted-foreground">Followers</div>
                      </div>
-                   )}
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
+                       <div className="text-xs text-muted-foreground">Following</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
+                       <div className="text-xs text-muted-foreground">Total Runs</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
+                       <div className="text-xs text-muted-foreground">Longest Streak</div>
+                     </div>
+                   </div>
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
@@ -572,38 +570,38 @@ export default function RunnerProfile() {
                     </div>
                   )}
                   
-                   <div className={`flex flex-col gap-2 items-center ${isOwnProfile ? 'sm:items-start' : ''}`}>
-                     <div className={`flex items-center gap-2 flex-wrap justify-center ${isOwnProfile ? 'sm:justify-start' : ''}`}>
+                   <div className="flex flex-col gap-2 items-center sm:items-start">
+                     <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                        <Badge variant={streakActive ? "default" : "secondary"} className="w-fit">
                          {streakActive ? (
                            <>
                              <Flame className="h-4 w-4 mr-1" />
-                             {isOwnProfile ? `${runner.current_streak_days} ${runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak` : 'Streak Active ✓'}
+                             {`${runner.current_streak_days} ${runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak`}
                            </>
                          ) : (
                            "Streak Broken"
                          )}
                        </Badge>
-                       
+
                        {!isOwnProfile && runner.timezone && streakActive && (
-                         <RunnerStreakStatus 
+                         <RunnerStreakStatus
                            lastActivityDate={runner.last_activity_date}
                            timezone={runner.timezone}
                            country={runner.country}
                          />
                        )}
                      </div>
-                     
+
                       {runner.joined_runstreak_at && (
-                        <div className={`text-xs text-muted-foreground text-center ${isOwnProfile ? 'sm:text-left' : ''}`}>
+                        <div className="text-xs text-muted-foreground text-center sm:text-left">
                           RunStreaks member since {new Date(runner.joined_runstreak_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                       )}
                    </div>
                 </div>
               </div>
-              
-              <div className={`w-full overflow-hidden flex-shrink-0 min-w-0 ${isOwnProfile ? 'lg:w-auto lg:max-w-[500px]' : ''}`}>
+
+              <div className="w-full overflow-hidden flex-shrink-0 min-w-0 lg:w-auto lg:max-w-[500px]">
                 <ActivityHeatmap runnerId={runner.id} isOwnProfile={isOwnProfile} />
               </div>
             </div>
@@ -628,102 +626,57 @@ export default function RunnerProfile() {
 
         {/* Tabs for different sections */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          {isOwnProfile && (
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="activities">Activities</TabsTrigger>
-            </TabsList>
-          )}
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="activities">Activities</TabsTrigger>
+          </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            {isOwnProfile ? (
-              <>
-                {/* Current Streak */}
-                <CurrentStreakCard
-                  streakDays={runner.current_streak_days || 0}
-                  streakMiles={runner.current_streak_miles || 0}
-                  streakStatus={runner.streak_status}
-                  avgMilesPerDay={runner.average_miles_per_day || 0}
-                  streakStartDate={runner.streak_start_date}
-                  lastActivityDate={runner.last_activity_date}
-                />
+            {/* Current Streak */}
+            <CurrentStreakCard
+              streakDays={runner.current_streak_days || 0}
+              streakMiles={runner.current_streak_miles || 0}
+              streakStatus={runner.streak_status}
+              avgMilesPerDay={runner.average_miles_per_day || 0}
+              streakStartDate={runner.streak_start_date}
+              lastActivityDate={runner.last_activity_date}
+            />
 
-                {/* Days on Streak - Primary Metric */}
-                <DaysOnStreakCard
-                  daysOnStreak30={runner.days_on_streak_last_30 || 0}
-                  daysOnStreak60={runner.days_on_streak_last_60 || 0}
-                  daysOnStreak90={runner.days_on_streak_last_90 || 0}
-                  daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
-                  totalDaysSinceJoining={runner.total_days_since_joining || 0}
-                  daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
-                  totalDaysBeforeJoining={runner.total_days_before_joining || 0}
-                  joinedAt={runner.joined_runstreak_at}
-                />
+            {/* Days on Streak - Primary Metric */}
+            <DaysOnStreakCard
+              daysOnStreak30={runner.days_on_streak_last_30 || 0}
+              daysOnStreak60={runner.days_on_streak_last_60 || 0}
+              daysOnStreak90={runner.days_on_streak_last_90 || 0}
+              daysOnStreakSinceJoining={runner.days_on_streak_since_joining || 0}
+              totalDaysSinceJoining={runner.total_days_since_joining || 0}
+              daysOnStreakBeforeJoining={runner.days_on_streak_before_joining || 0}
+              totalDaysBeforeJoining={runner.total_days_before_joining || 0}
+              joinedAt={runner.joined_runstreak_at}
+            />
 
-                {/* Streak History Section */}
-                <StreakHistory runnerId={runner.id} />
+            {/* Streak History Section */}
+            <StreakHistory runnerId={runner.id} />
 
-                {/* Accountability Partners Section */}
-                <AccountabilityPartnersSection runnerId={runner.id} />
+            {/* Accountability Partners Section */}
+            {isOwnProfile && <AccountabilityPartnersSection runnerId={runner.id} />}
 
-                {/* Best Efforts Section */}
-                <BestEfforts 
-                  runnerId={runner.id} 
-                  isOwnProfile={isOwnProfile}
-                  onCalculate={handleCalculateBestEfforts}
-                  isCalculating={isCalculatingBestEfforts}
-                />
+            {/* Best Efforts Section */}
+            <BestEfforts
+              runnerId={runner.id}
+              isOwnProfile={isOwnProfile}
+              onCalculate={handleCalculateBestEfforts}
+              isCalculating={isCalculatingBestEfforts}
+            />
 
-                {/* AI Analysis Section */}
-                <div>
-                  <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
-                  <AIAnalysisCards runner={runner} />
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-12 space-y-6 max-w-md mx-auto">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Runner's detailed stats are private</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Connect your Strava to get detailed tracking of your own streak, stay accountable on your daily streak goals, and get detailed insights on your running performance.
-                  </p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  {runner.strava_user_id && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => window.open(`https://www.strava.com/athletes/${runner.strava_user_id}`, '_blank')}
-                      className="gap-2"
-                    >
-                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                      </svg>
-                      Follow on Strava
-                    </Button>
-                  )}
-                  <Button 
-                    variant="default"
-                    onClick={() => navigate("/")}
-                    className="gap-2"
-                  >
-                    Connect Your Strava
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* AI Analysis Section */}
+            <div>
+              <h2 className="text-xl font-instrument font-medium mb-4">AI Performance Insights</h2>
+              <AIAnalysisCards runner={runner} />
+            </div>
           </TabsContent>
 
           <TabsContent value="activities" className="mt-6">
-            {isOwnProfile ? (
-              <RunnerActivities runnerId={id!} />
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  This runner's activity feed is private.
-                </p>
-              </div>
-            )}
+            <RunnerActivities runnerId={id!} />
           </TabsContent>
         </Tabs>
 
