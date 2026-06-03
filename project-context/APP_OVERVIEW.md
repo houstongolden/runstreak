@@ -323,3 +323,16 @@ Enforced via RLS on `daily_activities`, `strava_activities`, `best_efforts`, `st
 8. Wire Lovable AI Gateway (or swap to direct OpenAI/Gemini if porting off Lovable).
 9. Frontend: copy `src/` (auth context, route guards, theme, components), wire Tailwind tokens (orange-gradient design system, glassmorphism dark mode).
 10. Verify Strava compliance: public surfaces show **boolean only**; AI Coach gated to admin.
+
+---
+
+## 16. Companion docs
+
+This overview is the entry point. Four deep-dive companion documents in this folder cover the rest:
+
+- **[EDGE_FUNCTIONS.md](./EDGE_FUNCTIONS.md)** — Every edge function with purpose, trigger type (webhook / scheduler / manual), required secrets, and example request/response payloads. Includes the recommended cron schedule matrix.
+- **[BEST_EFFORTS_PIPELINE.md](./BEST_EFFORTS_PIPELINE.md)** — Step-by-step walkthrough of the two-stage PR pipeline: inputs, the estimate stage (0 API calls), the upgrade stage (≤30 calls), thresholds, persistence rules, caching, and failure modes.
+- **[API_REFERENCE.md](./API_REFERENCE.md)** — Every profile and leaderboard read path expressed as both `supabase-js` calls and raw PostgREST URLs. Request/response schemas, sorting & filter parameters, full PostgREST + edge function error code table, and realtime channels.
+- **[DATA_FETCHING_AND_RLS.md](./DATA_FETCHING_AND_RLS.md)** — The exact queries the frontend issues for leaderboard and profile views, the pagination strategy per surface, the indexes that back them, and the full RLS policy reference (`runners`, `daily_activities`, `user_follows`, `user_settings`, `user_roles`) including the privacy/sharing model that keeps the app Strava-policy compliant.
+
+Read these in order when onboarding a new engineer: overview → edge functions → data fetching/RLS → API reference → best-efforts pipeline.
