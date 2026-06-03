@@ -576,7 +576,7 @@ export default function RunnerProfile() {
                          {streakActive ? (
                            <>
                              <Flame className="h-4 w-4 mr-1" />
-                             {isOwnProfile ? `${runner.current_streak_days} ${runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak` : 'Streak Active ✓'}
+                             {`${runner.current_streak_days} ${runner.current_streak_days === 1 ? 'Day' : 'Days'} Streak`}
                            </>
                          ) : (
                            "Streak Broken"
