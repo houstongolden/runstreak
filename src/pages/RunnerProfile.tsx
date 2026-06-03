@@ -624,8 +624,8 @@ export default function RunnerProfile() {
         )}
 
 
-        {/* Tabs for different sections */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        {/* Tabs for different sections — detailed analytics, hidden on public profiles in Strava-safe mode */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className={`mb-6 ${isOwnProfile ? '' : 'compliance-full-only'}`}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="activities">Activities</TabsTrigger>
