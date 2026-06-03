@@ -535,26 +535,24 @@ export default function RunnerProfile() {
                   )}
 
                    {/* Follower/Following */}
-                   {isOwnProfile && (
-                     <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
-                         <div className="text-xs text-muted-foreground">Followers</div>
-                       </div>
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
-                         <div className="text-xs text-muted-foreground">Following</div>
-                       </div>
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
-                         <div className="text-xs text-muted-foreground">Total Runs</div>
-                       </div>
-                       <div className="text-center">
-                         <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
-                         <div className="text-xs text-muted-foreground">Longest Streak</div>
-                       </div>
+                   <div className="flex gap-4 sm:gap-6 mb-3 sm:mb-4 justify-center sm:justify-start flex-wrap">
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{followerCount}</div>
+                       <div className="text-xs text-muted-foreground">Followers</div>
                      </div>
-                   )}
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{followingCount}</div>
+                       <div className="text-xs text-muted-foreground">Following</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.all_time_run_count || 0}</div>
+                       <div className="text-xs text-muted-foreground">Total Runs</div>
+                     </div>
+                     <div className="text-center">
+                       <div className="text-lg sm:text-xl font-bold text-foreground">{runner.longest_streak_ever || 0}</div>
+                       <div className="text-xs text-muted-foreground">Longest Streak</div>
+                     </div>
+                   </div>
 
                   {/* Action Buttons */}
                   {!isOwnProfile && (
