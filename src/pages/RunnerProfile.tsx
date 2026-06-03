@@ -503,8 +503,8 @@ export default function RunnerProfile() {
         {/* Profile Header */}
         <Card className="mb-6 sm:mb-8 overflow-hidden">
           <CardContent className="p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-            <div className={`flex flex-col items-center gap-6 lg:gap-8 min-w-0 ${isOwnProfile ? 'lg:flex-row lg:items-start' : 'max-w-3xl mx-auto'}`}>
-              <div className={`flex flex-col items-center gap-4 sm:gap-6 flex-1 w-full min-w-0 ${isOwnProfile ? 'sm:flex-row sm:items-start' : ''}`}>
+            <div className="flex flex-col items-center gap-6 lg:gap-8 min-w-0 lg:flex-row lg:items-start">
+              <div className="flex flex-col items-center gap-4 sm:gap-6 flex-1 w-full min-w-0 sm:flex-row sm:items-start">
                 <Avatar className="h-24 w-24 sm:h-28 sm:w-28 lg:h-32 lg:w-32 flex-shrink-0 border-2 border-primary/40 shadow-[0_0_12px_rgba(255,107,53,0.35)]">
                   <AvatarImage src={runner.avatar_url || undefined} />
                   <AvatarFallback className="text-2xl">
