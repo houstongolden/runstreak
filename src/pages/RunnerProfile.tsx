@@ -520,7 +520,7 @@ export default function RunnerProfile() {
                   )}
                   
                   {(runner.city || runner.state || runner.country) && (
-                    <p className={`text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center ${isOwnProfile ? 'sm:justify-start' : ''}`}>
+                    <p className="text-sm text-muted-foreground mb-3 sm:mb-4 break-words flex items-center gap-2 justify-center sm:justify-start">
                       {runner.country && (
                         <img 
                           src={`https://flagcdn.com/16x12/${getCountryCode(runner.country)}.png`}
